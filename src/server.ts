@@ -6,25 +6,21 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
-import { appelerMock } from './server/mock-bff';
+import { appelerBffActif } from './server/bff';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
-// BFF : /api/* sert les fixtures du BFF factice si MOCK_BFF=1 (délai simulé de 150 ms).
-// Le vrai BFF (prompt 02) remplacera cette branche ; sans MOCK_BFF, l'API n'est pas encore disponible.
-app.use('/api', async (req, res) => {
-  if (process.env['MOCK_BFF'] === '1') {
-    const reponse = await appelerMock(req.originalUrl);
+// BFF : /api/* interroge l'API tabulaire de data.gouv.fr (src/server/bff.ts), ou les fixtures avec MOCK_BFF=1.
+app.use('/api', async (req, res, suivant) => {
+  try {
+    const reponse = await appelerBffActif(req.originalUrl);
     res.status(reponse.status).set(reponse.headers).json(reponse.body);
-    return;
+  } catch (erreur) {
+    suivant(erreur);
   }
-  res
-    .status(503)
-    .set({ 'retry-after': '60', 'cache-control': 'no-store' })
-    .json({ erreur: 'API indisponible' });
 });
 
 /**
