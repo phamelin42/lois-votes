@@ -41,24 +41,41 @@ function planifier(tache: () => void): void {
 @Injectable({ providedIn: 'root' })
 export class ViewportPreloadingStrategy extends PreloadingStrategy {
   private readonly routes: RouteChargeable[] = [];
+  /** Chemins de liens devenus visibles avant que le routeur ait déclaré la route qu'ils désignent. */
+  private readonly enAttente: string[][] = [];
 
   override preload(route: Route, charger: () => Observable<unknown>): Observable<unknown> {
     if (route.path !== undefined && route.path !== '**') {
       const segments = route.path.split('/').filter((s) => s !== '');
-      this.routes.push({ segments, charger, prechargee: false });
+      const declaree: RouteChargeable = { segments, charger, prechargee: false };
+      this.routes.push(declaree);
+      // L'en-tête peut être visible avant la première navigation : on applique les liens reçus trop tôt.
+      const attente = this.enAttente.findIndex((lien) => correspond(segments, lien));
+      if (attente >= 0) {
+        this.enAttente.splice(attente, 1);
+        this.precharger(declaree);
+      }
     }
     return EMPTY;
   }
 
-  /** Appelée quand un lien devient visible : précharge la route qu'il désigne, si elle existe. */
+  /** Appelée quand un lien devient visible : précharge la route qu'il désigne, si elle est déjà connue. */
   lienVisible(lien: string): void {
     if (connexionLimitee()) return;
     const segments = cheminLocal(lien);
     if (segments === null) return;
 
     const route = this.routes.find((r) => !r.prechargee && correspond(r.segments, segments));
-    if (!route) return;
+    if (route) {
+      this.precharger(route);
+      return;
+    }
+    // Route pas encore déclarée : on garde le lien (une seule fois) pour l'appliquer dans preload().
+    const dejaNote = this.enAttente.some((attente) => attente.join('/') === segments.join('/'));
+    if (!dejaNote) this.enAttente.push(segments);
+  }
 
+  private precharger(route: RouteChargeable): void {
     route.prechargee = true;
     planifier(() => {
       route
