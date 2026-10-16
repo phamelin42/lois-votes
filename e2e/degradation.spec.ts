@@ -4,11 +4,13 @@ import { expect, test } from '@playwright/test';
 test.use({ baseURL: 'http://localhost:4001' });
 
 test.describe('source de données en panne, sans cache', () => {
-  test('l\'accueil répond 503 avec une alerte lisible', async ({ page }) => {
+  test("l'accueil répond 503 avec une alerte lisible", async ({ page }) => {
     const reponse = await page.goto('/');
 
     expect(reponse!.status()).toBe(503);
-    await expect(page.locator('fd-alert')).toContainText('Données momentanément indisponibles, réessayez dans une minute.');
+    await expect(page.locator('fd-alert')).toContainText(
+      'Données momentanément indisponibles, réessayez dans une minute.',
+    );
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
@@ -19,7 +21,7 @@ test.describe('source de données en panne, sans cache', () => {
     expect(reponse.headers()['cache-control']).toContain('no-store');
   });
 
-  test('l\'API répond 503 avec Retry-After et sans cache', async ({ request }) => {
+  test("l'API répond 503 avec Retry-After et sans cache", async ({ request }) => {
     const reponse = await request.get('/api/deputes');
 
     expect(reponse.status()).toBe(503);
@@ -28,7 +30,7 @@ test.describe('source de données en panne, sans cache', () => {
     expect(await reponse.json()).toEqual({ erreur: expect.any(String) });
   });
 
-  test('/a-propos reste disponible : elle ne dépend d\'aucune donnée', async ({ request }) => {
+  test("/a-propos reste disponible : elle ne dépend d'aucune donnée", async ({ request }) => {
     expect((await request.get('/a-propos')).status()).toBe(200);
   });
 });

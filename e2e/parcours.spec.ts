@@ -2,11 +2,15 @@ import { expect, test } from '@playwright/test';
 import { attendreHydratation } from './aide';
 
 test.describe('parcours complet', () => {
-  test('accueil → loi → liste nominative → député → recherche d\'un autre député', async ({ page }) => {
+  test("accueil → loi → liste nominative → député → recherche d'un autre député", async ({
+    page,
+  }) => {
     // Accueil : les dernières lois votées, la plus récente d'abord
     await page.goto('/');
     await attendreHydratation(page);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText("Les dernières lois votées à l'Assemblée");
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      "Les dernières lois votées à l'Assemblée",
+    );
     const cartes = page.locator('app-loi-card');
     await expect(cartes).toHaveCount(10);
     await expect(cartes.first()).toContainText('au sujet n°111');
@@ -21,7 +25,9 @@ test.describe('parcours complet', () => {
     // Loi : le vote final, le tableau par groupe
     await page.locator('app-loi-card', { hasText: 'sobriété foncière' }).click();
     await expect(page).toHaveURL('/lois/DLR5L17N1110');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Projet de loi relatif à la sobriété foncière');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Projet de loi relatif à la sobriété foncière',
+    );
     await expect(page.getByText("Rejeté par l'Assemblée").first()).toBeVisible();
     const tableau = page.getByRole('table', { name: 'Vote par groupe' });
     await expect(tableau).toBeVisible();
@@ -29,12 +35,13 @@ test.describe('parcours complet', () => {
 
     // Liste nominative, chargée à la demande
     await page.getByRole('button', { name: 'Voir comment chaque député a voté' }).click();
+    await page.getByRole('tab', { name: /Abstention/ }).click(); // David Moreau s'est abstenu sur ce scrutin
     await page.getByRole('link', { name: 'David Moreau' }).first().click();
 
     // Député : photo ou initiales, parti, chiffres clés, 10 derniers votes
     await expect(page).toHaveURL('/deputes/david-moreau');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('David Moreau');
-    await expect(page.getByText('Rassemblement National')).toBeVisible();
+    await expect(page.getByText('Rassemblement National').first()).toBeVisible();
     await expect(page.getByText('Participation aux scrutins')).toBeVisible();
     await expect(page.getByText(/93\s?%/)).toBeVisible();
     await expect(page.getByText("Taux d'abstention")).toBeVisible();
@@ -51,7 +58,7 @@ test.describe('parcours complet', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Élodie Roux');
   });
 
-  test('la page des députés se filtre par l\'URL', async ({ page }) => {
+  test("la page des députés se filtre par l'URL", async ({ page }) => {
     await page.goto('/deputes?groupe=RN&dept=69');
     await attendreHydratation(page);
 
@@ -69,7 +76,9 @@ test.describe('parcours complet', () => {
     await page.goto('/lois/DLR5L17N2000');
     await attendreHydratation(page);
 
-    await expect(page.getByRole('heading', { level: 2, name: 'Lectures précédentes' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 2, name: 'Lectures précédentes' }),
+    ).toBeVisible();
     await page.locator('a[href="/scrutins/90"]').click();
     await expect(page).toHaveURL('/scrutins/90');
   });

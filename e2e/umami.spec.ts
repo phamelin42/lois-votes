@@ -8,10 +8,12 @@ test.describe('Umami', () => {
     expect(html).not.toContain('umami');
   });
 
-  test('le script est ajouté dans <head> quand l\'identifiant est défini', async ({ request }) => {
+  test("le script est ajouté dans <head> quand l'identifiant est défini", async ({ request }) => {
     const html = await (await request.get('http://localhost:4002/')).text();
 
-    expect(html).toMatch(/<script defer src="https:\/\/cloud\.umami\.is\/script\.js" data-website-id="site-de-test"><\/script>/);
+    expect(html).toMatch(
+      /<script defer src="https:\/\/cloud\.umami\.is\/script\.js" data-website-id="site-de-test"><\/script>/,
+    );
     expect(html.indexOf('umami')).toBeLessThan(html.indexOf('</head>'));
   });
 });

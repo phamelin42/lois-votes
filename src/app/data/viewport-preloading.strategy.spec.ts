@@ -136,4 +136,16 @@ describe('ViewportPreloadingStrategy', () => {
     expect(charger.lois).toHaveBeenCalledTimes(1);
     vi.useRealTimers();
   });
+
+  it("n'oublie pas un lien devenu visible avant que le routeur déclare ses routes", () => {
+    TestBed.configureTestingModule({ providers: [provideRouter(routes)] });
+    const strategie = TestBed.inject(ViewportPreloadingStrategy);
+    const chargeur = vi.fn(() => of('deputes'));
+
+    strategie.lienVisible('/deputes'); // l'en-tête s'affiche avant la fin de la 1ʳᵉ navigation
+    expect(chargeur).not.toHaveBeenCalled();
+    strategie.preload(routes[1], chargeur as () => Observable<unknown>);
+
+    expect(chargeur).toHaveBeenCalledTimes(1);
+  });
 });

@@ -17,11 +17,14 @@ test.describe('chargement intelligent', () => {
     expect(appels).toEqual([]); // seul le rendu serveur a interrogé le BFF
   });
 
-  test('« Voir plus » ne fait qu\'une requête, pour la page suivante', async ({ page }) => {
+  test("« Voir plus » ne fait qu'une requête, pour la page suivante", async ({ page }) => {
     await page.goto('/');
     await attendreHydratation(page);
     const appels: string[] = [];
-    page.on('request', (r) => estApi(r.url()) && appels.push(new URL(r.url()).pathname + new URL(r.url()).search));
+    page.on(
+      'request',
+      (r) => estApi(r.url()) && appels.push(new URL(r.url()).pathname + new URL(r.url()).search),
+    );
 
     await page.getByRole('button', { name: 'Voir plus' }).click();
     await expect(page.locator('app-loi-card')).toHaveCount(14);
@@ -29,7 +32,9 @@ test.describe('chargement intelligent', () => {
     expect(appels).toEqual(['/api/accueil?page=2']);
   });
 
-  test('le survol d\'une carte précharge le code de la route et les données de la loi', async ({ page }) => {
+  test("le survol d'une carte précharge le code de la route et les données de la loi", async ({
+    page,
+  }) => {
     await page.goto('/');
     await attendreHydratation(page);
     const apres: string[] = [];
@@ -41,35 +46,46 @@ test.describe('chargement intelligent', () => {
     expect(page.url()).toMatch(/\/$/); // on n'a pas navigué : seulement préchargé
   });
 
-  test('le code de la page cible est préchargé quand le lien devient visible', async ({ page }) => {
-    const scripts: string[] = [];
+  test('le code des pages visibles est déjà préchargé : naviguer ne charge aucun script', async ({
+    page,
+  }) => {
     await page.goto('/');
     await attendreHydratation(page);
+    await page.waitForTimeout(1500); // le pré-chargement attend un moment d'inactivité du navigateur
+    const scripts: string[] = [];
     page.on('request', (r) => r.resourceType() === 'script' && scripts.push(r.url()));
 
-    await page.locator('app-loi-card').first().scrollIntoViewIfNeeded();
+    await page.getByRole('link', { name: 'Députés' }).click();
+    await expect(page).toHaveURL('/deputes');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
-    await expect.poll(() => scripts.length, { timeout: 5000 }).toBeGreaterThan(0);
+    expect(scripts).toEqual([]);
   });
 
-  test('les blocs différés sous la ligne de flottaison ne chargent rien avant d\'être visibles', async ({ page }) => {
+  test("les blocs différés sous la ligne de flottaison ne chargent rien avant d'être visibles", async ({
+    page,
+  }) => {
     await page.goto('/lois/DLR5L17N1110');
     await attendreHydratation(page);
 
-    const scrutins = page.waitForRequest((r) => new URL(r.url()).pathname === '/api/scrutins/110', { timeout: 1500 }).then(
-      () => true,
-      () => false,
-    );
+    const scrutins = page
+      .waitForRequest((r) => new URL(r.url()).pathname === '/api/scrutins/110', { timeout: 1500 })
+      .then(
+        () => true,
+        () => false,
+      );
     expect(await scrutins).toBe(false);
 
     await page.getByRole('button', { name: 'Voir comment chaque député a voté' }).click();
     await expect(page.getByRole('link', { name: 'Alice Durand' }).first()).toBeVisible();
   });
 
-  test('la photo du député est le LCP : chargée en priorité', async ({ page }) => {
-    await page.goto('/deputes/david-moreau');
+  test('la photo du député est le LCP : chargée en priorité dès le HTML rendu par le serveur', async ({
+    request,
+  }) => {
+    const html = await (await request.get('/deputes/david-moreau')).text();
 
-    await expect(page.locator('img[fetchpriority="high"]')).toHaveCount(1);
+    expect(html).toMatch(/<img[^>]*fetchpriority="high"/);
   });
 
   test('le navigateur ne parle jamais à data.gouv.fr', async ({ page }) => {
@@ -81,7 +97,11 @@ test.describe('chargement intelligent', () => {
     await page.goto('/deputes/david-moreau');
     await attendreHydratation(page);
 
-    expect([...hotes].filter((h) => h.includes('data.gouv.fr') || h.includes('nosparlementaires') || h.includes('datan'))).toEqual([]);
+    expect(
+      [...hotes].filter(
+        (h) => h.includes('data.gouv.fr') || h.includes('nosparlementaires') || h.includes('datan'),
+      ),
+    ).toEqual([]);
   });
 
   test('seules les polices latines sont chargées', async ({ page }) => {

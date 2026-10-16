@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test';
 import { attendreHydratation } from './aide';
 
 test.describe('clavier et focus', () => {
-  test('le lien d\'évitement est le premier élément focalisable et mène au contenu', async ({ page }) => {
+  test("le lien d'évitement est le premier élément focalisable et mène au contenu", async ({
+    page,
+  }) => {
     await page.goto('/');
     await attendreHydratation(page);
 
@@ -15,7 +17,7 @@ test.describe('clavier et focus', () => {
     await expect(page).toHaveURL(/#contenu$/);
   });
 
-  test('chaque élément interactif de l\'en-tête a un focus visible', async ({ page }) => {
+  test("chaque élément interactif de l'en-tête a un focus visible", async ({ page }) => {
     await page.goto('/');
     await attendreHydratation(page);
 
@@ -66,7 +68,11 @@ test.describe('clavier et focus', () => {
     const themes: (string | null)[] = [];
     await page.exposeFunction('noter', (t: string | null) => themes.push(t));
     await page.addInitScript(() => {
-      document.addEventListener('DOMContentLoaded', () => (window as unknown as { noter: (t: string | null) => void }).noter(document.documentElement.getAttribute('data-theme')));
+      document.addEventListener('DOMContentLoaded', () =>
+        (window as unknown as { noter: (t: string | null) => void }).noter(
+          document.documentElement.getAttribute('data-theme'),
+        ),
+      );
     });
 
     await page.goto('/');
@@ -91,7 +97,9 @@ test.describe('mouvement réduit', () => {
     await page.getByRole('link', { name: 'Députés' }).click();
     await expect(page).toHaveURL('/deputes');
 
-    expect(await page.evaluate(() => (window as unknown as { __transitions: number }).__transitions)).toBeGreaterThan(0);
+    expect(
+      await page.evaluate(() => (window as unknown as { __transitions: number }).__transitions),
+    ).toBeGreaterThan(0);
   });
 
   test('aucune transition de vue avec prefers-reduced-motion', async ({ page }) => {
@@ -103,6 +111,8 @@ test.describe('mouvement réduit', () => {
     await page.getByRole('link', { name: 'Députés' }).click();
     await expect(page).toHaveURL('/deputes');
 
-    expect(await page.evaluate(() => (window as unknown as { __transitions: number }).__transitions)).toBe(0);
+    expect(
+      await page.evaluate(() => (window as unknown as { __transitions: number }).__transitions),
+    ).toBe(0);
   });
 });
