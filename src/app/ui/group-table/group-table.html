@@ -1,0 +1,30 @@
+<div class="app-group-table" role="region" aria-label="Vote détaillé par groupe" tabindex="0">
+  <table class="app-group-table__table body">
+    <caption class="app-group-table__legende">Vote par groupe</caption>
+    <thead>
+      <tr>
+        <th scope="col">Groupe</th>
+        <th scope="col">Position</th>
+        <th scope="col">Pour</th>
+        <th scope="col">Contre</th>
+        <th scope="col">Abst.</th>
+        <th scope="col">Non-votants</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (vote of groupes(); track vote.groupe.id) {
+        <tr>
+          <th scope="row"><app-group-pill [groupe]="vote.groupe" /></th>
+          <td>
+            <app-position [position]="vote.position" />
+            <app-vote-bar [compte]="vote.compte" taille="sm" />
+          </td>
+          <td class="app-group-table__nombre">{{ vote.compte.pour }}</td>
+          <td class="app-group-table__nombre">{{ vote.compte.contre }}</td>
+          <td class="app-group-table__nombre">{{ vote.compte.abstention }}</td>
+          <td class="app-group-table__nombre">{{ vote.compte.nonvotant }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

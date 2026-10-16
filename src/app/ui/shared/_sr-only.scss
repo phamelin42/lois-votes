@@ -1,0 +1,9 @@
+// Texte réservé aux lecteurs d'écran : dimensions nulles et clip, sans valeur en dur.
+@mixin sr-only {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

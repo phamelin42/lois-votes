@@ -1,0 +1,26 @@
+.app-loi-card {
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.app-loi-card__corps {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+
+.app-loi-card__corps > app-vote-bar,
+.app-loi-card__corps > app-group-pills {
+  justify-self: stretch;
+}
+
+/* Le titre officiel tient sur deux lignes ; le reste est coupé. */
+.app-loi-card__officiel {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+}

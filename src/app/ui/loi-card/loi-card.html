@@ -1,0 +1,17 @@
+<a fdCard class="app-loi-card" [routerLink]="cible()">
+  <span slot="meta">
+    @if (loi().lecture; as lecture) {
+      <span class="app-loi-card__lecture">{{ lecture }}</span> ·
+    }
+    <time [attr.datetime]="loi().voteFinal.date">{{ dateCourte(loi().voteFinal.date) }}</time>
+  </span>
+  <span slot="title" class="app-loi-card__titre">{{ loi().titreCourt }}</span>
+  <div class="app-loi-card__corps">
+    <p class="app-loi-card__officiel">{{ loi().titreOfficiel }}</p>
+    <fd-badge [tone]="loi().voteFinal.adopte ? 'tokiwa' : 'enji'">
+      {{ loi().voteFinal.adopte ? "Adopté par l'Assemblée" : "Rejeté par l'Assemblée" }}
+    </fd-badge>
+    <app-vote-bar [compte]="loi().voteFinal.compte" />
+    <app-group-pills [groupes]="loi().groupes" />
+  </div>
+</a>

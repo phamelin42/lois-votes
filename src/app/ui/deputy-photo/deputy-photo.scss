@@ -1,0 +1,10 @@
+.app-deputy-photo {
+  display: block;
+  flex: none;
+  border-radius: var(--radius-full);
+}
+
+img.app-deputy-photo {
+  object-fit: cover;
+  box-shadow: 0 0 0 var(--border-control) var(--rim);
+}

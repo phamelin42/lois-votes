@@ -1,0 +1,13 @@
+<ul class="app-group-pills caption">
+  @for (vote of visibles(); track vote.groupe.id) {
+    <li class="app-group-pills__item">
+      <app-group-pill [groupe]="vote.groupe" />
+      <span class="app-group-pills__position">{{ libellePosition(vote.position) }}</span>
+    </li>
+  }
+  @if (reste() > 0) {
+    <li class="app-group-pills__reste">
+      +{{ reste() }}<span class="app-group-pills__reste-libelle"> autres groupes</span>
+    </li>
+  }
+</ul>

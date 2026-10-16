@@ -1,0 +1,13 @@
+@if (photo(); as url) {
+  <img
+    class="app-deputy-photo"
+    [ngSrc]="url"
+    [width]="taille()"
+    [height]="taille()"
+    [alt]="nom()"
+    [priority]="priority()"
+    (error)="echoue()"
+  />
+} @else {
+  <fd-avatar class="app-deputy-photo" [name]="nom()" emblem="initials" [size]="avatar()" />
+}

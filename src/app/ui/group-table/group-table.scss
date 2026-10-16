@@ -1,0 +1,50 @@
+@use '../shared/sr-only' as sr;
+
+.app-group-table {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+}
+
+.app-group-table:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.app-group-table__table {
+  width: 100%;
+  min-width: max-content;
+  border-collapse: collapse;
+  color: var(--ink);
+}
+
+.app-group-table__legende {
+  @include sr.sr-only;
+}
+
+.app-group-table th,
+.app-group-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-hair) solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.app-group-table thead th {
+  color: var(--ink-muted);
+  font-weight: 700;
+}
+
+.app-group-table td > * + * {
+  margin-top: var(--space-1);
+}
+
+.app-group-table__nombre {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Mini-barre : largeur minimale pour que les segments restent lisibles dans la cellule. */
+.app-group-table .app-vote-bar {
+  min-width: calc(var(--space-16) * 2);
+}

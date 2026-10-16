@@ -1,0 +1,13 @@
+<div class="app-vote-bar" [class.app-vote-bar--sm]="taille() === 'sm'">
+  <div class="app-vote-bar__barre" role="img" [attr.aria-label]="resume()">
+    @for (segment of segments(); track segment.type) {
+      <span
+        class="app-vote-bar__segment app-vote-bar__segment--{{ segment.type }}"
+        [style.flex-grow]="segment.nombre"
+      ></span>
+    }
+  </div>
+  <p class="app-vote-bar__chiffres caption" aria-hidden="true">
+    {{ compte().pour }} pour · {{ compte().contre }} contre · {{ compte().abstention }} abst.
+  </p>
+</div>

@@ -1,0 +1,7 @@
+<span class="app-position">
+  @if (position(); as valeur) {
+    <fd-badge [tone]="tons[valeur]">{{ libellePosition(valeur) }}</fd-badge>
+  } @else {
+    —
+  }
+</span>

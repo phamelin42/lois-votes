@@ -1,0 +1,26 @@
+@use '../shared/sr-only' as sr;
+
+.app-group-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  color: var(--ink);
+}
+
+.app-group-pill__dot {
+  flex: none;
+  width: var(--space-3);
+  height: var(--space-3);
+  border-radius: var(--radius-full);
+  background-color: var(--line-strong);
+}
+
+.app-group-pill__abrege {
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.app-group-pill__libelle {
+  @include sr.sr-only;
+}
