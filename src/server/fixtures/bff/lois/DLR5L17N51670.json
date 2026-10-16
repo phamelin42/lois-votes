@@ -1,0 +1,656 @@
+{
+  "dossier": "DLR5L17N51670",
+  "titreCourt": "Proposition de loi relative au droit à l'aide à mourir",
+  "titreOfficiel": "l'ensemble de la proposition de loi relative au droit à l'aide à mourir (lecture définitive).",
+  "lecture": "lecture définitive",
+  "statut": null,
+  "urlDossier": null,
+  "voteFinal": {
+    "numero": 8280,
+    "date": "2026-07-15",
+    "titre": "l'ensemble de la proposition de loi relative au droit à l'aide à mourir (lecture définitive).",
+    "type": "final",
+    "adopte": true,
+    "compte": {
+      "pour": 291,
+      "contre": 241,
+      "abstention": 29,
+      "nonvotant": 0
+    },
+    "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8280",
+    "groupes": [
+      {
+        "groupe": {
+          "id": "RN",
+          "abrege": "RN",
+          "libelle": "Rassemblement National",
+          "couleur": null
+        },
+        "position": "contre",
+        "compte": {
+          "pour": 12,
+          "contre": 106,
+          "abstention": 0,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "EPR",
+          "abrege": "EPR",
+          "libelle": "Ensemble pour la République",
+          "couleur": null
+        },
+        "position": "pour",
+        "compte": {
+          "pour": 63,
+          "contre": 18,
+          "abstention": 9,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "LFI-NFP",
+          "abrege": "LFI-NFP",
+          "libelle": "La France insoumise - Nouveau Front Populaire",
+          "couleur": null
+        },
+        "position": "pour",
+        "compte": {
+          "pour": 61,
+          "contre": 2,
+          "abstention": 3,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "SOC",
+          "abrege": "SOC",
+          "libelle": "Socialistes et apparentés",
+          "couleur": null
+        },
+        "position": "pour",
+        "compte": {
+          "pour": 57,
+          "contre": 4,
+          "abstention": 5,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "DR",
+          "abrege": "DR",
+          "libelle": "Droite Républicaine",
+          "couleur": null
+        },
+        "position": "contre",
+        "compte": {
+          "pour": 5,
+          "contre": 41,
+          "abstention": 2,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "ECOS",
+          "abrege": "ECOS",
+          "libelle": "Écologiste et Social",
+          "couleur": null
+        },
+        "position": "pour",
+        "compte": {
+          "pour": 33,
+          "contre": 2,
+          "abstention": 1,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "DEM",
+          "abrege": "DEM",
+          "libelle": "Les Démocrates",
+          "couleur": null
+        },
+        "position": "pour",
+        "compte": {
+          "pour": 20,
+          "contre": 16,
+          "abstention": 0,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "HOR",
+          "abrege": "HOR",
+          "libelle": "Horizons & Indépendants",
+          "couleur": null
+        },
+        "position": "contre",
+        "compte": {
+          "pour": 17,
+          "contre": 18,
+          "abstention": 1,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "LIOT",
+          "abrege": "LIOT",
+          "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+          "couleur": null
+        },
+        "position": "pour",
+        "compte": {
+          "pour": 10,
+          "contre": 8,
+          "abstention": 4,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "GDR",
+          "abrege": "GDR",
+          "libelle": "Gauche Démocrate et Républicaine",
+          "couleur": null
+        },
+        "position": "pour",
+        "compte": {
+          "pour": 10,
+          "contre": 2,
+          "abstention": 3,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "UDDPLR",
+          "abrege": "UDDPLR",
+          "libelle": "Union des droites pour la République",
+          "couleur": null
+        },
+        "position": "contre",
+        "compte": {
+          "pour": 0,
+          "contre": 17,
+          "abstention": 0,
+          "nonvotant": 0
+        }
+      },
+      {
+        "groupe": {
+          "id": "NI",
+          "abrege": "NI",
+          "libelle": "Non inscrits",
+          "couleur": null
+        },
+        "position": "contre",
+        "compte": {
+          "pour": 3,
+          "contre": 7,
+          "abstention": 1,
+          "nonvotant": 0
+        }
+      }
+    ]
+  },
+  "lectures": [
+    {
+      "numero": 7894,
+      "date": "2026-06-30",
+      "titre": "l'ensemble de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "final",
+      "adopte": true,
+      "compte": {
+        "pour": 295,
+        "contre": 232,
+        "abstention": 35,
+        "nonvotant": 0
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7894"
+    },
+    {
+      "numero": 5729,
+      "date": "2026-02-25",
+      "titre": "l'ensemble de la proposition de loi relative au droit à l'aide à mourir (deuxième lecture).",
+      "type": "final",
+      "adopte": true,
+      "compte": {
+        "pour": 299,
+        "contre": 226,
+        "abstention": 37,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/5729"
+    }
+  ],
+  "scrutins": [
+    {
+      "numero": 7818,
+      "date": "2026-06-27",
+      "titre": "l'article 2 de la proposition de loi relative au droit à l'aide à mourir (seconde délibération) (nouvelle lecture).",
+      "type": "article",
+      "adopte": true,
+      "compte": {
+        "pour": 56,
+        "contre": 19,
+        "abstention": 1,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7818"
+    },
+    {
+      "numero": 7817,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1 de M. Philippe Vigier à l'article 2 de la proposition de loi relative au droit à l'aide à mourir (seconde délibération) (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": true,
+      "compte": {
+        "pour": 57,
+        "contre": 19,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7817"
+    },
+    {
+      "numero": 7816,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 117 de M. Bazin au titre de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 25,
+        "contre": 55,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7816"
+    },
+    {
+      "numero": 7815,
+      "date": "2026-06-27",
+      "titre": "l'article 19 bis de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "article",
+      "adopte": true,
+      "compte": {
+        "pour": 56,
+        "contre": 21,
+        "abstention": 1,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7815"
+    },
+    {
+      "numero": 7814,
+      "date": "2026-06-27",
+      "titre": "l'article 19 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "article",
+      "adopte": true,
+      "compte": {
+        "pour": 59,
+        "contre": 21,
+        "abstention": 1,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7814"
+    },
+    {
+      "numero": 7813,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1154 de Mme Pollet l'article 19 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 20,
+        "contre": 57,
+        "abstention": 1,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7813"
+    },
+    {
+      "numero": 7812,
+      "date": "2026-06-27",
+      "titre": "l'article 18 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "article",
+      "adopte": true,
+      "compte": {
+        "pour": 59,
+        "contre": 10,
+        "abstention": 14,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7812"
+    },
+    {
+      "numero": 7811,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 535 de Mme Gruet à l'article 18 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 22,
+        "contre": 59,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7811"
+    },
+    {
+      "numero": 7810,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1278 de M. Meurin de rétablissement de l'article 17 (supprimé) de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 25,
+        "contre": 59,
+        "abstention": 3,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7810"
+    },
+    {
+      "numero": 7809,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1112 de M. Bernhardt et l'amendement identique suivant de rétablissement de l'article 17 (supprimé) de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 27,
+        "contre": 61,
+        "abstention": 1,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7809"
+    },
+    {
+      "numero": 7808,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1362 de M. Clouet de rétablissement de l'article 17 (supprimé) de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 23,
+        "contre": 54,
+        "abstention": 2,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7808"
+    },
+    {
+      "numero": 7807,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 687 de M. Simion  de rétablissement de l'article 17 (supprimé) de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 24,
+        "contre": 52,
+        "abstention": 10,
+        "nonvotant": 0
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7807"
+    },
+    {
+      "numero": 7806,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 5 de M. Simion de rétablissement de l'article 17 (supprimé) de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 24,
+        "contre": 53,
+        "abstention": 11,
+        "nonvotant": 0
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7806"
+    },
+    {
+      "numero": 7805,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 4 de M. Simion et l'amendement identique suivant de rétablissement de l'article 17 (supprimé) de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 25,
+        "contre": 53,
+        "abstention": 10,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7805"
+    },
+    {
+      "numero": 7804,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1111 de M. Bernhardt de rétablissement de l'article 17 (supprimé) de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 29,
+        "contre": 57,
+        "abstention": 1,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7804"
+    },
+    {
+      "numero": 7803,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1277 de M. Meurin de rétablissement de l'article 17 (supprimé) de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 27,
+        "contre": 59,
+        "abstention": 1,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7803"
+    },
+    {
+      "numero": 7802,
+      "date": "2026-06-27",
+      "titre": "l'article 16 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "article",
+      "adopte": true,
+      "compte": {
+        "pour": 54,
+        "contre": 26,
+        "abstention": 2,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7802"
+    },
+    {
+      "numero": 7801,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 789 de Mme Blin et l'amendement identique suivant de suppression de l'article 16 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 31,
+        "contre": 58,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7801"
+    },
+    {
+      "numero": 7800,
+      "date": "2026-06-27",
+      "titre": "l'article 15 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "article",
+      "adopte": true,
+      "compte": {
+        "pour": 58,
+        "contre": 30,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7800"
+    },
+    {
+      "numero": 7799,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 948 de M. Juvin à l'article 15 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 31,
+        "contre": 58,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7799"
+    },
+    {
+      "numero": 7798,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1585 de M. Potier à l'article 15 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 30,
+        "contre": 58,
+        "abstention": 1,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7798"
+    },
+    {
+      "numero": 7797,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 2 de M. Simion à l'article 15 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 19,
+        "contre": 63,
+        "abstention": 3,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7797"
+    },
+    {
+      "numero": 7796,
+      "date": "2026-06-27",
+      "titre": "l'article 14 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "article",
+      "adopte": true,
+      "compte": {
+        "pour": 76,
+        "contre": 0,
+        "abstention": 12,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7796"
+    },
+    {
+      "numero": 7795,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 508 de Mme Gruet et les amendements identiques suivants à l'article 14 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 29,
+        "contre": 61,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7795"
+    },
+    {
+      "numero": 7794,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 134 de Mme Dogor-Such à l'article 14 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 30,
+        "contre": 58,
+        "abstention": 1,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7794"
+    },
+    {
+      "numero": 7793,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1223 de Mme Joncour à l'article 14 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 30,
+        "contre": 58,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7793"
+    },
+    {
+      "numero": 7792,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1150 de Mme Pollet à l'article 14 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 28,
+        "contre": 58,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7792"
+    },
+    {
+      "numero": 7791,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 1292 de Mme Loir à l'article 14 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 28,
+        "contre": 60,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7791"
+    },
+    {
+      "numero": 7790,
+      "date": "2026-06-27",
+      "titre": "l'amendement n° 713 de Mme Colin-Oesterlé et les amendements identique suivants à l'article 14 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "amendement",
+      "adopte": false,
+      "compte": {
+        "pour": 27,
+        "contre": 60,
+        "abstention": 0,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7790"
+    },
+    {
+      "numero": 7789,
+      "date": "2026-06-27",
+      "titre": "l'article 13 de la proposition de loi relative au droit à l'aide à mourir (nouvelle lecture).",
+      "type": "article",
+      "adopte": true,
+      "compte": {
+        "pour": 61,
+        "contre": 30,
+        "abstention": 1,
+        "nonvotant": 1
+      },
+      "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/7789"
+    }
+  ]
+}

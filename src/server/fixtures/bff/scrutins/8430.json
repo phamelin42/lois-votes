@@ -1,0 +1,2552 @@
+{
+  "numero": 8430,
+  "date": "2026-07-21",
+  "titre": "l'ensemble du projet de loi relatif à la protection des enfants (première lecture).",
+  "type": "final",
+  "adopte": true,
+  "compte": {
+    "pour": 378,
+    "contre": 7,
+    "abstention": 173,
+    "nonvotant": 1
+  },
+  "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8430",
+  "loi": {
+    "dossier": "DLR5L17N54372",
+    "titreCourt": "Projet de loi relatif à la protection des enfants"
+  },
+  "groupes": [
+    {
+      "groupe": {
+        "id": "RN",
+        "abrege": "RN",
+        "libelle": "Rassemblement National",
+        "couleur": null
+      },
+      "position": "pour",
+      "compte": {
+        "pour": 119,
+        "contre": 0,
+        "abstention": 0,
+        "nonvotant": 0
+      }
+    },
+    {
+      "groupe": {
+        "id": "EPR",
+        "abrege": "EPR",
+        "libelle": "Ensemble pour la République",
+        "couleur": null
+      },
+      "position": "pour",
+      "compte": {
+        "pour": 85,
+        "contre": 0,
+        "abstention": 2,
+        "nonvotant": 1
+      }
+    },
+    {
+      "groupe": {
+        "id": "LFI-NFP",
+        "abrege": "LFI-NFP",
+        "libelle": "La France insoumise - Nouveau Front Populaire",
+        "couleur": null
+      },
+      "position": "abstention",
+      "compte": {
+        "pour": 0,
+        "contre": 0,
+        "abstention": 69,
+        "nonvotant": 0
+      }
+    },
+    {
+      "groupe": {
+        "id": "SOC",
+        "abrege": "SOC",
+        "libelle": "Socialistes et apparentés",
+        "couleur": null
+      },
+      "position": "abstention",
+      "compte": {
+        "pour": 0,
+        "contre": 0,
+        "abstention": 62,
+        "nonvotant": 0
+      }
+    },
+    {
+      "groupe": {
+        "id": "DR",
+        "abrege": "DR",
+        "libelle": "Droite Républicaine",
+        "couleur": null
+      },
+      "position": "pour",
+      "compte": {
+        "pour": 48,
+        "contre": 0,
+        "abstention": 0,
+        "nonvotant": 0
+      }
+    },
+    {
+      "groupe": {
+        "id": "ECOS",
+        "abrege": "ECOS",
+        "libelle": "Écologiste et Social",
+        "couleur": null
+      },
+      "position": "abstention",
+      "compte": {
+        "pour": 3,
+        "contre": 0,
+        "abstention": 33,
+        "nonvotant": 0
+      }
+    },
+    {
+      "groupe": {
+        "id": "DEM",
+        "abrege": "DEM",
+        "libelle": "Les Démocrates",
+        "couleur": null
+      },
+      "position": "pour",
+      "compte": {
+        "pour": 33,
+        "contre": 0,
+        "abstention": 1,
+        "nonvotant": 0
+      }
+    },
+    {
+      "groupe": {
+        "id": "HOR",
+        "abrege": "HOR",
+        "libelle": "Horizons & Indépendants",
+        "couleur": null
+      },
+      "position": "pour",
+      "compte": {
+        "pour": 36,
+        "contre": 0,
+        "abstention": 0,
+        "nonvotant": 0
+      }
+    },
+    {
+      "groupe": {
+        "id": "LIOT",
+        "abrege": "LIOT",
+        "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+        "couleur": null
+      },
+      "position": "pour",
+      "compte": {
+        "pour": 23,
+        "contre": 0,
+        "abstention": 0,
+        "nonvotant": 0
+      }
+    },
+    {
+      "groupe": {
+        "id": "GDR",
+        "abrege": "GDR",
+        "libelle": "Gauche Démocrate et Républicaine",
+        "couleur": null
+      },
+      "position": "contre",
+      "compte": {
+        "pour": 5,
+        "contre": 7,
+        "abstention": 5,
+        "nonvotant": 0
+      }
+    },
+    {
+      "groupe": {
+        "id": "UDDPLR",
+        "abrege": "UDDPLR",
+        "libelle": "Union des droites pour la République",
+        "couleur": null
+      },
+      "position": "pour",
+      "compte": {
+        "pour": 17,
+        "contre": 0,
+        "abstention": 0,
+        "nonvotant": 0
+      }
+    },
+    {
+      "groupe": {
+        "id": "NI",
+        "abrege": "NI",
+        "libelle": "Non inscrits",
+        "couleur": null
+      },
+      "position": "pour",
+      "compte": {
+        "pour": 9,
+        "contre": 0,
+        "abstention": 1,
+        "nonvotant": 0
+      }
+    }
+  ],
+  "nominatif": [
+    {
+      "groupeId": "RN",
+      "position": "pour",
+      "deputes": [
+        {
+          "slug": "alexandre-dufosset",
+          "nom": "Alexandre Dufosset"
+        },
+        {
+          "slug": "alexandre-loubet",
+          "nom": "Alexandre Loubet"
+        },
+        {
+          "slug": "alexis-jolly",
+          "nom": "Alexis Jolly"
+        },
+        {
+          "slug": "anais-sabatini",
+          "nom": "Anaïs Sabatini"
+        },
+        {
+          "slug": "anchya-bamana",
+          "nom": "Anchya Bamana"
+        },
+        {
+          "slug": "angelique-ranc",
+          "nom": "Angélique Ranc"
+        },
+        {
+          "slug": "anne-sicard",
+          "nom": "Anne Sicard"
+        },
+        {
+          "slug": "anthony-boulogne",
+          "nom": "Anthony Boulogne"
+        },
+        {
+          "slug": "antoine-golliot",
+          "nom": "Antoine Golliot"
+        },
+        {
+          "slug": "antoine-villedieu",
+          "nom": "Antoine Villedieu"
+        },
+        {
+          "slug": "auguste-evrard",
+          "nom": "Auguste Evrard"
+        },
+        {
+          "slug": "aurelien-dutremble",
+          "nom": "Aurélien Dutremble"
+        },
+        {
+          "slug": "beatrice-roullaud",
+          "nom": "Béatrice Roullaud"
+        },
+        {
+          "slug": "benedicte-auzanot",
+          "nom": "Bénédicte Auzanot"
+        },
+        {
+          "slug": "bernard-chaumeil",
+          "nom": "Bernard Chaumeil"
+        },
+        {
+          "slug": "bruno-bilde",
+          "nom": "Bruno Bilde"
+        },
+        {
+          "slug": "bruno-clavet",
+          "nom": "Bruno Clavet"
+        },
+        {
+          "slug": "caroline-colombier",
+          "nom": "Caroline Colombier"
+        },
+        {
+          "slug": "caroline-parmentier",
+          "nom": "Caroline Parmentier"
+        },
+        {
+          "slug": "catherine-dellong-meng",
+          "nom": "Catherine Dellong Meng"
+        },
+        {
+          "slug": "catherine-rimbert",
+          "nom": "Catherine Rimbert"
+        },
+        {
+          "slug": "christian-girard",
+          "nom": "Christian Girard"
+        },
+        {
+          "slug": "christine-loir",
+          "nom": "Christine Loir"
+        },
+        {
+          "slug": "christophe-bentz",
+          "nom": "Christophe Bentz"
+        },
+        {
+          "slug": "claire-marais-beuil",
+          "nom": "Claire Marais-Beuil"
+        },
+        {
+          "slug": "cyril-tribuiani",
+          "nom": "Cyril Tribuiani"
+        },
+        {
+          "slug": "david-magnier",
+          "nom": "David Magnier"
+        },
+        {
+          "slug": "eddy-casterman",
+          "nom": "Eddy Casterman"
+        },
+        {
+          "slug": "edouard-jordan",
+          "nom": "Édouard Jordan"
+        },
+        {
+          "slug": "edwige-diaz",
+          "nom": "Edwige Diaz"
+        },
+        {
+          "slug": "emeric-salmon",
+          "nom": "Emeric Salmon"
+        },
+        {
+          "slug": "emmanuel-blairy",
+          "nom": "Emmanuel Blairy"
+        },
+        {
+          "slug": "emmanuel-fouquart",
+          "nom": "Emmanuel Fouquart"
+        },
+        {
+          "slug": "emmanuel-tache",
+          "nom": "Emmanuel Taché"
+        },
+        {
+          "slug": "florence-goulet",
+          "nom": "Florence Goulet"
+        },
+        {
+          "slug": "florence-joubert",
+          "nom": "Florence Joubert"
+        },
+        {
+          "slug": "franck-allisio",
+          "nom": "Franck Allisio"
+        },
+        {
+          "slug": "frank-giletti",
+          "nom": "Frank Giletti"
+        },
+        {
+          "slug": "frederic-boccaletti",
+          "nom": "Frédéric Boccaletti"
+        },
+        {
+          "slug": "frederic-falcon",
+          "nom": "Frédéric Falcon"
+        },
+        {
+          "slug": "gabriel-tomatis",
+          "nom": "Gabriel Tomatis"
+        },
+        {
+          "slug": "gaetan-dussausaye",
+          "nom": "Gaëtan Dussausaye"
+        },
+        {
+          "slug": "geraldine-grangier",
+          "nom": "Géraldine Grangier"
+        },
+        {
+          "slug": "gisele-lelouis",
+          "nom": "Gisèle Lelouis"
+        },
+        {
+          "slug": "guillaume-bigot",
+          "nom": "Guillaume Bigot"
+        },
+        {
+          "slug": "guillaume-florquin",
+          "nom": "Guillaume Florquin"
+        },
+        {
+          "slug": "helene-laporte",
+          "nom": "Hélène Laporte"
+        },
+        {
+          "slug": "herve-de-lepinau",
+          "nom": "Hervé de Lépinau"
+        },
+        {
+          "slug": "jean-philippe-tanguy",
+          "nom": "Jean-Philippe Tanguy"
+        },
+        {
+          "slug": "jerome-buisson",
+          "nom": "Jérôme Buisson"
+        },
+        {
+          "slug": "jocelyn-dessigny",
+          "nom": "Jocelyn Dessigny"
+        },
+        {
+          "slug": "joelle-melin",
+          "nom": "Joëlle Mélin"
+        },
+        {
+          "slug": "jonathan-gery",
+          "nom": "Jonathan Gery"
+        },
+        {
+          "slug": "jordan-guitton",
+          "nom": "Jordan Guitton"
+        },
+        {
+          "slug": "jorys-bovet",
+          "nom": "Jorys Bovet"
+        },
+        {
+          "slug": "jose-beaurain",
+          "nom": "José Beaurain"
+        },
+        {
+          "slug": "jose-gonzalez",
+          "nom": "José Gonzalez"
+        },
+        {
+          "slug": "joseph-riviere",
+          "nom": "Joseph Rivière"
+        },
+        {
+          "slug": "julie-lechanteux",
+          "nom": "Julie Lechanteux"
+        },
+        {
+          "slug": "julien-gabarron",
+          "nom": "Julien Gabarron"
+        },
+        {
+          "slug": "julien-guibert",
+          "nom": "Julien Guibert"
+        },
+        {
+          "slug": "julien-limongi",
+          "nom": "Julien Limongi"
+        },
+        {
+          "slug": "julien-odoul",
+          "nom": "Julien Odoul"
+        },
+        {
+          "slug": "julien-rancoule",
+          "nom": "Julien Rancoule"
+        },
+        {
+          "slug": "katiana-levavasseur",
+          "nom": "Katiana Levavasseur"
+        },
+        {
+          "slug": "kevin-mauvieux",
+          "nom": "Kévin Mauvieux"
+        },
+        {
+          "slug": "kevin-pfeffer",
+          "nom": "Kévin Pfeffer"
+        },
+        {
+          "slug": "laure-lavalette",
+          "nom": "Laure Lavalette"
+        },
+        {
+          "slug": "laurence-robert-dehault",
+          "nom": "Laurence Robert-Dehault"
+        },
+        {
+          "slug": "laurent-jacobelli",
+          "nom": "Laurent Jacobelli"
+        },
+        {
+          "slug": "lionel-tivoli",
+          "nom": "Lionel Tivoli"
+        },
+        {
+          "slug": "lisette-pollet",
+          "nom": "Lisette Pollet"
+        },
+        {
+          "slug": "manon-bouquin",
+          "nom": "Manon Bouquin"
+        },
+        {
+          "slug": "marc-de-fleurian",
+          "nom": "Marc de Fleurian"
+        },
+        {
+          "slug": "marie-france-lorho",
+          "nom": "Marie-France Lorho"
+        },
+        {
+          "slug": "marine-hamelet",
+          "nom": "Marine Hamelet"
+        },
+        {
+          "slug": "marine-le-pen",
+          "nom": "Marine Le Pen"
+        },
+        {
+          "slug": "matthias-renault",
+          "nom": "Matthias Renault"
+        },
+        {
+          "slug": "matthieu-marchio",
+          "nom": "Matthieu Marchio"
+        },
+        {
+          "slug": "maxime-amblard",
+          "nom": "Maxime Amblard"
+        },
+        {
+          "slug": "michael-taverne",
+          "nom": "Michaël Taverne"
+        },
+        {
+          "slug": "michel-guiniot",
+          "nom": "Michel Guiniot"
+        },
+        {
+          "slug": "michele-martinez",
+          "nom": "Michèle Martinez"
+        },
+        {
+          "slug": "monique-griseti",
+          "nom": "Monique Griseti"
+        },
+        {
+          "slug": "nadine-lechon",
+          "nom": "Nadine Lechon"
+        },
+        {
+          "slug": "nathalie-da-conceicao-carvalho",
+          "nom": "Nathalie Da Conceicao Carvalho"
+        },
+        {
+          "slug": "nicolas-dragon",
+          "nom": "Nicolas Dragon"
+        },
+        {
+          "slug": "nicolas-meizonnet",
+          "nom": "Nicolas Meizonnet"
+        },
+        {
+          "slug": "pascal-jenft",
+          "nom": "Pascal Jenft"
+        },
+        {
+          "slug": "pascal-markowsky",
+          "nom": "Pascal Markowsky"
+        },
+        {
+          "slug": "patrice-martin",
+          "nom": "Patrice Martin"
+        },
+        {
+          "slug": "philippe-ballard",
+          "nom": "Philippe Ballard"
+        },
+        {
+          "slug": "philippe-lottiaux",
+          "nom": "Philippe Lottiaux"
+        },
+        {
+          "slug": "philippe-schreck",
+          "nom": "Philippe Schreck"
+        },
+        {
+          "slug": "pierre-meurin",
+          "nom": "Pierre Meurin"
+        },
+        {
+          "slug": "rene-lioret",
+          "nom": "René Lioret"
+        },
+        {
+          "slug": "robert-le-bourgeois",
+          "nom": "Robert Le Bourgeois"
+        },
+        {
+          "slug": "roger-chudeau",
+          "nom": "Roger Chudeau"
+        },
+        {
+          "slug": "romain-baubry",
+          "nom": "Romain Baubry"
+        },
+        {
+          "slug": "romain-tonussi",
+          "nom": "Romain Tonussi"
+        },
+        {
+          "slug": "sandrine-dogor-such",
+          "nom": "Sandrine Dogor-Such"
+        },
+        {
+          "slug": "sebastien-chenu",
+          "nom": "Sébastien Chenu"
+        },
+        {
+          "slug": "sebastien-humbert",
+          "nom": "Sébastien Humbert"
+        },
+        {
+          "slug": "serge-muller",
+          "nom": "Serge Muller"
+        },
+        {
+          "slug": "sophie-blanc",
+          "nom": "Sophie Blanc"
+        },
+        {
+          "slug": "sophie-laurence-roy",
+          "nom": "Sophie-Laurence Roy"
+        },
+        {
+          "slug": "stephane-rambaud",
+          "nom": "Stéphane Rambaud"
+        },
+        {
+          "slug": "stephanie-galzy",
+          "nom": "Stéphanie Galzy"
+        },
+        {
+          "slug": "sylvie-josserand",
+          "nom": "Sylvie Josserand"
+        },
+        {
+          "slug": "theo-bernhardt",
+          "nom": "Théo Bernhardt"
+        },
+        {
+          "slug": "thibaut-monnier",
+          "nom": "Thibaut Monnier"
+        },
+        {
+          "slug": "thierry-frappe",
+          "nom": "Thierry Frappé"
+        },
+        {
+          "slug": "thierry-perez",
+          "nom": "Thierry Perez"
+        },
+        {
+          "slug": "thierry-tesson",
+          "nom": "Thierry Tesson"
+        },
+        {
+          "slug": "thomas-menage",
+          "nom": "Thomas Ménagé"
+        },
+        {
+          "slug": "tiffany-joncour",
+          "nom": "Tiffany Joncour"
+        },
+        {
+          "slug": "timothee-houssin",
+          "nom": "Timothée Houssin"
+        },
+        {
+          "slug": "yael-menache",
+          "nom": "Yaël Ménaché"
+        },
+        {
+          "slug": "yoann-gillet",
+          "nom": "Yoann Gillet"
+        }
+      ]
+    },
+    {
+      "groupeId": "EPR",
+      "position": "pour",
+      "deputes": [
+        {
+          "slug": "agnes-pannier-runacher",
+          "nom": "Agnès Pannier-Runacher"
+        },
+        {
+          "slug": "alexandra-martin-gironde",
+          "nom": "Alexandra Martin (Gironde)"
+        },
+        {
+          "slug": "alim-latreche",
+          "nom": "Alim Latrèche"
+        },
+        {
+          "slug": "amelia-lakrafi",
+          "nom": "Amélia Lakrafi"
+        },
+        {
+          "slug": "annaig-le-meur",
+          "nom": "Annaïg Le Meur"
+        },
+        {
+          "slug": "anne-genetet",
+          "nom": "Anne Genetet"
+        },
+        {
+          "slug": "anne-sophie-ronceret",
+          "nom": "Anne-Sophie Ronceret"
+        },
+        {
+          "slug": "annie-vidal",
+          "nom": "Annie Vidal"
+        },
+        {
+          "slug": "anthony-brosse",
+          "nom": "Anthony Brosse"
+        },
+        {
+          "slug": "astrid-panosyan-bouvet",
+          "nom": "Astrid Panosyan-Bouvet"
+        },
+        {
+          "slug": "bastien-marchive",
+          "nom": "Bastien Marchive"
+        },
+        {
+          "slug": "benjamin-dirx",
+          "nom": "Benjamin Dirx"
+        },
+        {
+          "slug": "bertrand-sorre",
+          "nom": "Bertrand Sorre"
+        },
+        {
+          "slug": "brigitte-klinkert",
+          "nom": "Brigitte Klinkert"
+        },
+        {
+          "slug": "brigitte-liso",
+          "nom": "Brigitte Liso"
+        },
+        {
+          "slug": "caroline-yadan",
+          "nom": "Caroline Yadan"
+        },
+        {
+          "slug": "catherine-ibled",
+          "nom": "Catherine Ibled"
+        },
+        {
+          "slug": "celine-calvez",
+          "nom": "Céline Calvez"
+        },
+        {
+          "slug": "charles-rodwell",
+          "nom": "Charles Rodwell"
+        },
+        {
+          "slug": "charles-sitzenstuhl",
+          "nom": "Charles Sitzenstuhl"
+        },
+        {
+          "slug": "christophe-marion",
+          "nom": "Christophe Marion"
+        },
+        {
+          "slug": "christophe-mongardien",
+          "nom": "Christophe Mongardien"
+        },
+        {
+          "slug": "christopher-weissberg",
+          "nom": "Christopher Weissberg"
+        },
+        {
+          "slug": "constance-le-grip",
+          "nom": "Constance Le Grip"
+        },
+        {
+          "slug": "corinne-vignon",
+          "nom": "Corinne Vignon"
+        },
+        {
+          "slug": "daniel-labaronne",
+          "nom": "Daniel Labaronne"
+        },
+        {
+          "slug": "daniele-carteron",
+          "nom": "Danièle Carteron"
+        },
+        {
+          "slug": "danielle-brulebois",
+          "nom": "Danielle Brulebois"
+        },
+        {
+          "slug": "denis-masseglia",
+          "nom": "Denis Masséglia"
+        },
+        {
+          "slug": "didier-le-gac",
+          "nom": "Didier Le Gac"
+        },
+        {
+          "slug": "eric-bothorel",
+          "nom": "Éric Bothorel"
+        },
+        {
+          "slug": "francois-cormier-bouligeon",
+          "nom": "François Cormier-Bouligeon"
+        },
+        {
+          "slug": "francoise-buffet",
+          "nom": "Françoise Buffet"
+        },
+        {
+          "slug": "gabriel-attal",
+          "nom": "Gabriel Attal"
+        },
+        {
+          "slug": "graziella-melchior",
+          "nom": "Graziella Melchior"
+        },
+        {
+          "slug": "guillaume-gouffier-valente",
+          "nom": "Guillaume Gouffier Valente"
+        },
+        {
+          "slug": "guillaume-kasbarian",
+          "nom": "Guillaume Kasbarian"
+        },
+        {
+          "slug": "herve-berville",
+          "nom": "Hervé Berville"
+        },
+        {
+          "slug": "jean-terlier",
+          "nom": "Jean Terlier"
+        },
+        {
+          "slug": "jean-francois-rousset",
+          "nom": "Jean-François Rousset"
+        },
+        {
+          "slug": "jean-luc-fugit",
+          "nom": "Jean-Luc Fugit"
+        },
+        {
+          "slug": "jean-marie-fievet",
+          "nom": "Jean-Marie Fiévet"
+        },
+        {
+          "slug": "jean-michel-jacques",
+          "nom": "Jean-Michel Jacques"
+        },
+        {
+          "slug": "jean-rene-cazeneuve",
+          "nom": "Jean-René Cazeneuve"
+        },
+        {
+          "slug": "josephine-missoffe",
+          "nom": "Joséphine Missoffe"
+        },
+        {
+          "slug": "julie-delpech",
+          "nom": "Julie Delpech"
+        },
+        {
+          "slug": "karl-olive",
+          "nom": "Karl Olive"
+        },
+        {
+          "slug": "laure-miller",
+          "nom": "Laure Miller"
+        },
+        {
+          "slug": "liliana-tanguy",
+          "nom": "Liliana Tanguy"
+        },
+        {
+          "slug": "lionel-causse",
+          "nom": "Lionel Causse"
+        },
+        {
+          "slug": "ludovic-mendes",
+          "nom": "Ludovic Mendes"
+        },
+        {
+          "slug": "marc-ferracci",
+          "nom": "Marc Ferracci"
+        },
+        {
+          "slug": "marie-lebec",
+          "nom": "Marie Lebec"
+        },
+        {
+          "slug": "marie-philippe-lubet",
+          "nom": "Marie-Philippe Lubet"
+        },
+        {
+          "slug": "marie-pierre-rixain",
+          "nom": "Marie-Pierre Rixain"
+        },
+        {
+          "slug": "marie-sophie-bernadeau",
+          "nom": "Marie-Sophie Bernadeau"
+        },
+        {
+          "slug": "michel-lauzzana",
+          "nom": "Michel Lauzzana"
+        },
+        {
+          "slug": "mikaele-seo",
+          "nom": "Mikaele Seo"
+        },
+        {
+          "slug": "moerani-frebault",
+          "nom": "Moerani Frébault"
+        },
+        {
+          "slug": "natalia-pouzyreff",
+          "nom": "Natalia Pouzyreff"
+        },
+        {
+          "slug": "nathalie-coggia",
+          "nom": "Nathalie Coggia"
+        },
+        {
+          "slug": "nicolas-metzdorf",
+          "nom": "Nicolas Metzdorf"
+        },
+        {
+          "slug": "nicole-le-peih",
+          "nom": "Nicole Le Peih"
+        },
+        {
+          "slug": "olga-givernet",
+          "nom": "Olga Givernet"
+        },
+        {
+          "slug": "olivia-gregoire",
+          "nom": "Olivia Grégoire"
+        },
+        {
+          "slug": "olivier-becht",
+          "nom": "Olivier Becht"
+        },
+        {
+          "slug": "patricia-lemoine",
+          "nom": "Patricia Lemoine"
+        },
+        {
+          "slug": "paul-midy",
+          "nom": "Paul Midy"
+        },
+        {
+          "slug": "pauline-cestrieres",
+          "nom": "Pauline Cestrières"
+        },
+        {
+          "slug": "pierre-cazeneuve",
+          "nom": "Pierre Cazeneuve"
+        },
+        {
+          "slug": "pieyre-alexandre-anglade",
+          "nom": "Pieyre-Alexandre Anglade"
+        },
+        {
+          "slug": "prisca-thevenot",
+          "nom": "Prisca Thevenot"
+        },
+        {
+          "slug": "sandrine-lalanne",
+          "nom": "Sandrine Lalanne"
+        },
+        {
+          "slug": "sandrine-le-feur",
+          "nom": "Sandrine Le Feur"
+        },
+        {
+          "slug": "sebastien-huyghe",
+          "nom": "Sébastien Huyghe"
+        },
+        {
+          "slug": "sophie-panonacle",
+          "nom": "Sophie Panonacle"
+        },
+        {
+          "slug": "stephane-buchou",
+          "nom": "Stéphane Buchou"
+        },
+        {
+          "slug": "stephane-travert",
+          "nom": "Stéphane Travert"
+        },
+        {
+          "slug": "sylvain-maillard",
+          "nom": "Sylvain Maillard"
+        },
+        {
+          "slug": "thomas-gassilloud",
+          "nom": "Thomas Gassilloud"
+        },
+        {
+          "slug": "veronique-riotton",
+          "nom": "Véronique Riotton"
+        },
+        {
+          "slug": "vincent-caure",
+          "nom": "Vincent Caure"
+        },
+        {
+          "slug": "vincent-ledoux",
+          "nom": "Vincent Ledoux"
+        },
+        {
+          "slug": "violette-spillebout",
+          "nom": "Violette Spillebout"
+        },
+        {
+          "slug": "yannick-chenevard",
+          "nom": "Yannick Chenevard"
+        }
+      ]
+    },
+    {
+      "groupeId": "EPR",
+      "position": "abstention",
+      "deputes": [
+        {
+          "slug": "elisabeth-borne",
+          "nom": "Élisabeth Borne"
+        },
+        {
+          "slug": "nicole-dubre-chirat",
+          "nom": "Nicole Dubré-Chirat"
+        }
+      ]
+    },
+    {
+      "groupeId": "EPR",
+      "position": "nonvotant",
+      "deputes": [
+        {
+          "slug": "yael-braun-pivet",
+          "nom": "Yaël Braun-Pivet"
+        }
+      ]
+    },
+    {
+      "groupeId": "LFI-NFP",
+      "position": "abstention",
+      "deputes": [
+        {
+          "slug": "abdelkader-lahmar",
+          "nom": "Abdelkader Lahmar"
+        },
+        {
+          "slug": "aly-diouara",
+          "nom": "Aly Diouara"
+        },
+        {
+          "slug": "anais-belouassa-cherifi",
+          "nom": "Anaïs Belouassa-Cherifi"
+        },
+        {
+          "slug": "andree-taurinya",
+          "nom": "Andrée Taurinya"
+        },
+        {
+          "slug": "andy-kerbrat",
+          "nom": "Andy Kerbrat"
+        },
+        {
+          "slug": "anne-stambach-terrenoir",
+          "nom": "Anne Stambach-Terrenoir"
+        },
+        {
+          "slug": "antoine-leaument",
+          "nom": "Antoine Léaument"
+        },
+        {
+          "slug": "arnaud-le-gall",
+          "nom": "Arnaud Le Gall"
+        },
+        {
+          "slug": "arnaud-saint-martin",
+          "nom": "Arnaud Saint-Martin"
+        },
+        {
+          "slug": "aurelie-trouve",
+          "nom": "Aurélie Trouvé"
+        },
+        {
+          "slug": "aurelien-le-coq",
+          "nom": "Aurélien Le Coq"
+        },
+        {
+          "slug": "aurelien-saintoul",
+          "nom": "Aurélien Saintoul"
+        },
+        {
+          "slug": "aurelien-tache",
+          "nom": "Aurélien Taché"
+        },
+        {
+          "slug": "aymeric-caron",
+          "nom": "Aymeric Caron"
+        },
+        {
+          "slug": "bastien-lachaud",
+          "nom": "Bastien Lachaud"
+        },
+        {
+          "slug": "berenger-cernon",
+          "nom": "Bérenger Cernon"
+        },
+        {
+          "slug": "carlos-martens-bilongo",
+          "nom": "Carlos Martens Bilongo"
+        },
+        {
+          "slug": "christophe-bex",
+          "nom": "Christophe Bex"
+        },
+        {
+          "slug": "claire-lejeune",
+          "nom": "Claire Lejeune"
+        },
+        {
+          "slug": "clemence-guette",
+          "nom": "Clémence Guetté"
+        },
+        {
+          "slug": "damien-maudet",
+          "nom": "Damien Maudet"
+        },
+        {
+          "slug": "daniele-obono",
+          "nom": "Danièle Obono"
+        },
+        {
+          "slug": "elisa-martin",
+          "nom": "Élisa Martin"
+        },
+        {
+          "slug": "elise-leboucher",
+          "nom": "Élise Leboucher"
+        },
+        {
+          "slug": "emmanuel-fernandes",
+          "nom": "Emmanuel Fernandes"
+        },
+        {
+          "slug": "eric-coquerel",
+          "nom": "Éric Coquerel"
+        },
+        {
+          "slug": "ersilia-soudais",
+          "nom": "Ersilia Soudais"
+        },
+        {
+          "slug": "farida-amrani",
+          "nom": "Farida Amrani"
+        },
+        {
+          "slug": "francois-piquemal",
+          "nom": "François Piquemal"
+        },
+        {
+          "slug": "gabriel-amard",
+          "nom": "Gabriel Amard"
+        },
+        {
+          "slug": "gabrielle-cathala",
+          "nom": "Gabrielle Cathala"
+        },
+        {
+          "slug": "hadrien-clouet",
+          "nom": "Hadrien Clouet"
+        },
+        {
+          "slug": "idir-boumertit",
+          "nom": "Idir Boumertit"
+        },
+        {
+          "slug": "jean-francois-coulomme",
+          "nom": "Jean-François Coulomme"
+        },
+        {
+          "slug": "jean-hugues-ratenon",
+          "nom": "Jean-Hugues Ratenon"
+        },
+        {
+          "slug": "jean-philippe-nilor",
+          "nom": "Jean-Philippe Nilor"
+        },
+        {
+          "slug": "jerome-legavre",
+          "nom": "Jérôme Legavre"
+        },
+        {
+          "slug": "karen-erodi",
+          "nom": "Karen Erodi"
+        },
+        {
+          "slug": "laurent-alexandre",
+          "nom": "Laurent Alexandre"
+        },
+        {
+          "slug": "loic-prud-homme",
+          "nom": "Loïc Prud'homme"
+        },
+        {
+          "slug": "manon-meunier",
+          "nom": "Manon Meunier"
+        },
+        {
+          "slug": "manuel-bompard",
+          "nom": "Manuel Bompard"
+        },
+        {
+          "slug": "marianne-maximi",
+          "nom": "Marianne Maximi"
+        },
+        {
+          "slug": "marie-mesmeur",
+          "nom": "Marie Mesmeur"
+        },
+        {
+          "slug": "mathilde-feld",
+          "nom": "Mathilde Feld"
+        },
+        {
+          "slug": "mathilde-hignet",
+          "nom": "Mathilde Hignet"
+        },
+        {
+          "slug": "mathilde-panot",
+          "nom": "Mathilde Panot"
+        },
+        {
+          "slug": "matthias-tavel",
+          "nom": "Matthias Tavel"
+        },
+        {
+          "slug": "maxime-laisney",
+          "nom": "Maxime Laisney"
+        },
+        {
+          "slug": "murielle-lepvraud",
+          "nom": "Murielle Lepvraud"
+        },
+        {
+          "slug": "nadege-abomangoli",
+          "nom": "Nadège Abomangoli"
+        },
+        {
+          "slug": "nathalie-oziol",
+          "nom": "Nathalie Oziol"
+        },
+        {
+          "slug": "paul-vannier",
+          "nom": "Paul Vannier"
+        },
+        {
+          "slug": "perceval-gaillard",
+          "nom": "Perceval Gaillard"
+        },
+        {
+          "slug": "pierre-yves-cadalen",
+          "nom": "Pierre-Yves Cadalen"
+        },
+        {
+          "slug": "raphael-arnault",
+          "nom": "Raphaël Arnault"
+        },
+        {
+          "slug": "rene-pilato",
+          "nom": "René Pilato"
+        },
+        {
+          "slug": "rodrigo-arenas",
+          "nom": "Rodrigo Arenas"
+        },
+        {
+          "slug": "sandrine-nosbe",
+          "nom": "Sandrine Nosbé"
+        },
+        {
+          "slug": "sarah-legrain",
+          "nom": "Sarah Legrain"
+        },
+        {
+          "slug": "sebastien-delogu",
+          "nom": "Sébastien Delogu"
+        },
+        {
+          "slug": "segolene-amiot",
+          "nom": "Ségolène Amiot"
+        },
+        {
+          "slug": "sheherazade-bentorki",
+          "nom": "Shéhérazade Bentorki"
+        },
+        {
+          "slug": "sophia-chikirou",
+          "nom": "Sophia Chikirou"
+        },
+        {
+          "slug": "sylvain-carriere",
+          "nom": "Sylvain Carrière"
+        },
+        {
+          "slug": "sylvie-ferrer",
+          "nom": "Sylvie Ferrer"
+        },
+        {
+          "slug": "thomas-portes",
+          "nom": "Thomas Portes"
+        },
+        {
+          "slug": "ugo-bernalicis",
+          "nom": "Ugo Bernalicis"
+        },
+        {
+          "slug": "zahia-hamdane",
+          "nom": "Zahia Hamdane"
+        }
+      ]
+    },
+    {
+      "groupeId": "SOC",
+      "position": "abstention",
+      "deputes": [
+        {
+          "slug": "alain-david",
+          "nom": "Alain David"
+        },
+        {
+          "slug": "anna-pic",
+          "nom": "Anna Pic"
+        },
+        {
+          "slug": "arnaud-simion",
+          "nom": "Arnaud Simion"
+        },
+        {
+          "slug": "arthur-delaporte",
+          "nom": "Arthur Delaporte"
+        },
+        {
+          "slug": "aurelien-rousseau",
+          "nom": "Aurélien Rousseau"
+        },
+        {
+          "slug": "ayda-hadizadeh",
+          "nom": "Ayda Hadizadeh"
+        },
+        {
+          "slug": "beatrice-bellay",
+          "nom": "Béatrice Bellay"
+        },
+        {
+          "slug": "belkhir-belhaddad",
+          "nom": "Belkhir Belhaddad"
+        },
+        {
+          "slug": "boris-vallaud",
+          "nom": "Boris Vallaud"
+        },
+        {
+          "slug": "celine-thiebault-martinez",
+          "nom": "Céline Thiébault-Martinez"
+        },
+        {
+          "slug": "chantal-jourdan",
+          "nom": "Chantal Jourdan"
+        },
+        {
+          "slug": "christian-baptiste",
+          "nom": "Christian Baptiste"
+        },
+        {
+          "slug": "christine-pires-beaune",
+          "nom": "Christine Pirès Beaune"
+        },
+        {
+          "slug": "christophe-proenca",
+          "nom": "Christophe Proença"
+        },
+        {
+          "slug": "claudia-rouaux",
+          "nom": "Claudia Rouaux"
+        },
+        {
+          "slug": "colette-capdevielle",
+          "nom": "Colette Capdevielle"
+        },
+        {
+          "slug": "denis-fegne",
+          "nom": "Denis Fégné"
+        },
+        {
+          "slug": "dieynaba-diop",
+          "nom": "Dieynaba Diop"
+        },
+        {
+          "slug": "dominique-potier",
+          "nom": "Dominique Potier"
+        },
+        {
+          "slug": "dorine-bregman",
+          "nom": "Dorine Bregman"
+        },
+        {
+          "slug": "elie-califer",
+          "nom": "Elie Califer"
+        },
+        {
+          "slug": "estelle-mercier",
+          "nom": "Estelle Mercier"
+        },
+        {
+          "slug": "fabrice-barusseau",
+          "nom": "Fabrice Barusseau"
+        },
+        {
+          "slug": "fabrice-roussel",
+          "nom": "Fabrice Roussel"
+        },
+        {
+          "slug": "fanny-dombre-coste",
+          "nom": "Fanny Dombre Coste"
+        },
+        {
+          "slug": "fatiha-keloua-hachi",
+          "nom": "Fatiha Keloua Hachi"
+        },
+        {
+          "slug": "florence-herouin-leautey",
+          "nom": "Florence Herouin-Léautey"
+        },
+        {
+          "slug": "francois-hollande",
+          "nom": "François Hollande"
+        },
+        {
+          "slug": "gerard-leseul",
+          "nom": "Gérard Leseul"
+        },
+        {
+          "slug": "guillaume-garot",
+          "nom": "Guillaume Garot"
+        },
+        {
+          "slug": "herve-saulignac",
+          "nom": "Hervé Saulignac"
+        },
+        {
+          "slug": "inaki-echaniz",
+          "nom": "Iñaki Echaniz"
+        },
+        {
+          "slug": "isabelle-santiago",
+          "nom": "Isabelle Santiago"
+        },
+        {
+          "slug": "jacques-oberti",
+          "nom": "Jacques Oberti"
+        },
+        {
+          "slug": "jerome-guedj",
+          "nom": "Jérôme Guedj"
+        },
+        {
+          "slug": "joel-aviragnet",
+          "nom": "Joël Aviragnet"
+        },
+        {
+          "slug": "karim-benbrahim",
+          "nom": "Karim Benbrahim"
+        },
+        {
+          "slug": "laurent-baumel",
+          "nom": "Laurent Baumel"
+        },
+        {
+          "slug": "marc-pena",
+          "nom": "Marc Pena"
+        },
+        {
+          "slug": "marie-recalde",
+          "nom": "Marie Récalde"
+        },
+        {
+          "slug": "marie-jose-allemand",
+          "nom": "Marie-José Allemand"
+        },
+        {
+          "slug": "marie-noelle-battistel",
+          "nom": "Marie-Noëlle Battistel"
+        },
+        {
+          "slug": "marietta-karamanli",
+          "nom": "Marietta Karamanli"
+        },
+        {
+          "slug": "martine-froger",
+          "nom": "Martine Froger"
+        },
+        {
+          "slug": "melanie-thomin",
+          "nom": "Mélanie Thomin"
+        },
+        {
+          "slug": "oceane-godard",
+          "nom": "Océane Godard"
+        },
+        {
+          "slug": "olivier-faure",
+          "nom": "Olivier Faure"
+        },
+        {
+          "slug": "pascale-got",
+          "nom": "Pascale Got"
+        },
+        {
+          "slug": "paul-christophle",
+          "nom": "Paul Christophle"
+        },
+        {
+          "slug": "peio-dufau",
+          "nom": "Peio Dufau"
+        },
+        {
+          "slug": "philippe-naillet",
+          "nom": "Philippe Naillet"
+        },
+        {
+          "slug": "pierre-pribetich",
+          "nom": "Pierre Pribetich"
+        },
+        {
+          "slug": "pierrick-courbon",
+          "nom": "Pierrick Courbon"
+        },
+        {
+          "slug": "roger-vicot",
+          "nom": "Roger Vicot"
+        },
+        {
+          "slug": "romain-eskenazi",
+          "nom": "Romain Eskenazi"
+        },
+        {
+          "slug": "sandrine-runel",
+          "nom": "Sandrine Runel"
+        },
+        {
+          "slug": "sebastien-saint-pasteur",
+          "nom": "Sébastien Saint-Pasteur"
+        },
+        {
+          "slug": "sophie-pantel",
+          "nom": "Sophie Pantel"
+        },
+        {
+          "slug": "stephane-delautrette",
+          "nom": "Stéphane Delautrette"
+        },
+        {
+          "slug": "stephane-hablot",
+          "nom": "Stéphane Hablot"
+        },
+        {
+          "slug": "thierry-sother",
+          "nom": "Thierry Sother"
+        },
+        {
+          "slug": "valerie-rossi",
+          "nom": "Valérie Rossi"
+        }
+      ]
+    },
+    {
+      "groupeId": "DR",
+      "position": "pour",
+      "deputes": [
+        {
+          "slug": "alexandra-martin",
+          "nom": "Alexandra Martin (Alpes-Maritimes)"
+        },
+        {
+          "slug": "alexandre-portier",
+          "nom": "Alexandre Portier"
+        },
+        {
+          "slug": "alix-fruchon",
+          "nom": "Alix Fruchon"
+        },
+        {
+          "slug": "anne-laure-blin",
+          "nom": "Anne-Laure Blin"
+        },
+        {
+          "slug": "antoine-vermorel-marques",
+          "nom": "Antoine Vermorel"
+        },
+        {
+          "slug": "cendrine-chaze",
+          "nom": "Cendrine Chazé"
+        },
+        {
+          "slug": "christelle-minard",
+          "nom": "Christelle Minard"
+        },
+        {
+          "slug": "corentin-le-fur",
+          "nom": "Corentin Le Fur"
+        },
+        {
+          "slug": "elisabeth-de-maistre",
+          "nom": "Élisabeth de Maistre"
+        },
+        {
+          "slug": "emeline-rey",
+          "nom": "Emeline Rey-Rinchet"
+        },
+        {
+          "slug": "emilie-bonnivard",
+          "nom": "Émilie Bonnivard"
+        },
+        {
+          "slug": "eric-liegeon",
+          "nom": "Eric Liégeon"
+        },
+        {
+          "slug": "eric-pauget",
+          "nom": "Éric Pauget"
+        },
+        {
+          "slug": "fabrice-brun",
+          "nom": "Fabrice Brun"
+        },
+        {
+          "slug": "francois-xavier-ceccoli",
+          "nom": "François-Xavier Ceccoli"
+        },
+        {
+          "slug": "frederique-meunier",
+          "nom": "Frédérique Meunier"
+        },
+        {
+          "slug": "hubert-brigand",
+          "nom": "Hubert Brigand"
+        },
+        {
+          "slug": "ian-boucard",
+          "nom": "Ian Boucard"
+        },
+        {
+          "slug": "jean-louis-thieriot",
+          "nom": "Jean-Louis Thiériot"
+        },
+        {
+          "slug": "jean-luc-bourgeaux",
+          "nom": "Jean-Luc Bourgeaux"
+        },
+        {
+          "slug": "jean-pierre-vigier",
+          "nom": "Jean-Pierre Vigier"
+        },
+        {
+          "slug": "jean-yves-bonnefoy",
+          "nom": "Jean-Yves Bonnefoy"
+        },
+        {
+          "slug": "jean-yves-bony",
+          "nom": "Jean-Yves Bony"
+        },
+        {
+          "slug": "jerome-end",
+          "nom": "Jérôme End"
+        },
+        {
+          "slug": "josiane-corneloup",
+          "nom": "Josiane Corneloup"
+        },
+        {
+          "slug": "julien-dive",
+          "nom": "Julien Dive"
+        },
+        {
+          "slug": "justine-gruet",
+          "nom": "Justine Gruet"
+        },
+        {
+          "slug": "laurent-wauquiez",
+          "nom": "Laurent Wauquiez"
+        },
+        {
+          "slug": "lionel-duparay",
+          "nom": "Lionel Duparay"
+        },
+        {
+          "slug": "marie-christine-dalloz",
+          "nom": "Marie-Christine Dalloz"
+        },
+        {
+          "slug": "michel-barnier",
+          "nom": "Michel Barnier"
+        },
+        {
+          "slug": "michel-herbillon",
+          "nom": "Michel Herbillon"
+        },
+        {
+          "slug": "michele-tabarot",
+          "nom": "Michèle Tabarot"
+        },
+        {
+          "slug": "nicolas-ray",
+          "nom": "Nicolas Ray"
+        },
+        {
+          "slug": "nicolas-tryzna",
+          "nom": "Nicolas Tryzna"
+        },
+        {
+          "slug": "patrick-hetzel",
+          "nom": "Patrick Hetzel"
+        },
+        {
+          "slug": "philippe-gosselin",
+          "nom": "Philippe Gosselin"
+        },
+        {
+          "slug": "philippe-juvin",
+          "nom": "Philippe Juvin"
+        },
+        {
+          "slug": "pierre-cordier",
+          "nom": "Pierre Cordier"
+        },
+        {
+          "slug": "sylvie-bonnet",
+          "nom": "Sylvie Bonnet"
+        },
+        {
+          "slug": "thibault-bazin",
+          "nom": "Thibault Bazin"
+        },
+        {
+          "slug": "thierry-liger",
+          "nom": "Thierry Liger"
+        },
+        {
+          "slug": "valerie-bazin-malgras",
+          "nom": "Valérie Bazin-Malgras"
+        },
+        {
+          "slug": "vincent-descoeur",
+          "nom": "Vincent Descoeur"
+        },
+        {
+          "slug": "vincent-rolland",
+          "nom": "Vincent Rolland"
+        },
+        {
+          "slug": "virginie-duby-muller",
+          "nom": "Virginie Duby-Muller"
+        },
+        {
+          "slug": "xavier-breton",
+          "nom": "Xavier Breton"
+        },
+        {
+          "slug": "yannick-neuder",
+          "nom": "Yannick Neuder"
+        }
+      ]
+    },
+    {
+      "groupeId": "ECOS",
+      "position": "pour",
+      "deputes": [
+        {
+          "slug": "nicolas-thierry",
+          "nom": "Nicolas Thierry"
+        },
+        {
+          "slug": "sandra-regol",
+          "nom": "Sandra Regol"
+        },
+        {
+          "slug": "steevy-gustave",
+          "nom": "Steevy Gustave"
+        }
+      ]
+    },
+    {
+      "groupeId": "ECOS",
+      "position": "abstention",
+      "deputes": [
+        {
+          "slug": "alexis-corbiere",
+          "nom": "Alexis Corbière"
+        },
+        {
+          "slug": "arnaud-bonnet",
+          "nom": "Arnaud Bonnet"
+        },
+        {
+          "slug": "benjamin-lucas-lundy",
+          "nom": "Benjamin Lucas-Lundy"
+        },
+        {
+          "slug": "benoit-biteau",
+          "nom": "Benoît Biteau"
+        },
+        {
+          "slug": "boris-tavernier",
+          "nom": "Boris Tavernier"
+        },
+        {
+          "slug": "catherine-hervieu",
+          "nom": "Catherine Hervieu"
+        },
+        {
+          "slug": "charles-fournier",
+          "nom": "Charles Fournier"
+        },
+        {
+          "slug": "christine-arrighi",
+          "nom": "Christine Arrighi"
+        },
+        {
+          "slug": "clementine-autain",
+          "nom": "Clémentine Autain"
+        },
+        {
+          "slug": "cyrielle-chatelain",
+          "nom": "Cyrielle Chatelain"
+        },
+        {
+          "slug": "damien-girard",
+          "nom": "Damien Girard"
+        },
+        {
+          "slug": "danielle-simonnet",
+          "nom": "Danielle Simonnet"
+        },
+        {
+          "slug": "dominique-voynet",
+          "nom": "Dominique Voynet"
+        },
+        {
+          "slug": "emmanuel-duplessy",
+          "nom": "Emmanuel Duplessy"
+        },
+        {
+          "slug": "eva-sas",
+          "nom": "Eva Sas"
+        },
+        {
+          "slug": "francois-ruffin",
+          "nom": "François Ruffin"
+        },
+        {
+          "slug": "hendrik-davi",
+          "nom": "Hendrik Davi"
+        },
+        {
+          "slug": "jean-claude-raux",
+          "nom": "Jean-Claude Raux"
+        },
+        {
+          "slug": "jean-louis-roumegas",
+          "nom": "Jean-Louis Roumégas"
+        },
+        {
+          "slug": "jeremie-iordanoff",
+          "nom": "Jérémie Iordanoff"
+        },
+        {
+          "slug": "julie-laernoes",
+          "nom": "Julie Laernoes"
+        },
+        {
+          "slug": "julie-ozenne",
+          "nom": "Julie Ozenne"
+        },
+        {
+          "slug": "karim-ben-cheikh",
+          "nom": "Karim Ben Cheikh"
+        },
+        {
+          "slug": "lea-balage-el-mariky",
+          "nom": "Léa Balage El Mariky"
+        },
+        {
+          "slug": "lisa-belluco",
+          "nom": "Lisa Belluco"
+        },
+        {
+          "slug": "marie-pochon",
+          "nom": "Marie Pochon"
+        },
+        {
+          "slug": "marie-charlotte-garin",
+          "nom": "Marie-Charlotte Garin"
+        },
+        {
+          "slug": "nicolas-bonnet",
+          "nom": "Nicolas Bonnet"
+        },
+        {
+          "slug": "sabrina-sebaihi",
+          "nom": "Sabrina Sebaihi"
+        },
+        {
+          "slug": "sandrine-rousseau",
+          "nom": "Sandrine Rousseau"
+        },
+        {
+          "slug": "sebastien-peytavie",
+          "nom": "Sébastien Peytavie"
+        },
+        {
+          "slug": "sophie-taille-polian",
+          "nom": "Sophie Taillé-Polian"
+        },
+        {
+          "slug": "tristan-lahais",
+          "nom": "Tristan Lahais"
+        }
+      ]
+    },
+    {
+      "groupeId": "DEM",
+      "position": "pour",
+      "deputes": [
+        {
+          "slug": "anne-bergantz",
+          "nom": "Anne Bergantz"
+        },
+        {
+          "slug": "blandine-brocard",
+          "nom": "Blandine Brocard"
+        },
+        {
+          "slug": "bruno-fuchs",
+          "nom": "Bruno Fuchs"
+        },
+        {
+          "slug": "carole-guillerm",
+          "nom": "Carole Guillerm"
+        },
+        {
+          "slug": "christophe-blanchet",
+          "nom": "Christophe Blanchet"
+        },
+        {
+          "slug": "cyrille-isaac-sibille",
+          "nom": "Cyrille Isaac-Sibille"
+        },
+        {
+          "slug": "delphine-lingemann",
+          "nom": "Delphine Lingemann"
+        },
+        {
+          "slug": "didier-padey",
+          "nom": "Didier Padey"
+        },
+        {
+          "slug": "eric-martineau",
+          "nom": "Éric Martineau"
+        },
+        {
+          "slug": "erwan-balanant",
+          "nom": "Erwan Balanant"
+        },
+        {
+          "slug": "frantz-gumbs",
+          "nom": "Frantz Gumbs"
+        },
+        {
+          "slug": "frederic-petit",
+          "nom": "Frédéric Petit"
+        },
+        {
+          "slug": "genevieve-darrieussecq",
+          "nom": "Geneviève Darrieussecq"
+        },
+        {
+          "slug": "geraldine-bannier",
+          "nom": "Géraldine Bannier"
+        },
+        {
+          "slug": "hubert-ott",
+          "nom": "Hubert Ott"
+        },
+        {
+          "slug": "jean-carles-grelier",
+          "nom": "Jean-Carles Grelier"
+        },
+        {
+          "slug": "jean-paul-mattei",
+          "nom": "Jean-Paul Mattei"
+        },
+        {
+          "slug": "jimmy-pahun",
+          "nom": "Jimmy Pahun"
+        },
+        {
+          "slug": "josy-poueyto",
+          "nom": "Josy Poueyto"
+        },
+        {
+          "slug": "laurent-croizier",
+          "nom": "Laurent Croizier"
+        },
+        {
+          "slug": "louise-morel",
+          "nom": "Louise Morel"
+        },
+        {
+          "slug": "marc-fesneau",
+          "nom": "Marc Fesneau"
+        },
+        {
+          "slug": "maud-petit",
+          "nom": "Maud Petit"
+        },
+        {
+          "slug": "mickael-cosson",
+          "nom": "Mickaël Cosson"
+        },
+        {
+          "slug": "nicolas-turquois",
+          "nom": "Nicolas Turquois"
+        },
+        {
+          "slug": "pascal-lecamp",
+          "nom": "Pascal Lecamp"
+        },
+        {
+          "slug": "patricia-maussion",
+          "nom": "Patricia Maussion"
+        },
+        {
+          "slug": "perrine-goulet",
+          "nom": "Perrine Goulet"
+        },
+        {
+          "slug": "romain-daubie",
+          "nom": "Romain Daubié"
+        },
+        {
+          "slug": "sabine-gervais",
+          "nom": "Sabine Gervais"
+        },
+        {
+          "slug": "sabine-thillaye",
+          "nom": "Sabine Thillaye"
+        },
+        {
+          "slug": "sandrine-josso",
+          "nom": "Sandrine Josso"
+        },
+        {
+          "slug": "sophie-mette",
+          "nom": "Sophie Mette"
+        }
+      ]
+    },
+    {
+      "groupeId": "DEM",
+      "position": "abstention",
+      "deputes": [
+        {
+          "slug": "philippe-latombe",
+          "nom": "Philippe Latombe"
+        }
+      ]
+    },
+    {
+      "groupeId": "HOR",
+      "position": "pour",
+      "deputes": [
+        {
+          "slug": "agnes-firmin-le-bodo",
+          "nom": "Agnès Firmin Le Bodo"
+        },
+        {
+          "slug": "anne-cecile-violland",
+          "nom": "Anne-Cécile Violland"
+        },
+        {
+          "slug": "beatrice-piron",
+          "nom": "Béatrice Piron"
+        },
+        {
+          "slug": "benoit-blanchard",
+          "nom": "Benoît Blanchard"
+        },
+        {
+          "slug": "bertrand-bouyx",
+          "nom": "Bertrand Bouyx"
+        },
+        {
+          "slug": "charlotte-parmentier-lecocq",
+          "nom": "Charlotte Parmentier-Lecocq"
+        },
+        {
+          "slug": "christine-le-nabour",
+          "nom": "Christine Le Nabour"
+        },
+        {
+          "slug": "christophe-plassard",
+          "nom": "Christophe Plassard"
+        },
+        {
+          "slug": "didier-lemaire",
+          "nom": "Didier Lemaire"
+        },
+        {
+          "slug": "dominique-paillat",
+          "nom": "Dominique Paillat"
+        },
+        {
+          "slug": "felicie-gerard",
+          "nom": "Félicie Gérard"
+        },
+        {
+          "slug": "francois-gernigon",
+          "nom": "François Gernigon"
+        },
+        {
+          "slug": "francois-jolivet",
+          "nom": "François Jolivet"
+        },
+        {
+          "slug": "frederic-valletoux",
+          "nom": "Frédéric Valletoux"
+        },
+        {
+          "slug": "henri-alfandari",
+          "nom": "Henri Alfandari"
+        },
+        {
+          "slug": "isabelle-rauch",
+          "nom": "Isabelle Rauch"
+        },
+        {
+          "slug": "jean-francois-portarrieu",
+          "nom": "Jean-François Portarrieu"
+        },
+        {
+          "slug": "jean-michel-brard",
+          "nom": "Jean-Michel Brard"
+        },
+        {
+          "slug": "jeremie-patrier-leitus",
+          "nom": "Jérémie Patrier-Leitus"
+        },
+        {
+          "slug": "laetitia-saint-paul",
+          "nom": "Laetitia Saint-Paul"
+        },
+        {
+          "slug": "laurent-marcangeli",
+          "nom": "Laurent Marcangeli"
+        },
+        {
+          "slug": "lise-magnier",
+          "nom": "Lise Magnier"
+        },
+        {
+          "slug": "loic-kervran",
+          "nom": "Loïc Kervran"
+        },
+        {
+          "slug": "marie-agnes-poussier-winsback",
+          "nom": "Marie-Agnès Poussier-Winsback"
+        },
+        {
+          "slug": "michel-criaud",
+          "nom": "Michel Criaud"
+        },
+        {
+          "slug": "nathalie-colin-oesterle",
+          "nom": "Nathalie Colin-Oesterlé"
+        },
+        {
+          "slug": "philippe-fait",
+          "nom": "Philippe Fait"
+        },
+        {
+          "slug": "pierre-henriet",
+          "nom": "Pierre Henriet"
+        },
+        {
+          "slug": "pierre-marle",
+          "nom": "Pierre Marle"
+        },
+        {
+          "slug": "sylvain-berrios",
+          "nom": "Sylvain Berrios"
+        },
+        {
+          "slug": "thierry-benoit",
+          "nom": "Thierry Benoit"
+        },
+        {
+          "slug": "thomas-lam",
+          "nom": "Thomas Lam"
+        },
+        {
+          "slug": "veronique-ludmann",
+          "nom": "Véronique Ludmann"
+        },
+        {
+          "slug": "vincent-thiebaut",
+          "nom": "Vincent Thiébaut"
+        },
+        {
+          "slug": "xavier-albertini",
+          "nom": "Xavier Albertini"
+        },
+        {
+          "slug": "xavier-roseren",
+          "nom": "Xavier Roseren"
+        }
+      ]
+    },
+    {
+      "groupeId": "LIOT",
+      "position": "pour",
+      "deputes": [
+        {
+          "slug": "audrey-abadie-amiel",
+          "nom": "Audrey Abadie-Amiel"
+        },
+        {
+          "slug": "charles-de-courson",
+          "nom": "Charles de Courson"
+        },
+        {
+          "slug": "christophe-naegelen",
+          "nom": "Christophe Naegelen"
+        },
+        {
+          "slug": "constance-de-pelichy",
+          "nom": "Constance de Pélichy"
+        },
+        {
+          "slug": "david-habib",
+          "nom": "David Habib"
+        },
+        {
+          "slug": "david-taupiac",
+          "nom": "David Taupiac"
+        },
+        {
+          "slug": "estelle-youssouffa",
+          "nom": "Estelle Youssouffa"
+        },
+        {
+          "slug": "harold-huwart",
+          "nom": "Harold Huwart"
+        },
+        {
+          "slug": "jean-bodart",
+          "nom": "Jean Bodart"
+        },
+        {
+          "slug": "jean-luc-warsmann",
+          "nom": "Jean-Luc Warsmann"
+        },
+        {
+          "slug": "jean-pierre-bataille",
+          "nom": "Jean-Pierre Bataille"
+        },
+        {
+          "slug": "joel-bruneau",
+          "nom": "Joël Bruneau"
+        },
+        {
+          "slug": "laurent-mazaury",
+          "nom": "Laurent Mazaury"
+        },
+        {
+          "slug": "max-mathiasin",
+          "nom": "Max Mathiasin"
+        },
+        {
+          "slug": "michel-castellani",
+          "nom": "Michel Castellani"
+        },
+        {
+          "slug": "nicole-sanquer",
+          "nom": "Nicole Sanquer"
+        },
+        {
+          "slug": "olivier-serva",
+          "nom": "Olivier Serva"
+        },
+        {
+          "slug": "paul-molac",
+          "nom": "Paul Molac"
+        },
+        {
+          "slug": "paul-andre-colombani",
+          "nom": "Paul-André Colombani"
+        },
+        {
+          "slug": "stephane-lenormand",
+          "nom": "Stéphane Lenormand"
+        },
+        {
+          "slug": "stephane-viry",
+          "nom": "Stéphane Viry"
+        },
+        {
+          "slug": "valerie-letard",
+          "nom": "Valérie Létard"
+        },
+        {
+          "slug": "yannick-favennec-becot",
+          "nom": "Yannick Favennec-Bécot"
+        }
+      ]
+    },
+    {
+      "groupeId": "GDR",
+      "position": "pour",
+      "deputes": [
+        {
+          "slug": "emeline-k-bidi",
+          "nom": "Émeline K/Bidi"
+        },
+        {
+          "slug": "emmanuel-maurel",
+          "nom": "Emmanuel Maurel"
+        },
+        {
+          "slug": "frederic-maillot",
+          "nom": "Frédéric Maillot"
+        },
+        {
+          "slug": "karine-lebon",
+          "nom": "Karine Lebon"
+        },
+        {
+          "slug": "mereana-reid-arbelot",
+          "nom": "Mereana Reid Arbelot"
+        }
+      ]
+    },
+    {
+      "groupeId": "GDR",
+      "position": "contre",
+      "deputes": [
+        {
+          "slug": "davy-rimane",
+          "nom": "Davy Rimane"
+        },
+        {
+          "slug": "emmanuel-tjibaou",
+          "nom": "Emmanuel Tjibaou"
+        },
+        {
+          "slug": "julien-brugerolles",
+          "nom": "Julien Brugerolles"
+        },
+        {
+          "slug": "marcellin-nadeau",
+          "nom": "Marcellin Nadeau"
+        },
+        {
+          "slug": "soumya-bourouaha",
+          "nom": "Soumya Bourouaha"
+        },
+        {
+          "slug": "stephane-peu",
+          "nom": "Stéphane Peu"
+        },
+        {
+          "slug": "yannick-monnet",
+          "nom": "Yannick Monnet"
+        }
+      ]
+    },
+    {
+      "groupeId": "GDR",
+      "position": "abstention",
+      "deputes": [
+        {
+          "slug": "edouard-benard",
+          "nom": "Édouard Bénard"
+        },
+        {
+          "slug": "elsa-faucillon",
+          "nom": "Elsa Faucillon"
+        },
+        {
+          "slug": "jean-paul-lecoq",
+          "nom": "Jean-Paul Lecoq"
+        },
+        {
+          "slug": "jean-victor-castor",
+          "nom": "Jean-Victor Castor"
+        },
+        {
+          "slug": "nicolas-sansu",
+          "nom": "Nicolas Sansu"
+        }
+      ]
+    },
+    {
+      "groupeId": "UDDPLR",
+      "position": "pour",
+      "deputes": [
+        {
+          "slug": "alexandre-allegret-pilot",
+          "nom": "Alexandre Allegret-Pilot"
+        },
+        {
+          "slug": "antoine-valentin",
+          "nom": "Antoine Valentin"
+        },
+        {
+          "slug": "bartolome-lenoir",
+          "nom": "Bartolomé Lenoir"
+        },
+        {
+          "slug": "bernard-chaix",
+          "nom": "Bernard Chaix"
+        },
+        {
+          "slug": "charles-alloncle",
+          "nom": "Charles Alloncle"
+        },
+        {
+          "slug": "christelle-d-intorni",
+          "nom": "Christelle D'Intorni"
+        },
+        {
+          "slug": "eric-ciotti",
+          "nom": "Éric Ciotti"
+        },
+        {
+          "slug": "eric-michoux",
+          "nom": "Éric Michoux"
+        },
+        {
+          "slug": "gerault-verny",
+          "nom": "Gérault Verny"
+        },
+        {
+          "slug": "hanane-mansouri",
+          "nom": "Hanane Mansouri"
+        },
+        {
+          "slug": "marc-chavent",
+          "nom": "Marc Chavent"
+        },
+        {
+          "slug": "matthieu-bloch",
+          "nom": "Matthieu Bloch"
+        },
+        {
+          "slug": "maxime-michelet",
+          "nom": "Maxime Michelet"
+        },
+        {
+          "slug": "olivier-fayssat",
+          "nom": "Olivier Fayssat"
+        },
+        {
+          "slug": "pierre-henri-carbonnel",
+          "nom": "Pierre-Henri Carbonnel"
+        },
+        {
+          "slug": "sophie-ricourt-vaginay",
+          "nom": "Sophie Ricourt Vaginay"
+        },
+        {
+          "slug": "vincent-trebuchet",
+          "nom": "Vincent Trébuchet"
+        }
+      ]
+    },
+    {
+      "groupeId": "NI",
+      "position": "pour",
+      "deputes": [
+        {
+          "slug": "aurelien-pradie",
+          "nom": "Aurélien Pradié"
+        },
+        {
+          "slug": "christine-engrand",
+          "nom": "Christine Engrand"
+        },
+        {
+          "slug": "daniel-grenon",
+          "nom": "Daniel Grenon"
+        },
+        {
+          "slug": "lionel-vuibert",
+          "nom": "Lionel Vuibert"
+        },
+        {
+          "slug": "philippe-bonnecarrere",
+          "nom": "Philippe Bonnecarrère"
+        },
+        {
+          "slug": "sandra-delannoy",
+          "nom": "Sandra Delannoy"
+        },
+        {
+          "slug": "sophie-errante",
+          "nom": "Sophie Errante"
+        },
+        {
+          "slug": "stella-dupont",
+          "nom": "Stella Dupont"
+        },
+        {
+          "slug": "veronique-besse",
+          "nom": "Véronique Besse"
+        }
+      ]
+    },
+    {
+      "groupeId": "NI",
+      "position": "abstention",
+      "deputes": [
+        {
+          "slug": "philippe-brun",
+          "nom": "Philippe Brun"
+        }
+      ]
+    }
+  ]
+}
