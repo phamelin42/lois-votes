@@ -46,20 +46,24 @@ test.describe('chargement intelligent', () => {
     expect(page.url()).toMatch(/\/$/); // on n'a pas navigué : seulement préchargé
   });
 
-  test('le code des pages visibles est déjà préchargé : naviguer ne charge aucun script', async ({
+  test('le code de la page cible est déjà préchargé : naviguer ne le redemande pas', async ({
     page,
   }) => {
     await page.goto('/');
     await attendreHydratation(page);
     await page.waitForTimeout(1500); // le pré-chargement attend un moment d'inactivité du navigateur
-    const scripts: string[] = [];
-    page.on('request', (r) => r.resourceType() === 'script' && scripts.push(r.url()));
+    const chargesApresClic: Promise<string>[] = [];
+    page.on('response', (r) => {
+      if (r.request().resourceType() === 'script') chargesApresClic.push(r.text().catch(() => ''));
+    });
 
     await page.getByRole('link', { name: 'Députés' }).click();
     await expect(page).toHaveURL('/deputes');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
-    expect(scripts).toEqual([]);
+    // D'autres routes (profil, à propos) peuvent se précharger à l'arrivée : seule la page cible compte.
+    const corps = await Promise.all(chargesApresClic);
+    expect(corps.filter((code) => code.includes('app-deputes-page'))).toEqual([]);
   });
 
   test("les blocs différés sous la ligne de flottaison ne chargent rien avant d'être visibles", async ({
