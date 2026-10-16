@@ -59,6 +59,15 @@ Reprendre celles de Fuda (`/home/user/design-system-fuda/CLAUDE.md`) :
 - Budgets `angular.json` en erreur : initial ≤ 150 Ko, styles par composant ≤ 4 Ko.
 - `outputHashing: bundles` en production : les polices gardent un nom stable, pour que le préchargement de `index.html` (`/media/zen-maru-gothic-latin-500-normal.woff2`) corresponde au fichier réellement chargé. À vérifier après chaque changement de build.
 
+## Données et chargement
+
+- Une page n'appelle jamais `fetch` ni `HttpClient` directement : elle injecte un service de `src/app/data/` (`AccueilApi`, `LoiApi`, `ScrutinApi`, `DeputeApi`), qui renvoie une `httpResource` typée par `@contrat`. La page lit `value()`, `isLoading()`, `error()`, et reporte l'erreur sur le statut HTTP du rendu serveur avec `statutDePage(ressource)` (404 ou 503).
+- Les services ne s'abonnent jamais à la main. Une URL dépend d'un `Signal` ; tant qu'il vaut `undefined`, aucune requête n'est lancée. Les paramètres sont encodés avec `encodeURIComponent`.
+- Côté serveur, `serverApiInterceptor` (fourni seulement par `app.config.server.ts`, comme intercepteur racine) exécute `/api/*` en mémoire via `APPELER_BFF`, sans réseau. Comme intercepteur racine, il passe sous le cache de transfert HTTP, qui transmet ensuite les données au navigateur : pas de seconde requête à l'hydratation. Un intercepteur ordinaire qui court-circuite la requête empêche ce cache de voir la réponse.
+- `format.ts` fournit les formats partagés (`pourcent`, `dateCourte`, `dateLongue`, `normaliser`, `libellePosition`). Les dates s'affichent dans le fuseau `Europe/Paris`.
+- Hydratation : `@defer (on viewport; hydrate on viewport)` pour ce qui est sous la ligne de flottaison, `@defer (on interaction; hydrate on interaction)` pour les blocs interactifs lourds comme la liste nominative. Chaque `@defer` a son `@placeholder` de hauteur fixe.
+- Pré-chargement : `ViewportPreloadingStrategy` charge le code d'une route quand un `a[routerLink]` qui y mène entre dans l'écran (`AppLienVisible`). `appPrefetch="/api/…"` précharge les données au survol, au focus ou au toucher, par un seul `fetch` de priorité basse. Rien ne se précharge avec l'économiseur de données (`saveData`) ; le code d'une route ne se précharge pas non plus en 2g.
+
 ## Textes
 
 Tous les textes de l'interface et de la documentation sont en français, ainsi que les messages de commit.
