@@ -1,0 +1,50 @@
+<section class="app-accueil">
+  <h1 class="app-accueil__accroche title-1">Les dernières lois votées à l'Assemblée</h1>
+  <p class="app-accueil__intro body">
+    Pour chaque loi, le vote de chaque groupe de l'Assemblée nationale, des plus récentes aux plus
+    anciennes.
+  </p>
+
+  @if (erreur()) {
+    <fd-alert
+      tone="danger"
+      title="Données momentanément indisponibles, réessayez dans une minute."
+      announce
+    />
+  }
+
+  @if (donnees(); as page) {
+    @if (page.lois.length > 0) {
+      <ul class="app-accueil__liste">
+        @for (loi of page.lois; track loi.voteFinal.numero) {
+          <li><app-loi-card [loi]="loi" /></li>
+        }
+      </ul>
+      @if (page.pageSuivante) {
+        <div class="app-accueil__suite">
+          <button
+            fdButton
+            type="button"
+            variant="secondary"
+            [loading]="chargement()"
+            [disabled]="chargement()"
+            (click)="pageSuivante.emit()"
+          >
+            Voir plus
+          </button>
+        </div>
+      }
+    } @else {
+      <fd-empty-state
+        title="Aucune loi à afficher pour l'instant"
+        text="Les votes apparaissent ici dès que l'Assemblée les publie."
+      />
+    }
+  } @else if (!erreur()) {
+    <div class="app-accueil__liste app-accueil__liste--attente" aria-busy="true">
+      @for (squelette of [1, 2, 3]; track squelette) {
+        <div class="app-accueil__squelette" aria-hidden="true"></div>
+      }
+    </div>
+  }
+</section>

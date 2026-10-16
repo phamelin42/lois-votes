@@ -1,0 +1,85 @@
+/* Lien d'évitement : caché jusqu'au focus clavier. */
+.app-shell__evitement {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: var(--layer-dialog);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--ink);
+  box-shadow: var(--shadow-float);
+  transform: translateY(-200%);
+}
+
+.app-shell__evitement:focus {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  transform: none;
+}
+
+.app-shell__entete {
+  position: sticky;
+  top: 0;
+  z-index: var(--layer-sticky);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-hair) solid var(--line);
+  background: var(--surface);
+}
+
+.app-shell__nom {
+  color: var(--ink);
+  font-family: var(--font-display);
+  text-decoration: none;
+}
+
+.app-shell__nav {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.app-shell__nav a {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.app-shell__recherche {
+  display: block;
+  flex: 1 1 calc(var(--space-16) * 3);
+  max-width: calc(var(--space-16) * 5);
+}
+
+.app-shell__bascule {
+  margin-left: auto;
+}
+
+.app-shell__lune {
+  width: var(--space-6);
+  height: var(--space-6);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.app-shell__contenu {
+  max-width: calc(var(--space-16) * 16);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.app-shell__pied {
+  max-width: calc(var(--space-16) * 16);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+  border-top: var(--border-hair) solid var(--line);
+  color: var(--ink-muted);
+}
+
+.app-shell__pied a {
+  color: var(--link);
+}

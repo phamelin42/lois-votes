@@ -1,0 +1,38 @@
+.app-accueil__accroche {
+  margin: 0;
+  color: var(--ink);
+}
+
+.app-accueil__intro {
+  max-width: calc(var(--space-16) * 10);
+  margin: var(--space-2) 0 var(--space-6);
+  color: var(--ink-muted);
+}
+
+.app-accueil__liste {
+  display: grid;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40em) {
+  .app-accueil__liste {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.app-accueil__suite {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+/* Hauteur fixe : la liste ne saute pas quand les cartes arrivent. */
+.app-accueil__squelette {
+  height: calc(var(--space-16) * 2);
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunken);
+  animation: fd-pulse var(--duration-slow) var(--ease-mizu) infinite;
+}
