@@ -16,6 +16,7 @@
 
 .app-deputes__filtres {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
   margin-bottom: var(--space-6);
 }
@@ -33,6 +34,7 @@
 
 .app-deputes__liste {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   margin: 0;
   padding: 0;
@@ -61,6 +63,7 @@
 
 .app-depute-carte__texte {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-1);
   justify-items: start;
   min-width: 0;

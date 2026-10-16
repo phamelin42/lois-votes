@@ -5,6 +5,7 @@
 
 .app-scrutin__entete {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   justify-items: start;
   margin: var(--space-4) 0 0;
@@ -39,6 +40,7 @@
 
 .app-scrutin__section {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
   margin-top: var(--space-8);
 }

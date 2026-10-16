@@ -25,12 +25,12 @@
     <fd-badge [tone]="scrutin.adopte ? 'tokiwa' : 'enji'">{{ libelleAdoption(scrutin.adopte) }}</fd-badge>
     <app-vote-bar [compte]="scrutin.compte" taille="md" />
     <p class="app-scrutin__liens">
-      @if (scrutin.loi?.dossier; as dossier) {
-        <a
-          [routerLink]="['/lois', dossier]"
-          [appPrefetch]="'/api/lois/' + dossier"
-          >Voir la loi « {{ scrutin.loi?.titreCourt }} »</a
-        >
+      @if (scrutin.loi; as loi) {
+        @if (loi.dossier; as dossier) {
+          <a [routerLink]="['/lois', dossier]" [appPrefetch]="'/api/lois/' + dossier"
+            >Voir la loi « {{ loi.titreCourt }} »</a
+          >
+        }
       }
       <a fdLink [href]="scrutin.urlOfficielle">Voir le scrutin sur le site de l'Assemblée</a>
     </p>

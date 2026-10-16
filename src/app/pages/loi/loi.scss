@@ -5,6 +5,7 @@
 
 .app-loi__entete {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   justify-items: start;
   margin: var(--space-4) 0 var(--space-8);
@@ -28,6 +29,7 @@
 
 .app-loi__section {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
   margin-top: var(--space-8);
 }
@@ -50,6 +52,7 @@
 
 .app-loi__liste {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
   margin: 0;
   padding: 0;

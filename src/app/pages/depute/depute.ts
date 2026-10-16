@@ -64,6 +64,8 @@ export class DeputePage {
           depute.nom,
           `Participation aux scrutins, abstentions et votes de ${depute.nom}${depute.groupe ? ` (${depute.groupe.libelle})` : ''}.`,
         );
+      } else if (this.introuvable()) {
+        this.meta.poser('Député introuvable', "Ce député n'est pas dans les données.");
       }
     });
   }

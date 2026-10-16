@@ -100,6 +100,8 @@ export class LoiPage {
           loi.titreCourt,
           `Vote de chaque groupe sur « ${loi.titreCourt} » à l'Assemblée nationale.`,
         );
+      } else if (this.introuvable()) {
+        this.meta.poser('Loi introuvable', "Cette loi n'est pas dans les données.");
       }
     });
   }

@@ -74,6 +74,8 @@ export class ScrutinPage {
           `Scrutin n° ${scrutin.numero}`,
           `${libelleType(scrutin.type)} du ${dateLongue(scrutin.date)} : ${libelleAdoption(scrutin.adopte)}. ${scrutin.titre}`,
         );
+      } else if (this.introuvable()) {
+        this.meta.poser('Scrutin introuvable', "Ce scrutin n'est pas dans les données.");
       }
     });
   }
