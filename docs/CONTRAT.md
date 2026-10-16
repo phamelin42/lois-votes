@@ -20,7 +20,7 @@ export interface Compte {
 }
 
 export interface Groupe {
-  id: string;          // identifiant de la source
+  id: string;          // abrégé du groupe (« RN ») : les ressources n'ont pas d'autre identifiant commun
   abrege: string;      // « RN », « LFI-NFP »…
   libelle: string;     // « Rassemblement National »
   couleur: string | null; // couleur officielle, pour une pastille seulement (jamais pour du texte)
@@ -43,10 +43,11 @@ export interface ScrutinResume {
 }
 
 export interface LoiCarte {
-  slug: string | null;   // null si le texte n'a pas de fiche « loi » dans la source
-  titreCourt: string;    // short_title, sinon titre dérivé du scrutin
-  titreOfficiel: string; // title (sert de résumé, tronqué à 2 lignes sur l'accueil)
-  statut: string | null; // statut de la source, affiché tel quel
+  dossier: string | null; // dossier_ref (« DLR5L17N54372 ») ; null si le scrutin n'est rattaché à aucun dossier
+  titreCourt: string;     // dérivé du titre du scrutin final (« Projet de loi relatif à … »)
+  titreOfficiel: string;  // titre du scrutin final (sert de résumé, tronqué à 2 lignes sur l'accueil)
+  lecture: string | null; // « première lecture », « lecture définitive »… si le titre l'indique
+  statut: null;           // aucune source sans clé ne le fournit ; gardé pour plus tard
   voteFinal: ScrutinResume;
   groupes: VoteGroupe[]; // triés par nombre de sièges décroissant
 }
@@ -59,15 +60,17 @@ export interface Accueil {
   miseAJour: string;     // ISO : date de génération des données de la source si elle est connue, sinon de la réponse
 }
 
-/** GET /api/lois/:slug */
+/** GET /api/lois/:dossier */
 export interface LoiDetail {
-  slug: string;
+  dossier: string;
   titreCourt: string;
   titreOfficiel: string;
-  statut: string | null;
-  urlDossier: string | null;
-  voteFinal: (ScrutinResume & { groupes: VoteGroupe[] }) | null; // null : pas encore de vote sur l'ensemble
-  scrutins: ScrutinResume[]; // tous les autres scrutins du texte, du plus récent au plus ancien
+  lecture: string | null;
+  statut: null;              // voir LoiCarte
+  urlDossier: null;          // idem
+  voteFinal: (ScrutinResume & { groupes: VoteGroupe[] }) | null; // vote sur l'ensemble le plus récent ; null s'il n'y en a pas encore
+  lectures: ScrutinResume[]; // autres votes sur l'ensemble du texte (lectures précédentes), du plus récent au plus ancien
+  scrutins: ScrutinResume[]; // articles, amendements, motions et autres scrutins du texte, du plus récent au plus ancien
 }
 
 export interface DeputeMini {
@@ -77,7 +80,7 @@ export interface DeputeMini {
 
 /** GET /api/scrutins/:numero */
 export interface ScrutinDetail extends ScrutinResume {
-  loi: { slug: string | null; titreCourt: string } | null;
+  loi: { dossier: string | null; titreCourt: string } | null;
   groupes: VoteGroupe[];
   nominatif: { groupeId: string; position: Position; deputes: DeputeMini[] }[];
 }
@@ -95,11 +98,11 @@ export interface DeputeIndex {
 export interface DeputeListe {
   deputes: DeputeIndex[];
   groupes: Groupe[];
-  loisRecentes: { slug: string; titreCourt: string; date: string }[]; // pour la recherche de lois
+  loisRecentes: { dossier: string; titreCourt: string; date: string }[]; // textes ayant un vote sur l'ensemble, pour la recherche de lois
 }
 
 export interface VoteDepute {
-  loi: { slug: string | null; titreCourt: string };
+  loi: { dossier: string | null; titreCourt: string };
   numero: number;
   date: string;
   position: Position | null;            // null : n'était pas député ou absent de la liste
@@ -111,14 +114,14 @@ export interface VoteDepute {
 export interface DeputeDetail {
   slug: string;
   nom: string;
-  photo: string | null;
+  photo: string | null; // photo officielle de l'Assemblée (identifiant PA de Datan) ; null si la jointure échoue
   groupe: Groupe | null;
   circonscription: string | null;
-  urlFiche: string;   // fiche sur la source
+  urlFiche: string;   // fiche officielle sur assemblee-nationale.fr si l'identifiant PA est connu, sinon fiche NosParlementaires
   taux: {
-    participation: number | null; // 0..1, votes_participation_rate : « participation aux scrutins publics »
-    abstention: number | null;    // 0..1, abstentions / (pour + contre + abstention) sur la législature
-    loyaute: number | null;       // 0..1, group_loyalty_rate
+    participation: number | null; // 0..1, score de participation de Datan : « participation aux scrutins publics »
+    abstention: number | null;    // 0..1, abstentions / (pour + contre + abstention) sur la législature, calculé par comptage (meta.total)
+    loyaute: number | null;       // 0..1, score de loyauté de Datan
   };
   dernieresLois: VoteDepute[];    // ses votes sur les 10 derniers votes finaux
 }
@@ -126,6 +129,8 @@ export interface DeputeDetail {
 
 ## Règles
 
+- Une loi est identifiée par son `dossier_ref` ; le site l'utilise dans l'URL (`/lois/DLR5L17N54372`).
 - Les montants sont des entiers et les taux des nombres entre 0 et 1 (l'application les formate en %, en `fr-FR`).
-- Pour un même scrutin, la somme des `compte` de tous les groupes égale le `compte` du scrutin, à l'unité près. Tout écart (député sans groupe) est rangé dans un groupe `{ id: 'NI', abrege: 'NI', libelle: 'Non inscrits' }`. Un test le vérifie.
+- Pour un même scrutin, la somme des `compte` de tous les groupes égale le `compte` du scrutin, à l'unité près. Un député sans groupe connu va dans `{ id: 'NI', abrege: 'NI', libelle: 'Non inscrits' }`. Un test le vérifie.
+- Le groupe d'un député sur un scrutin est son groupe **actuel** (les votes ne portent pas le groupe à la date du vote ; voir PLAN.md).
 - Les textes affichés sont en français. Aucun champ ne contient de HTML.
