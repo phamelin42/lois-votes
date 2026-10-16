@@ -8,7 +8,9 @@ import { configurerPage, monter, stabiliser } from '../../testing/page';
 import { AccueilPage } from './accueil';
 
 const boutonPlus = (racine: HTMLElement) =>
-  Array.from(racine.querySelectorAll('button')).find((b) => b.textContent!.includes('Voir plus')) as HTMLButtonElement | undefined;
+  Array.from(racine.querySelectorAll('button')).find((b) =>
+    b.textContent!.includes('Voir plus'),
+  ) as HTMLButtonElement | undefined;
 
 describe('AccueilPage', () => {
   it('charge la première page et affiche les cartes', async () => {
@@ -22,7 +24,7 @@ describe('AccueilPage', () => {
     expect(racine.querySelector('h1')!.textContent).toContain('Les dernières lois votées');
   });
 
-  it('« Voir plus » ajoute la page suivante à la liste, sans la remplacer ni toucher à l\'URL', async () => {
+  it("« Voir plus » ajoute la page suivante à la liste, sans la remplacer ni toucher à l'URL", async () => {
     const { http } = configurerPage();
     const fixture = monter(AccueilPage);
     http.expectOne('/api/accueil?page=1').flush(accueil(2, 1, true));
@@ -33,7 +35,9 @@ describe('AccueilPage', () => {
     http.expectOne('/api/accueil?page=2').flush(accueil(1, 2, false));
     await stabiliser(fixture);
 
-    const titres = Array.from(racine.querySelectorAll('.app-loi-card__titre')).map((t) => t.textContent!.trim());
+    const titres = Array.from(racine.querySelectorAll('.app-loi-card__titre')).map((t) =>
+      t.textContent!.trim(),
+    );
     expect(titres).toEqual(['Loi numéro 1-1', 'Loi numéro 1-2', 'Loi numéro 2-1']);
     expect(boutonPlus(racine)).toBeUndefined();
     expect(TestBed.inject(Router).url).not.toContain('page');
@@ -59,17 +63,23 @@ describe('AccueilPage', () => {
     await stabiliser(fixture);
 
     expect(TestBed.inject(Title).getTitle()).toContain('Qui a voté quoi ?');
-    expect(document.head.querySelector('meta[name="description"]')?.getAttribute('content')?.length).toBeGreaterThan(20);
+    expect(
+      document.head.querySelector('meta[name="description"]')?.getAttribute('content')?.length,
+    ).toBeGreaterThan(20);
   });
 
   it('répond 503 et affiche une alerte quand la source est indisponible', async () => {
     const { http, init } = configurerPage();
     const fixture = monter(AccueilPage);
 
-    http.expectOne('/api/accueil?page=1').flush({ erreur: 'panne' }, { status: 503, statusText: 'Service Unavailable' });
+    http
+      .expectOne('/api/accueil?page=1')
+      .flush({ erreur: 'panne' }, { status: 503, statusText: 'Service Unavailable' });
     const racine = await stabiliser(fixture);
 
-    expect(racine.querySelector('fd-alert')!.textContent).toContain('Données momentanément indisponibles');
+    expect(racine.querySelector('fd-alert')!.textContent).toContain(
+      'Données momentanément indisponibles',
+    );
     expect(init.status).toBe(503);
   });
 });

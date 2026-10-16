@@ -17,7 +17,9 @@ describe('ScrutinPage', () => {
     const { racine } = await afficher();
 
     expect(racine.querySelectorAll('h1')).toHaveLength(1);
-    expect(sansEspaces(racine.querySelector('h1')!.textContent)).toContain("l'ensemble du projet de loi relatif à la sobriété foncière");
+    expect(sansEspaces(racine.querySelector('h1')!.textContent)).toContain(
+      "l'ensemble du projet de loi relatif à la sobriété foncière",
+    );
     expect(racine.querySelector('fd-badge')!.textContent!.trim()).toBe("Adopté par l'Assemblée");
     expect(racine.querySelector('app-vote-bar')).not.toBeNull();
     expect(racine.querySelector('app-group-table table')).not.toBeNull();
@@ -29,24 +31,34 @@ describe('ScrutinPage', () => {
     const liens = Array.from(racine.querySelectorAll('a'));
 
     expect(liens.find((a) => a.getAttribute('href') === '/lois/DLR5L17N54372')).toBeDefined();
-    expect(liens.find((a) => a.getAttribute('href') === 'https://www.assemblee-nationale.fr/dyn/17/scrutins/8317')).toBeDefined();
+    expect(
+      liens.find(
+        (a) => a.getAttribute('href') === 'https://www.assemblee-nationale.fr/dyn/17/scrutins/8317',
+      ),
+    ).toBeDefined();
   });
 
   it('ne propose pas de lien vers une loi absente', async () => {
     const { racine } = await afficher(scrutinDetail({ loi: null }));
 
-    expect(Array.from(racine.querySelectorAll('a')).some((a) => a.getAttribute('href')?.startsWith('/lois/'))).toBe(false);
+    expect(
+      Array.from(racine.querySelectorAll('a')).some((a) =>
+        a.getAttribute('href')?.startsWith('/lois/'),
+      ),
+    ).toBe(false);
   });
 
   it('propose la liste nominative derrière un bouton', async () => {
     const { racine } = await afficher();
 
     expect(
-      Array.from(racine.querySelectorAll('button')).some((b) => b.textContent!.includes('Voir comment chaque député a voté')),
+      Array.from(racine.querySelectorAll('button')).some((b) =>
+        b.textContent!.includes('Voir comment chaque député a voté'),
+      ),
     ).toBe(true);
   });
 
-  it('a un fil d\'Ariane et un titre de page', async () => {
+  it("a un fil d'Ariane et un titre de page", async () => {
     const { racine } = await afficher();
 
     expect(racine.querySelector('fd-breadcrumb')).not.toBeNull();
@@ -57,7 +69,9 @@ describe('ScrutinPage', () => {
     const { http, init } = configurerPage();
     const fixture = monter(ScrutinPage, { numero: '999' });
 
-    http.expectOne('/api/scrutins/999').flush({ erreur: 'inconnu' }, { status: 404, statusText: 'Not Found' });
+    http
+      .expectOne('/api/scrutins/999')
+      .flush({ erreur: 'inconnu' }, { status: 404, statusText: 'Not Found' });
     const racine = await stabiliser(fixture);
 
     expect(init.status).toBe(404);

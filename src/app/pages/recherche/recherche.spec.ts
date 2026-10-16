@@ -8,7 +8,9 @@ async function chercher(q: string | undefined) {
   ctx.http.expectOne('/api/deputes').flush(deputeListe());
   const racine = await stabiliser(fixture);
   const section = (titre: string) =>
-    Array.from(racine.querySelectorAll('section')).find((s) => s.querySelector('h2')?.textContent?.trim() === titre) as HTMLElement | undefined;
+    Array.from(racine.querySelectorAll('section')).find(
+      (s) => s.querySelector('h2')?.textContent?.trim() === titre,
+    ) as HTMLElement | undefined;
   return { ...ctx, fixture, racine, section };
 }
 
@@ -17,7 +19,9 @@ describe('RecherchePage', () => {
     const { racine } = await chercher('');
 
     expect(racine.querySelectorAll('h1')).toHaveLength(1);
-    expect(sansEspaces(racine.textContent)).toContain("Saisissez un nom de député ou un mot du titre d'une loi.");
+    expect(sansEspaces(racine.textContent)).toContain(
+      "Saisissez un nom de député ou un mot du titre d'une loi.",
+    );
   });
 
   it('redirige vers le profil quand un seul député répond (302 côté serveur, replaceUrl côté client)', async () => {
@@ -54,7 +58,11 @@ describe('RecherchePage', () => {
 
   it('ne redirige pas quand un député et une loi répondent à la fois', async () => {
     const liste = deputeListe();
-    liste.loisRecentes.push({ dossier: 'DLR5L17N3', titreCourt: 'Loi Martin sur les marais', date: '2025-01-01T00:00:00Z' });
+    liste.loisRecentes.push({
+      dossier: 'DLR5L17N3',
+      titreCourt: 'Loi Martin sur les marais',
+      date: '2025-01-01T00:00:00Z',
+    });
     const ctx = configurerPage();
     const fixture = monter(RecherchePage, { q: 'martin' });
     ctx.http.expectOne('/api/deputes').flush(liste);
@@ -75,7 +83,9 @@ describe('RecherchePage', () => {
     const { http, init } = configurerPage();
     const fixture = monter(RecherchePage, { q: 'martin' });
 
-    http.expectOne('/api/deputes').flush({ erreur: 'panne' }, { status: 503, statusText: 'Service Unavailable' });
+    http
+      .expectOne('/api/deputes')
+      .flush({ erreur: 'panne' }, { status: 503, statusText: 'Service Unavailable' });
     const racine = await stabiliser(fixture);
 
     expect(init.status).toBe(503);

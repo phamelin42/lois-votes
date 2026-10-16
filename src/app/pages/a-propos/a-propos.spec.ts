@@ -40,7 +40,7 @@ describe('AProposPage', () => {
     expect(texte).toMatch(/motion de censure/i);
   });
 
-  it('explique comment « adopté » et « rejeté » sont déterminés, et que ce n\'est pas une loi promulguée', () => {
+  it("explique comment « adopté » et « rejeté » sont déterminés, et que ce n'est pas une loi promulguée", () => {
     const texte = afficher();
 
     expect(texte).toMatch(/adopt/i);
@@ -54,7 +54,7 @@ describe('AProposPage', () => {
     expect(texte).toMatch(/présence/i);
   });
 
-  it('mentionne la mesure d\'audience Umami sans cookie', () => {
+  it("mentionne la mesure d'audience Umami sans cookie", () => {
     const texte = afficher();
 
     expect(texte).toContain('Umami');

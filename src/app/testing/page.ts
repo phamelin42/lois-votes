@@ -20,7 +20,10 @@ export function configurerPage(avecInit = true) {
   return { http: TestBed.inject(HttpTestingController), init, navigation };
 }
 
-export function monter<T>(type: Type<T>, entrees: Record<string, unknown> = {}): ComponentFixture<T> {
+export function monter<T>(
+  type: Type<T>,
+  entrees: Record<string, unknown> = {},
+): ComponentFixture<T> {
   const fixture = TestBed.createComponent(type);
   for (const [cle, valeur] of Object.entries(entrees)) fixture.componentRef.setInput(cle, valeur);
   fixture.detectChanges();
@@ -37,4 +40,5 @@ export async function stabiliser(fixture: ComponentFixture<unknown>): Promise<HT
   return fixture.nativeElement as HTMLElement;
 }
 
-export const sansEspaces = (texte: string | null | undefined) => (texte ?? '').replace(/\s+/g, ' ').trim();
+export const sansEspaces = (texte: string | null | undefined) =>
+  (texte ?? '').replace(/\s+/g, ' ').trim();

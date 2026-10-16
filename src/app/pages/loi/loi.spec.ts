@@ -18,18 +18,24 @@ describe('LoiPage', () => {
     const { racine } = await afficher();
 
     expect(racine.querySelectorAll('h1')).toHaveLength(1);
-    expect(racine.querySelector('h1')!.textContent!.trim()).toBe('Projet de loi relatif à la sobriété foncière');
-    expect(sansEspaces(racine.textContent)).toContain("l'ensemble du projet de loi relatif à la sobriété foncière");
+    expect(racine.querySelector('h1')!.textContent!.trim()).toBe(
+      'Projet de loi relatif à la sobriété foncière',
+    );
+    expect(sansEspaces(racine.textContent)).toContain(
+      "l'ensemble du projet de loi relatif à la sobriété foncière",
+    );
     expect(sansEspaces(racine.textContent)).toContain('première lecture');
   });
 
-  it('renvoie vers le scrutin sur le site de l\'Assemblée', async () => {
+  it("renvoie vers le scrutin sur le site de l'Assemblée", async () => {
     const { racine } = await afficher();
     const lien = Array.from(racine.querySelectorAll('a')).find((a) =>
       a.textContent!.includes("Voir le scrutin sur le site de l'Assemblée"),
     )!;
 
-    expect(lien.getAttribute('href')).toBe('https://www.assemblee-nationale.fr/dyn/17/scrutins/8317');
+    expect(lien.getAttribute('href')).toBe(
+      'https://www.assemblee-nationale.fr/dyn/17/scrutins/8317',
+    );
   });
 
   it('montre le bloc « Vote final » : date, résultat, barre et tableau par groupe', async () => {
@@ -42,20 +48,22 @@ describe('LoiPage', () => {
     expect(racine.querySelector('time')).not.toBeNull();
   });
 
-  it('n\'affiche aucun statut, que la source ne fournit pas', async () => {
+  it("n'affiche aucun statut, que la source ne fournit pas", async () => {
     const { racine } = await afficher();
 
     expect(sansEspaces(racine.textContent)).not.toMatch(/statut/i);
   });
 
-  it('prévient quand il n\'y a pas encore de vote sur l\'ensemble', async () => {
+  it("prévient quand il n'y a pas encore de vote sur l'ensemble", async () => {
     const { racine } = await afficher(loiDetail({ voteFinal: null }));
 
-    expect(sansEspaces(racine.textContent)).toContain("Pas encore de vote sur l'ensemble du texte.");
+    expect(sansEspaces(racine.textContent)).toContain(
+      "Pas encore de vote sur l'ensemble du texte.",
+    );
     expect(racine.querySelector('app-group-table')).toBeNull();
   });
 
-  it('propose la liste nominative derrière un bouton (bloc différé à l\'interaction)', async () => {
+  it("propose la liste nominative derrière un bouton (bloc différé à l'interaction)", async () => {
     const { racine } = await afficher();
     const bouton = Array.from(racine.querySelectorAll('button')).find((b) =>
       b.textContent!.includes('Voir comment chaque député a voté'),
@@ -76,20 +84,22 @@ describe('LoiPage', () => {
     expect(section.textContent).toContain("Rejeté par l'Assemblée");
   });
 
-  it('n\'écrit pas « Lectures précédentes » sans lecture précédente', async () => {
+  it("n'écrit pas « Lectures précédentes » sans lecture précédente", async () => {
     const { racine } = await afficher();
 
     expect(sansEspaces(racine.textContent)).not.toContain('Lectures précédentes');
   });
 
   it('annonce « Autres scrutins du texte » quand il y en a', async () => {
-    const autres = [scrutin(8320, { type: 'amendement', titre: "l'amendement n° 12 de M. Dupont" })];
+    const autres = [
+      scrutin(8320, { type: 'amendement', titre: "l'amendement n° 12 de M. Dupont" }),
+    ];
     const { racine } = await afficher(loiDetail({ scrutins: autres }));
 
     expect(sansEspaces(racine.textContent)).toContain('Autres scrutins du texte');
   });
 
-  it('a un fil d\'Ariane', async () => {
+  it("a un fil d'Ariane", async () => {
     const { racine } = await afficher();
 
     expect(racine.querySelector('fd-breadcrumb')).not.toBeNull();
@@ -107,7 +117,9 @@ describe('LoiPage', () => {
   it('pose le titre de la page', async () => {
     await afficher();
 
-    expect(TestBed.inject(Title).getTitle()).toContain('Projet de loi relatif à la sobriété foncière');
+    expect(TestBed.inject(Title).getTitle()).toContain(
+      'Projet de loi relatif à la sobriété foncière',
+    );
     expect(TestBed.inject(Title).getTitle()).toContain('Qui a voté quoi ?');
   });
 
@@ -115,7 +127,9 @@ describe('LoiPage', () => {
     const { http, init } = configurerPage();
     const fixture = monter(LoiPage, { dossier: 'DLR5L17N0' });
 
-    http.expectOne('/api/lois/DLR5L17N0').flush({ erreur: 'inconnu' }, { status: 404, statusText: 'Not Found' });
+    http
+      .expectOne('/api/lois/DLR5L17N0')
+      .flush({ erreur: 'inconnu' }, { status: 404, statusText: 'Not Found' });
     const racine = await stabiliser(fixture);
 
     expect(init.status).toBe(404);
@@ -126,10 +140,14 @@ describe('LoiPage', () => {
     const { http, init } = configurerPage();
     const fixture = monter(LoiPage, { dossier: 'DLR5L17N1' });
 
-    http.expectOne('/api/lois/DLR5L17N1').flush({ erreur: 'panne' }, { status: 503, statusText: 'Service Unavailable' });
+    http
+      .expectOne('/api/lois/DLR5L17N1')
+      .flush({ erreur: 'panne' }, { status: 503, statusText: 'Service Unavailable' });
     const racine = await stabiliser(fixture);
 
     expect(init.status).toBe(503);
-    expect(racine.querySelector('fd-alert')!.textContent).toContain('Données momentanément indisponibles, réessayez dans une minute.');
+    expect(racine.querySelector('fd-alert')!.textContent).toContain(
+      'Données momentanément indisponibles, réessayez dans une minute.',
+    );
   });
 });

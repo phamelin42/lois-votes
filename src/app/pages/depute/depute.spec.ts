@@ -14,7 +14,9 @@ async function afficher(detail = deputeDetail()) {
 }
 
 const tuile = (racine: HTMLElement, titre: string) =>
-  Array.from(racine.querySelectorAll('.app-depute__tuile')).find((t) => t.textContent!.includes(titre)) as HTMLElement | undefined;
+  Array.from(racine.querySelectorAll('.app-depute__tuile')).find((t) =>
+    t.textContent!.includes(titre),
+  ) as HTMLElement | undefined;
 
 describe('DeputePage', () => {
   it('annonce le nom en h1, le parti et la circonscription', async () => {
@@ -47,7 +49,9 @@ describe('DeputePage', () => {
     const { racine } = await afficher();
 
     expect(
-      Array.from(racine.querySelectorAll('a')).some((a) => a.getAttribute('href') === 'https://www.assemblee-nationale.fr/dyn/deputes/PA1001'),
+      Array.from(racine.querySelectorAll('a')).some(
+        (a) => a.getAttribute('href') === 'https://www.assemblee-nationale.fr/dyn/deputes/PA1001',
+      ),
     ).toBe(true);
   });
 
@@ -62,17 +66,21 @@ describe('DeputePage', () => {
   it('accompagne chaque chiffre de sa source', async () => {
     const { racine } = await afficher();
 
-    expect(sansEspaces(tuile(racine, 'Participation aux scrutins')!.textContent)).toContain('Datan');
+    expect(sansEspaces(tuile(racine, 'Participation aux scrutins')!.textContent)).toContain(
+      'Datan',
+    );
   });
 
   it('écrit « — » quand un chiffre est inconnu', async () => {
-    const { racine } = await afficher(deputeDetail({ taux: { participation: null, abstention: null, loyaute: null } }));
+    const { racine } = await afficher(
+      deputeDetail({ taux: { participation: null, abstention: null, loyaute: null } }),
+    );
 
     expect(sansEspaces(tuile(racine, 'Participation aux scrutins')!.textContent)).toContain('—');
     expect(sansEspaces(tuile(racine, 'Vote avec son groupe')!.textContent)).toContain('—');
   });
 
-  it('n\'écrit jamais « présence » : on parle de participation aux scrutins', async () => {
+  it("n'écrit jamais « présence » : on parle de participation aux scrutins", async () => {
     const { racine } = await afficher();
 
     expect(sansEspaces(racine.textContent)).not.toMatch(/présence/i);
@@ -89,7 +97,7 @@ describe('DeputePage', () => {
     expect(lignes[0].textContent).toContain("Adopté par l'Assemblée");
   });
 
-  it('renvoie vers le scrutin quand le vote n\'a pas de dossier', async () => {
+  it("renvoie vers le scrutin quand le vote n'a pas de dossier", async () => {
     const { racine } = await afficher();
     const derniere = racine.querySelectorAll('tbody tr')[2];
 
@@ -115,7 +123,7 @@ describe('DeputePage', () => {
     expect(urls).toEqual(expect.arrayContaining(['/api/lois/DLR5L17N54372', '/api/scrutins/8100']));
   });
 
-  it('a un fil d\'Ariane et un titre de page avec son nom', async () => {
+  it("a un fil d'Ariane et un titre de page avec son nom", async () => {
     const { racine } = await afficher();
 
     expect(racine.querySelector('fd-breadcrumb')).not.toBeNull();
@@ -126,7 +134,9 @@ describe('DeputePage', () => {
     const { http, init } = configurerPage();
     const fixture = monter(DeputePage, { slug: 'personne' });
 
-    http.expectOne('/api/deputes/personne').flush({ erreur: 'inconnu' }, { status: 404, statusText: 'Not Found' });
+    http
+      .expectOne('/api/deputes/personne')
+      .flush({ erreur: 'inconnu' }, { status: 404, statusText: 'Not Found' });
     const racine = await stabiliser(fixture);
 
     expect(init.status).toBe(404);
