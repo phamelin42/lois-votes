@@ -4,7 +4,9 @@ import { AppGroupPills } from './group-pills';
 
 const beaucoup = () =>
   ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map((abrege) =>
-    voteGroupe({ id: abrege, abrege, libelle: `Groupe ${abrege}`, couleur: null }, 'pour', { pour: 1 }),
+    voteGroupe({ id: abrege, abrege, libelle: `Groupe ${abrege}`, couleur: null }, 'pour', {
+      pour: 1,
+    }),
   );
 
 function monter(groupes = beaucoup(), max?: number) {
@@ -46,7 +48,7 @@ describe('AppGroupPills', () => {
     expect(racine.textContent).toContain('+5');
   });
 
-  it('n\'écrit pas « +n » quand tout tient', () => {
+  it("n'écrit pas « +n » quand tout tient", () => {
     const racine = monter(beaucoup().slice(0, 4));
 
     expect(racine.textContent).not.toMatch(/\+\d/);

@@ -22,7 +22,7 @@ describe('AppLoiCard', () => {
     expect(lien.getAttribute('href')).toBe('/lois/DLR5L17N54372');
   });
 
-  it('pointe vers le scrutin quand le vote n\'est rattaché à aucun dossier', () => {
+  it("pointe vers le scrutin quand le vote n'est rattaché à aucun dossier", () => {
     const { lien } = monter(loiCarte(null, 8317));
 
     expect(lien.getAttribute('href')).toBe('/scrutins/8317');
@@ -34,10 +34,12 @@ describe('AppLoiCard', () => {
     expect(racine.querySelector('.app-loi-card__titre')!.textContent!.trim()).toBe(
       'Projet de loi relatif à la sobriété foncière',
     );
-    expect(racine.querySelector('.app-loi-card__lecture')!.textContent!.trim()).toBe('première lecture');
+    expect(racine.querySelector('.app-loi-card__lecture')!.textContent!.trim()).toBe(
+      'première lecture',
+    );
   });
 
-  it('n\'écrit pas de lecture quand le titre n\'en indique pas', () => {
+  it("n'écrit pas de lecture quand le titre n'en indique pas", () => {
     const { racine } = monter(loiCarte('DLR5L17N1', 1, { lecture: null }));
 
     expect(racine.querySelector('.app-loi-card__lecture')).toBeNull();
@@ -47,7 +49,9 @@ describe('AppLoiCard', () => {
     const { racine } = monter();
     const scss = readFileSync('src/app/ui/loi-card/loi-card.scss', 'utf8');
 
-    expect(racine.querySelector('.app-loi-card__officiel')!.textContent).toContain('adopté par le Sénat');
+    expect(racine.querySelector('.app-loi-card__officiel')!.textContent).toContain(
+      'adopté par le Sénat',
+    );
     expect(scss).toMatch(/line-clamp:\s*2/);
   });
 
@@ -59,15 +63,17 @@ describe('AppLoiCard', () => {
     expect(temps.getAttribute('datetime')).toBe('2024-10-07T22:00:00+00:00');
   });
 
-  it('affiche « Adopté par l\'Assemblée »', () => {
+  it("affiche « Adopté par l'Assemblée »", () => {
     const { racine } = monter();
 
     expect(racine.querySelector('fd-badge')!.textContent!.trim()).toBe("Adopté par l'Assemblée");
     expect(racine.textContent).not.toMatch(/loi adoptée/i);
   });
 
-  it('affiche « Rejeté par l\'Assemblée »', () => {
-    const { racine } = monter(loiCarte('DLR5L17N1', 1, { voteFinal: { ...loiCarte().voteFinal, adopte: false } }));
+  it("affiche « Rejeté par l'Assemblée »", () => {
+    const { racine } = monter(
+      loiCarte('DLR5L17N1', 1, { voteFinal: { ...loiCarte().voteFinal, adopte: false } }),
+    );
 
     expect(racine.querySelector('fd-badge')!.textContent!.trim()).toBe("Rejeté par l'Assemblée");
   });

@@ -1,4 +1,11 @@
-import { afterNextRender, Directive, DestroyRef, ElementRef, inject, Injector } from '@angular/core';
+import {
+  afterNextRender,
+  Directive,
+  DestroyRef,
+  ElementRef,
+  inject,
+  Injector,
+} from '@angular/core';
 import { ViewportPreloadingStrategy } from './viewport-preloading.strategy';
 
 /**

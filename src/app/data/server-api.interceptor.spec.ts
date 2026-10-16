@@ -69,13 +69,11 @@ describe('intercepteur serveur de /api', () => {
   });
 
   it('transmet le 503 et son Retry-After', async () => {
-    const appeler = vi
-      .fn()
-      .mockResolvedValue({
-        status: 503,
-        headers: { 'retry-after': '60' },
-        body: { erreur: 'panne' },
-      });
+    const appeler = vi.fn().mockResolvedValue({
+      status: 503,
+      headers: { 'retry-after': '60' },
+      body: { erreur: 'panne' },
+    });
     const { http } = preparer(appeler);
 
     const erreur = await firstValueFrom(http.get('/api/deputes')).catch((e) => e);

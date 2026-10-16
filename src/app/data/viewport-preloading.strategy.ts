@@ -22,7 +22,7 @@ function cheminLocal(lien: string): string[] | null {
 /** Vrai si le chemin d'une route (« lois/:dossier ») correspond aux segments d'un lien. */
 function correspond(modele: string[], segments: string[]): boolean {
   if (modele.length !== segments.length) return false;
-  return modele.every((m, i) => m.startsWith(':') ? segments[i] !== '' : m === segments[i]);
+  return modele.every((m, i) => (m.startsWith(':') ? segments[i] !== '' : m === segments[i]));
 }
 
 function planifier(tache: () => void): void {
@@ -61,7 +61,10 @@ export class ViewportPreloadingStrategy extends PreloadingStrategy {
 
     route.prechargee = true;
     planifier(() => {
-      route.charger().pipe(catchError(() => EMPTY)).subscribe();
+      route
+        .charger()
+        .pipe(catchError(() => EMPTY))
+        .subscribe();
     });
   }
 }

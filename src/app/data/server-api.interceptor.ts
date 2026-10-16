@@ -60,7 +60,9 @@ export const serverApiInterceptor: HttpInterceptorFn = (req, suivant) => {
             }),
         );
       }
-      return of(new HttpResponse({ status: reponse.status, headers, body: reponse.body, url: req.url }));
+      return of(
+        new HttpResponse({ status: reponse.status, headers, body: reponse.body, url: req.url }),
+      );
     }),
   );
 };

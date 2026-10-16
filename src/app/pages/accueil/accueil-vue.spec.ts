@@ -14,10 +14,12 @@ function monter(entrees: Record<string, unknown> = {}) {
 }
 
 const bouton = (racine: HTMLElement) =>
-  Array.from(racine.querySelectorAll('button')).find((b) => b.textContent!.includes('Voir plus')) as HTMLButtonElement | undefined;
+  Array.from(racine.querySelectorAll('button')).find((b) =>
+    b.textContent!.includes('Voir plus'),
+  ) as HTMLButtonElement | undefined;
 
 describe('AccueilVue', () => {
-  it('a un seul h1 : « Les dernières lois votées à l\'Assemblée »', () => {
+  it("a un seul h1 : « Les dernières lois votées à l'Assemblée »", () => {
     const { racine } = monter();
     const titres = racine.querySelectorAll('h1');
 
@@ -28,12 +30,16 @@ describe('AccueilVue', () => {
   it('explique en une phrase ce que montre la page', () => {
     const { racine } = monter();
 
-    expect(racine.querySelector('h1 + p, .app-accueil__intro')!.textContent!.trim().length).toBeGreaterThan(20);
+    expect(
+      racine.querySelector('h1 + p, .app-accueil__intro')!.textContent!.trim().length,
+    ).toBeGreaterThan(20);
   });
 
-  it('affiche une carte par loi, dans l\'ordre reçu', () => {
+  it("affiche une carte par loi, dans l'ordre reçu", () => {
     const { racine } = monter();
-    const titres = Array.from(racine.querySelectorAll('app-loi-card .app-loi-card__titre')).map((t) => t.textContent!.trim());
+    const titres = Array.from(racine.querySelectorAll('app-loi-card .app-loi-card__titre')).map(
+      (t) => t.textContent!.trim(),
+    );
 
     expect(titres).toEqual(['Loi numéro 1-1', 'Loi numéro 1-2', 'Loi numéro 1-3']);
   });
@@ -57,7 +63,9 @@ describe('AccueilVue', () => {
     const { racine } = monter({ chargement: true });
 
     expect(racine.querySelector('fd-spinner')).not.toBeNull();
-    expect(bouton(racine)!.disabled || bouton(racine)!.getAttribute('aria-disabled') === 'true').toBe(true);
+    expect(
+      bouton(racine)!.disabled || bouton(racine)!.getAttribute('aria-disabled') === 'true',
+    ).toBe(true);
   });
 
   it('montre des squelettes de hauteur fixe avant la première réponse', () => {
@@ -67,7 +75,7 @@ describe('AccueilVue', () => {
     expect(racine.querySelectorAll('app-loi-card')).toHaveLength(0);
   });
 
-  it('montre un état vide quand il n\'y a aucune loi', () => {
+  it("montre un état vide quand il n'y a aucune loi", () => {
     const { racine } = monter({ donnees: accueil(0, 1, false) });
 
     expect(racine.querySelector('fd-empty-state')).not.toBeNull();
@@ -77,6 +85,8 @@ describe('AccueilVue', () => {
     const { racine } = monter({ donnees: undefined, erreur: true });
     const alerte = racine.querySelector('fd-alert')!;
 
-    expect(alerte.textContent).toContain('Données momentanément indisponibles, réessayez dans une minute.');
+    expect(alerte.textContent).toContain(
+      'Données momentanément indisponibles, réessayez dans une minute.',
+    );
   });
 });

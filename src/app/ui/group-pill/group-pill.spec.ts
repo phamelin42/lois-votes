@@ -10,7 +10,7 @@ function monter(groupe = LFI) {
 }
 
 describe('AppGroupPill', () => {
-  it('montre une pastille décorative et l\'abrégé du groupe', () => {
+  it("montre une pastille décorative et l'abrégé du groupe", () => {
     const racine = monter();
     const pastille = racine.querySelector('.app-group-pill__dot')!;
 
@@ -24,13 +24,13 @@ describe('AppGroupPill', () => {
     expect(pastille.style.backgroundColor).not.toBe('');
   });
 
-  it('laisse la couleur de repli du CSS quand le groupe n\'en a pas', () => {
+  it("laisse la couleur de repli du CSS quand le groupe n'en a pas", () => {
     const pastille = monter(NI).querySelector('.app-group-pill__dot') as HTMLElement;
 
     expect(pastille.style.backgroundColor).toBe('');
   });
 
-  it('donne le libellé complet en infobulle et aux lecteurs d\'écran', () => {
+  it("donne le libellé complet en infobulle et aux lecteurs d'écran", () => {
     const racine = monter();
 
     expect(racine.querySelector('[title]')!.getAttribute('title')).toBe(LFI.libelle);

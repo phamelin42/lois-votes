@@ -12,8 +12,18 @@ import type {
   VoteGroupe,
 } from '@contrat';
 
-export const RN: Groupe = { id: 'RN', abrege: 'RN', libelle: 'Rassemblement National', couleur: '#1b3a8a' };
-export const SOC: Groupe = { id: 'SOC', abrege: 'SOC', libelle: 'Socialistes et apparentés', couleur: '#e4002b' };
+export const RN: Groupe = {
+  id: 'RN',
+  abrege: 'RN',
+  libelle: 'Rassemblement National',
+  couleur: '#1b3a8a',
+};
+export const SOC: Groupe = {
+  id: 'SOC',
+  abrege: 'SOC',
+  libelle: 'Socialistes et apparentés',
+  couleur: '#e4002b',
+};
 export const LFI: Groupe = {
   id: 'LFI-NFP',
   abrege: 'LFI-NFP',
@@ -29,7 +39,11 @@ export const compte = (pour = 312, contre = 201, abstention = 18, nonvotant = 46
   nonvotant,
 });
 
-export function voteGroupe(groupe: Groupe, position: VoteGroupe['position'], c: Partial<Compte> = {}): VoteGroupe {
+export function voteGroupe(
+  groupe: Groupe,
+  position: VoteGroupe['position'],
+  c: Partial<Compte> = {},
+): VoteGroupe {
   return { groupe, position, compte: { pour: 0, contre: 0, abstention: 0, nonvotant: 0, ...c } };
 }
 
@@ -53,7 +67,11 @@ export function scrutin(numero = 8317, surcharge: Partial<ScrutinResume> = {}): 
   };
 }
 
-export function loiCarte(dossier: string | null = 'DLR5L17N54372', numero = 8317, surcharge: Partial<LoiCarte> = {}): LoiCarte {
+export function loiCarte(
+  dossier: string | null = 'DLR5L17N54372',
+  numero = 8317,
+  surcharge: Partial<LoiCarte> = {},
+): LoiCarte {
   return {
     dossier,
     titreCourt: 'Projet de loi relatif à la sobriété foncière',
@@ -70,7 +88,9 @@ export function loiCarte(dossier: string | null = 'DLR5L17N54372', numero = 8317
 export function accueil(nombre = 2, page = 1, pageSuivante = false): Accueil {
   return {
     lois: Array.from({ length: nombre }, (_, i) =>
-      loiCarte(`DLR5L17N${50000 + page * 100 + i}`, 8000 + page * 100 + i, { titreCourt: `Loi numéro ${page}-${i + 1}` }),
+      loiCarte(`DLR5L17N${50000 + page * 100 + i}`, 8000 + page * 100 + i, {
+        titreCourt: `Loi numéro ${page}-${i + 1}`,
+      }),
     ),
     page,
     pageSuivante,
@@ -99,15 +119,30 @@ export function scrutinDetail(surcharge: Partial<ScrutinDetail> = {}): ScrutinDe
     loi: { dossier: 'DLR5L17N54372', titreCourt: 'Projet de loi relatif à la sobriété foncière' },
     groupes: groupes(),
     nominatif: [
-      { groupeId: 'RN', position: 'pour', deputes: [{ slug: 'alice-durand', nom: 'Alice Durand' }] },
-      { groupeId: 'SOC', position: 'contre', deputes: [{ slug: 'emilie-laurent', nom: 'Émilie Laurent' }] },
+      {
+        groupeId: 'RN',
+        position: 'pour',
+        deputes: [{ slug: 'alice-durand', nom: 'Alice Durand' }],
+      },
+      {
+        groupeId: 'SOC',
+        position: 'contre',
+        deputes: [{ slug: 'emilie-laurent', nom: 'Émilie Laurent' }],
+      },
     ],
     ...surcharge,
   };
 }
 
 export function deputeListe(): DeputeListe {
-  const d = (slug: string, nom: string, nomTri: string, groupe: string | null, departement: string, circonscription: string) => ({
+  const d = (
+    slug: string,
+    nom: string,
+    nomTri: string,
+    groupe: string | null,
+    departement: string,
+    circonscription: string,
+  ) => ({
     slug,
     nom,
     nomTri,
@@ -125,8 +160,16 @@ export function deputeListe(): DeputeListe {
     ],
     groupes: [RN, SOC, LFI, NI],
     loisRecentes: [
-      { dossier: 'DLR5L17N54372', titreCourt: 'Projet de loi relatif à la sobriété foncière', date: '2025-01-10T22:00:00+00:00' },
-      { dossier: 'DLR5L17N2000', titreCourt: 'Proposition de loi visant à protéger les abeilles', date: '2024-12-10T22:00:00+00:00' },
+      {
+        dossier: 'DLR5L17N54372',
+        titreCourt: 'Projet de loi relatif à la sobriété foncière',
+        date: '2025-01-10T22:00:00+00:00',
+      },
+      {
+        dossier: 'DLR5L17N2000',
+        titreCourt: 'Proposition de loi visant à protéger les abeilles',
+        date: '2024-12-10T22:00:00+00:00',
+      },
     ],
   };
 }
@@ -142,7 +185,10 @@ export function deputeDetail(surcharge: Partial<DeputeDetail> = {}): DeputeDetai
     taux: { participation: 0.91, abstention: 0.12, loyaute: 0.99 },
     dernieresLois: [
       {
-        loi: { dossier: 'DLR5L17N54372', titreCourt: 'Projet de loi relatif à la sobriété foncière' },
+        loi: {
+          dossier: 'DLR5L17N54372',
+          titreCourt: 'Projet de loi relatif à la sobriété foncière',
+        },
         numero: 8317,
         date: '2024-10-07T22:00:00+00:00',
         position: 'abstention',
@@ -150,7 +196,10 @@ export function deputeDetail(surcharge: Partial<DeputeDetail> = {}): DeputeDetai
         adopte: true,
       },
       {
-        loi: { dossier: 'DLR5L17N2000', titreCourt: 'Proposition de loi visant à protéger les abeilles' },
+        loi: {
+          dossier: 'DLR5L17N2000',
+          titreCourt: 'Proposition de loi visant à protéger les abeilles',
+        },
         numero: 8200,
         date: '2024-09-01T22:00:00+00:00',
         position: 'pour',

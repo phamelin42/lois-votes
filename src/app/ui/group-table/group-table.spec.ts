@@ -42,7 +42,9 @@ describe('AppGroupTable', () => {
 
   it('affiche la position en toutes lettres et les décomptes', () => {
     const premiere = monter().querySelector('tbody tr')!;
-    const cellules = Array.from(premiere.querySelectorAll('td')).map((td) => td.textContent!.trim());
+    const cellules = Array.from(premiere.querySelectorAll('td')).map((td) =>
+      td.textContent!.trim(),
+    );
 
     expect(cellules[0]).toContain('Pour');
     expect(cellules.slice(1, 5)).toEqual(['3', '0', '1', '0']);

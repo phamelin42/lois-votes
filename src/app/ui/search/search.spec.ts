@@ -52,7 +52,7 @@ describe('AppSearch', () => {
     expect(champ.getAttribute('aria-controls')).toBeTruthy();
   });
 
-  it('demande l\'index au premier focus, une seule fois', () => {
+  it("demande l'index au premier focus, une seule fois", () => {
     const { fixture, champ } = monter(undefined);
     const demande = vi.fn();
     fixture.componentInstance.besoinIndex.subscribe(demande);
@@ -175,7 +175,9 @@ describe('AppSearch', () => {
 
     touche('Enter');
 
-    expect(navigation).toHaveBeenCalledWith('/recherche?q=sobri%C3%A9t%C3%A9%20%26%20fonci%C3%A8re');
+    expect(navigation).toHaveBeenCalledWith(
+      '/recherche?q=sobri%C3%A9t%C3%A9%20%26%20fonci%C3%A8re',
+    );
   });
 
   it('Échap ferme la liste', async () => {
@@ -188,7 +190,7 @@ describe('AppSearch', () => {
     expect(champ.getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('ne plante pas tant que l\'index n\'est pas chargé', async () => {
+  it("ne plante pas tant que l'index n'est pas chargé", async () => {
     const { saisir, options } = monter(undefined);
 
     await saisir('martin');

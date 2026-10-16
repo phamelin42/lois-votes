@@ -15,7 +15,9 @@ describe('AppVoteBar', () => {
     const { racine } = monter();
     const image = racine.querySelector('[role="img"]')!;
 
-    expect(image.getAttribute('aria-label')).toBe('312 pour, 201 contre, 18 abstentions, 46 non-votants');
+    expect(image.getAttribute('aria-label')).toBe(
+      '312 pour, 201 contre, 18 abstentions, 46 non-votants',
+    );
   });
 
   it('accorde le singulier', () => {
@@ -26,7 +28,7 @@ describe('AppVoteBar', () => {
     );
   });
 
-  it('écrit les chiffres sous la barre : la couleur ne porte jamais seule l\'information', () => {
+  it("écrit les chiffres sous la barre : la couleur ne porte jamais seule l'information", () => {
     const { racine } = monter();
     const texte = racine.textContent!.replace(/\s+/g, ' ');
 
@@ -38,7 +40,9 @@ describe('AppVoteBar', () => {
   it('répartit la largeur proportionnellement avec flex-grow, sans JS de mise en page', () => {
     const { racine } = monter();
     const grow = (type: string) =>
-      Number((racine.querySelector(`.app-vote-bar__segment--${type}`) as HTMLElement).style.flexGrow);
+      Number(
+        (racine.querySelector(`.app-vote-bar__segment--${type}`) as HTMLElement).style.flexGrow,
+      );
 
     expect(grow('pour')).toBe(312);
     expect(grow('contre')).toBe(201);
@@ -62,11 +66,15 @@ describe('AppVoteBar', () => {
 
   it('prend la taille md par défaut et accepte sm', () => {
     const { fixture, racine } = monter();
-    expect(racine.querySelector('.app-vote-bar')!.classList.contains('app-vote-bar--sm')).toBe(false);
+    expect(racine.querySelector('.app-vote-bar')!.classList.contains('app-vote-bar--sm')).toBe(
+      false,
+    );
 
     fixture.componentRef.setInput('taille', 'sm');
     fixture.detectChanges();
 
-    expect(racine.querySelector('.app-vote-bar')!.classList.contains('app-vote-bar--sm')).toBe(true);
+    expect(racine.querySelector('.app-vote-bar')!.classList.contains('app-vote-bar--sm')).toBe(
+      true,
+    );
   });
 });

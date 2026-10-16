@@ -48,7 +48,7 @@ describe('AppDeputyPhoto', () => {
     expect(image.getAttribute('loading')).toBe('eager');
   });
 
-  it('se replie sur les initiales (fd-avatar) quand il n\'y a pas de photo', () => {
+  it("se replie sur les initiales (fd-avatar) quand il n'y a pas de photo", () => {
     const { racine } = monter({ src: null });
 
     expect(racine.querySelector('img')).toBeNull();
@@ -56,7 +56,7 @@ describe('AppDeputyPhoto', () => {
     expect(racine.textContent).toContain('AD');
   });
 
-  it('se replie sur les initiales quand l\'image échoue', () => {
+  it("se replie sur les initiales quand l'image échoue", () => {
     const { fixture, racine } = monter();
 
     racine.querySelector('img')!.dispatchEvent(new Event('error'));

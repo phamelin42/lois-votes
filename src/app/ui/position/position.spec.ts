@@ -13,7 +13,7 @@ describe('AppPosition', () => {
     ['pour', 'Pour', 'tokiwa'],
     ['contre', 'Contre', 'enji'],
     ['abstention', 'Abstention', 'yamabuki'],
-  ])('%s s\'écrit « %s » dans un badge Fuda de ton %s', (position, libelle, ton) => {
+  ])("%s s'écrit « %s » dans un badge Fuda de ton %s", (position, libelle, ton) => {
     const racine = monter(position);
     const badge = racine.querySelector('fd-badge')!;
 
@@ -24,7 +24,7 @@ describe('AppPosition', () => {
   it.each([
     ['nonvotant', 'Non-votant'],
     ['partage', 'Partagé'],
-  ])('%s s\'écrit « %s » dans un badge neutre', (position, libelle) => {
+  ])("%s s'écrit « %s » dans un badge neutre", (position, libelle) => {
     const badge = monter(position).querySelector('fd-badge')!;
 
     expect(badge.textContent!.trim()).toBe(libelle);
