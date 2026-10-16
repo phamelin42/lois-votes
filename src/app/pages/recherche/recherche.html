@@ -1,1 +1,62 @@
-<h1 class="app-recherche__titre">Recherche</h1>
+<h1 class="app-recherche__titre title-1">Recherche</h1>
+
+@if (erreur()) {
+  <fd-alert
+    tone="danger"
+    title="Données momentanément indisponibles, réessayez dans une minute."
+    announce
+  />
+} @else if (!requete()) {
+  <p class="app-recherche__aide body">
+    Saisissez un nom de député ou un mot du titre d'une loi.
+  </p>
+} @else if (!liste()) {
+  <fd-spinner label="Recherche en cours" />
+} @else if (deputes().length === 0 && lois().length === 0) {
+  <fd-empty-state
+    [title]="'Aucun résultat pour « ' + requete() + ' »'"
+    text="Essayez un autre nom, ou un mot du titre d'une loi."
+  />
+} @else {
+  <p class="app-recherche__requete caption">Résultats pour « {{ requete() }} »</p>
+
+  <section class="app-recherche__section" aria-labelledby="resultats-deputes">
+    <h2 id="resultats-deputes" class="title-2">Députés</h2>
+    @if (deputes().length > 0) {
+      <ul class="app-recherche__liste">
+        @for (depute of deputes(); track depute.slug) {
+          <li>
+            <a
+              [routerLink]="['/deputes', depute.slug]"
+              [appPrefetch]="'/api/deputes/' + depute.slug"
+              >{{ depute.nom }}</a
+            >
+            <span class="caption">{{ detail(depute) }}</span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="caption">Aucun député ne correspond.</p>
+    }
+  </section>
+
+  <section class="app-recherche__section" aria-labelledby="resultats-lois">
+    <h2 id="resultats-lois" class="title-2">Lois</h2>
+    @if (lois().length > 0) {
+      <ul class="app-recherche__liste">
+        @for (loi of lois(); track loi.dossier) {
+          <li>
+            <a
+              [routerLink]="['/lois', loi.dossier]"
+              [appPrefetch]="precharge(loi.dossier)"
+              >{{ loi.titreCourt }}</a
+            >
+            <span class="caption">{{ dateCourte(loi.date) }}</span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="caption">Aucune loi ne correspond.</p>
+    }
+  </section>
+}
