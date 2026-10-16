@@ -24,12 +24,19 @@ describe('services de données (httpResource)', () => {
     TestBed.tick();
     const premiere = http.expectOne('/api/accueil?page=1');
     expect(premiere.request.method).toBe('GET');
-    premiere.flush({ lois: [], page: 1, pageSuivante: true, miseAJour: '2025-01-01T00:00:00Z' } satisfies Accueil);
+    premiere.flush({
+      lois: [],
+      page: 1,
+      pageSuivante: true,
+      miseAJour: '2025-01-01T00:00:00Z',
+    } satisfies Accueil);
     await vi.waitFor(() => expect(ressource.value()?.pageSuivante).toBe(true));
 
     page.set(2);
     TestBed.tick();
-    http.expectOne('/api/accueil?page=2').flush({ lois: [], page: 2, pageSuivante: false, miseAJour: '' } satisfies Accueil);
+    http
+      .expectOne('/api/accueil?page=2')
+      .flush({ lois: [], page: 2, pageSuivante: false, miseAJour: '' } satisfies Accueil);
     await vi.waitFor(() => expect(ressource.value()?.page).toBe(2));
   });
 
@@ -43,7 +50,7 @@ describe('services de données (httpResource)', () => {
     expect(ressource.isLoading).toBeDefined();
   });
 
-  it('LoiApi encode le dossier dans l\'URL', () => {
+  it("LoiApi encode le dossier dans l'URL", () => {
     const http = preparer();
     TestBed.runInInjectionContext(() => TestBed.inject(LoiApi).detail(signal('a b/c')));
 
@@ -66,24 +73,32 @@ describe('services de données (httpResource)', () => {
     TestBed.runInInjectionContext(() => api.detail(signal('alice-durand')));
 
     TestBed.tick();
-    http.expectOne('/api/deputes').flush({ deputes: [], groupes: [], loisRecentes: [] } satisfies DeputeListe);
+    http
+      .expectOne('/api/deputes')
+      .flush({ deputes: [], groupes: [], loisRecentes: [] } satisfies DeputeListe);
     http.expectOne('/api/deputes/alice-durand').flush({ slug: 'alice-durand' } as DeputeDetail);
   });
 
-  it('expose l\'erreur HTTP sans lever d\'exception', async () => {
+  it("expose l'erreur HTTP sans lever d'exception", async () => {
     const http = preparer();
-    const ressource = TestBed.runInInjectionContext(() => TestBed.inject(LoiApi).detail(signal('DLR5L17N0')));
+    const ressource = TestBed.runInInjectionContext(() =>
+      TestBed.inject(LoiApi).detail(signal('DLR5L17N0')),
+    );
 
     TestBed.tick();
-    http.expectOne('/api/lois/DLR5L17N0').flush({ erreur: 'inconnu' }, { status: 404, statusText: 'Not Found' });
+    http
+      .expectOne('/api/lois/DLR5L17N0')
+      .flush({ erreur: 'inconnu' }, { status: 404, statusText: 'Not Found' });
 
     await vi.waitFor(() => expect(ressource.error()).toBeTruthy());
-    expect(ressource.value()).toBeUndefined();
+    expect(ressource.hasValue()).toBe(false);
   });
 
   it('ne lance aucune requête tant que le paramètre est indéfini', () => {
     const http = preparer();
-    TestBed.runInInjectionContext(() => TestBed.inject(LoiApi).detail(signal<string | undefined>(undefined)));
+    TestBed.runInInjectionContext(() =>
+      TestBed.inject(LoiApi).detail(signal<string | undefined>(undefined)),
+    );
 
     TestBed.tick();
     http.expectNone(() => true);

@@ -55,7 +55,7 @@ describe('ViewportPreloadingStrategy', () => {
     expect(charger.deputes).not.toHaveBeenCalled();
   });
 
-  it('ne précharge une route qu\'une seule fois', () => {
+  it("ne précharge une route qu'une seule fois", () => {
     const { strategie, charger } = preparer();
 
     strategie.lienVisible('/lois/A');
@@ -82,7 +82,7 @@ describe('ViewportPreloadingStrategy', () => {
     expect(charger.deputes).toHaveBeenCalledTimes(1);
   });
 
-  it('ne précharge pas quand l\'économiseur de données est actif', () => {
+  it("ne précharge pas quand l'économiseur de données est actif", () => {
     connexion({ saveData: true });
     const { strategie, charger } = preparer();
 
@@ -109,7 +109,7 @@ describe('ViewportPreloadingStrategy', () => {
     expect(charger.lois).toHaveBeenCalledTimes(1);
   });
 
-  it('attend un moment d\'inactivité du navigateur', () => {
+  it("attend un moment d'inactivité du navigateur", () => {
     let rappelInactif: (() => void) | undefined;
     vi.stubGlobal('requestIdleCallback', (rappel: () => void) => {
       rappelInactif = rappel;

@@ -34,16 +34,22 @@ describe('AppPrefetch', () => {
     connexion(undefined);
   });
 
-  it.each(['pointerenter', 'focus', 'touchstart'])('lance un fetch de priorité basse au premier %s', (evenement) => {
-    const { lien } = monter();
+  it.each(['pointerenter', 'focus', 'touchstart'])(
+    'lance un fetch de priorité basse au premier %s',
+    (evenement) => {
+      const { lien } = monter();
 
-    lien.dispatchEvent(new Event(evenement));
+      lien.dispatchEvent(new Event(evenement));
 
-    expect(fetchEspion).toHaveBeenCalledTimes(1);
-    expect(fetchEspion).toHaveBeenCalledWith('/api/lois/DLR5L17N54372', expect.objectContaining({ priority: 'low' }));
-  });
+      expect(fetchEspion).toHaveBeenCalledTimes(1);
+      expect(fetchEspion).toHaveBeenCalledWith(
+        '/api/lois/DLR5L17N54372',
+        expect.objectContaining({ priority: 'low' }),
+      );
+    },
+  );
 
-  it('ne fait qu\'un seul fetch, quels que soient les événements suivants', () => {
+  it("ne fait qu'un seul fetch, quels que soient les événements suivants", () => {
     const { lien } = monter();
 
     lien.dispatchEvent(new Event('pointerenter'));
@@ -54,7 +60,7 @@ describe('AppPrefetch', () => {
     expect(fetchEspion).toHaveBeenCalledTimes(1);
   });
 
-  it('suit la valeur de l\'entrée', () => {
+  it("suit la valeur de l'entrée", () => {
     const { fixture, lien } = monter();
     fixture.componentInstance.url.set('/api/scrutins/8317');
     fixture.detectChanges();
@@ -64,7 +70,7 @@ describe('AppPrefetch', () => {
     expect(fetchEspion).toHaveBeenCalledWith('/api/scrutins/8317', expect.anything());
   });
 
-  it('ne fait rien avec l\'économiseur de données', () => {
+  it("ne fait rien avec l'économiseur de données", () => {
     connexion({ saveData: true });
     const { lien } = monter();
 

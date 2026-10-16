@@ -22,7 +22,7 @@ describe('dates', () => {
     expect(dateLongue('2024-10-07T22:00:00+00:00')).toBe('8 octobre 2024');
   });
 
-  it('garde le même jour quand l\'heure UTC reste dans la journée à Paris', () => {
+  it("garde le même jour quand l'heure UTC reste dans la journée à Paris", () => {
     expect(dateCourte('2024-10-07T10:00:00+00:00')).toBe('7 oct. 2024');
     expect(dateLongue('2025-01-15T09:00:00+00:00')).toBe('15 janvier 2025');
   });

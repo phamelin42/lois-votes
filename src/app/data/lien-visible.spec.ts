@@ -13,7 +13,10 @@ import { ViewportPreloadingStrategy } from './viewport-preloading.strategy';
 })
 class Hote {}
 
-type Observateur = { rappel: IntersectionObserverCallback; observes: Element[] };
+interface Observateur {
+  rappel: IntersectionObserverCallback;
+  observes: Element[];
+}
 
 describe('AppLienVisible', () => {
   let observateurs: Observateur[];
@@ -45,7 +48,10 @@ describe('AppLienVisible', () => {
   function monter() {
     const lienVisible = vi.fn();
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: ViewportPreloadingStrategy, useValue: { lienVisible } }],
+      providers: [
+        provideRouter([]),
+        { provide: ViewportPreloadingStrategy, useValue: { lienVisible } },
+      ],
     });
     const fixture = TestBed.createComponent(Hote);
     fixture.detectChanges();
@@ -61,7 +67,7 @@ describe('AppLienVisible', () => {
     }
   }
 
-  it("observe les liens routerLink et pas les autres", () => {
+  it('observe les liens routerLink et pas les autres', () => {
     const { fixture } = monter();
     const observes = observateurs.flatMap((o) => o.observes);
 
@@ -69,9 +75,11 @@ describe('AppLienVisible', () => {
     expect(observes[0]).toBe(fixture.nativeElement.querySelector('a[href="/lois/DLR5L17N1"]'));
   });
 
-  it('prévient la stratégie quand le lien entre dans l\'écran', () => {
+  it("prévient la stratégie quand le lien entre dans l'écran", () => {
     const { fixture, lienVisible } = monter();
-    const lien = fixture.nativeElement.querySelector('a[href="/lois/DLR5L17N1"]') as HTMLAnchorElement;
+    const lien = fixture.nativeElement.querySelector(
+      'a[href="/lois/DLR5L17N1"]',
+    ) as HTMLAnchorElement;
 
     rendreVisible(lien);
 
@@ -80,23 +88,27 @@ describe('AppLienVisible', () => {
 
   it('ne fait rien tant que le lien est hors écran', () => {
     const { fixture, lienVisible } = monter();
-    const lien = fixture.nativeElement.querySelector('a[href="/lois/DLR5L17N1"]') as HTMLAnchorElement;
+    const lien = fixture.nativeElement.querySelector(
+      'a[href="/lois/DLR5L17N1"]',
+    ) as HTMLAnchorElement;
 
     rendreVisible(lien, false);
 
     expect(lienVisible).not.toHaveBeenCalled();
   });
 
-  it('cesse d\'observer le lien une fois signalé', () => {
+  it("cesse d'observer le lien une fois signalé", () => {
     const { fixture } = monter();
-    const lien = fixture.nativeElement.querySelector('a[href="/lois/DLR5L17N1"]') as HTMLAnchorElement;
+    const lien = fixture.nativeElement.querySelector(
+      'a[href="/lois/DLR5L17N1"]',
+    ) as HTMLAnchorElement;
 
     rendreVisible(lien);
 
     expect(observateurs.flatMap((o) => o.observes)).toHaveLength(0);
   });
 
-  it('cesse d\'observer quand le composant est détruit', () => {
+  it("cesse d'observer quand le composant est détruit", () => {
     const { fixture } = monter();
 
     fixture.destroy();

@@ -1,4 +1,9 @@
-import { HttpErrorResponse, HttpResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  HttpErrorResponse,
+  HttpResponse,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import { HttpClient } from '@angular/common/http';
 import { DOCUMENT } from '@angular/common';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -6,7 +11,11 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { APPELER_BFF, serverApiInterceptor } from './server-api.interceptor';
 
-function preparer(appeler: (url: string) => Promise<{ status: number; headers: Record<string, string>; body: unknown }>) {
+function preparer(
+  appeler: (
+    url: string,
+  ) => Promise<{ status: number; headers: Record<string, string>; body: unknown }>,
+) {
   TestBed.configureTestingModule({
     providers: [
       provideHttpClient(withInterceptors([serverApiInterceptor])),
@@ -36,7 +45,7 @@ describe('intercepteur serveur de /api', () => {
     controleur.expectNone(() => true);
   });
 
-  it('ne garde que le chemin et la requête d\'une URL absolue de la même origine', async () => {
+  it("ne garde que le chemin et la requête d'une URL absolue de la même origine", async () => {
     const appeler = vi.fn().mockResolvedValue({ status: 200, headers: {}, body: {} });
     const { http } = preparer(appeler);
 
@@ -46,8 +55,10 @@ describe('intercepteur serveur de /api', () => {
     expect(appeler).toHaveBeenCalledWith('/api/lois/DLR5L17N1?x=1');
   });
 
-  it('transforme un statut d\'erreur en HttpErrorResponse', async () => {
-    const appeler = vi.fn().mockResolvedValue({ status: 404, headers: {}, body: { erreur: 'inconnu' } });
+  it("transforme un statut d'erreur en HttpErrorResponse", async () => {
+    const appeler = vi
+      .fn()
+      .mockResolvedValue({ status: 404, headers: {}, body: { erreur: 'inconnu' } });
     const { http } = preparer(appeler);
 
     const erreur = await firstValueFrom(http.get('/api/lois/DLR5L17N0')).catch((e) => e);
@@ -58,7 +69,13 @@ describe('intercepteur serveur de /api', () => {
   });
 
   it('transmet le 503 et son Retry-After', async () => {
-    const appeler = vi.fn().mockResolvedValue({ status: 503, headers: { 'retry-after': '60' }, body: { erreur: 'panne' } });
+    const appeler = vi
+      .fn()
+      .mockResolvedValue({
+        status: 503,
+        headers: { 'retry-after': '60' },
+        body: { erreur: 'panne' },
+      });
     const { http } = preparer(appeler);
 
     const erreur = await firstValueFrom(http.get('/api/deputes')).catch((e) => e);
@@ -67,7 +84,7 @@ describe('intercepteur serveur de /api', () => {
     expect(erreur.headers.get('retry-after')).toBe('60');
   });
 
-  it('laisse passer ce qui n\'est pas /api', async () => {
+  it("laisse passer ce qui n'est pas /api", async () => {
     const appeler = vi.fn();
     const { http, controleur } = preparer(appeler);
 
