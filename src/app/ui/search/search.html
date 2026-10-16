@@ -1,0 +1,49 @@
+<form
+  #formulaire
+  class="app-search__formulaire"
+  role="search"
+  action="/recherche"
+  method="get"
+  (focusout)="onFocusOut($event, formulaire)"
+>
+  <fd-text-field
+    class="app-search__champ"
+    label="Rechercher"
+    placeholder="Un député, une loi…"
+    icon="search"
+    [value]="requete()"
+    (valueChange)="onSaisie($event)"
+    (keydown)="onKeydown($event)"
+  />
+  <p class="app-search__annonce caption" aria-live="polite">{{ annonce() }}</p>
+  <div
+    class="app-search__liste"
+    role="listbox"
+    [id]="listeId"
+    aria-label="Résultats"
+    (mousedown)="$event.preventDefault()"
+  >
+    @if (liste()) {
+      @for (section of sections(); track section.libelle) {
+        <div role="group" class="app-search__groupe" [attr.aria-label]="section.libelle">
+          <p class="app-search__titre-groupe caption" role="presentation">
+            {{ section.libelle }}
+          </p>
+          @for (item of section.items; track item.url) {
+            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- Option de listbox : le clavier agit sur le champ (aria-activedescendant), l'option n'a pas le focus. -->
+            <div
+              role="option"
+              class="app-search__option"
+              [id]="idOption(item.rang)"
+              [attr.aria-selected]="item.rang === actif()"
+              (click)="choisir(item.url)"
+            >
+              <span class="app-search__option-titre">{{ item.titre }}</span>
+              <span class="app-search__option-detail caption">{{ item.detail }}</span>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</form>
