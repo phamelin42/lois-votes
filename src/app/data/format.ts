@@ -1,4 +1,4 @@
-import type { PositionGroupe } from '@contrat';
+import type { PositionGroupe, TypeScrutin } from '@contrat';
 
 const FUSEAU = 'Europe/Paris';
 
@@ -52,4 +52,22 @@ export function normaliser(texte: string): string {
 /** Libellé français d'une position de vote. */
 export function libellePosition(position: PositionGroupe): string {
   return LIBELLES[position];
+}
+
+const TYPES: Record<TypeScrutin, string> = {
+  final: 'Vote final',
+  motion: 'Motion de censure',
+  article: 'Vote sur un article',
+  amendement: 'Amendement',
+  autre: 'Autre scrutin',
+};
+
+/** Libellé français du type d'un scrutin (« Vote final », « Amendement »…). */
+export function libelleType(type: TypeScrutin): string {
+  return TYPES[type];
+}
+
+/** Résultat d'un vote, écrit en toutes lettres : jamais « loi adoptée » (voir CLAUDE.md). */
+export function libelleAdoption(adopte: boolean): string {
+  return adopte ? "Adopté par l'Assemblée" : "Rejeté par l'Assemblée";
 }

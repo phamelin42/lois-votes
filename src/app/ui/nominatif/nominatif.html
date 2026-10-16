@@ -1,0 +1,41 @@
+@if (detail(); as scrutin) {
+  <fd-tabs label="Positions des députés">
+    @for (onglet of onglets; track onglet.position) {
+      <fd-tab [id]="onglet.position" [label]="onglet.libelle" [count]="nombre(onglet.position)">
+        @for (bloc of groupesDe(onglet.position); track bloc.id) {
+          <section class="app-nominatif__groupe">
+            <h3 class="app-nominatif__titre title-3">
+              @if (bloc.groupe; as groupe) {
+                <app-group-pill [groupe]="groupe" />
+                <span>{{ groupe.libelle }}</span>
+              } @else {
+                {{ bloc.id }}
+              }
+            </h3>
+            <ul class="app-nominatif__liste">
+              @for (depute of bloc.deputes; track depute.slug) {
+                <li>
+                  <a
+                    [routerLink]="['/deputes', depute.slug]"
+                    [appPrefetch]="'/api/deputes/' + depute.slug"
+                    >{{ depute.nom }}</a
+                  >
+                </li>
+              }
+            </ul>
+          </section>
+        } @empty {
+          <p class="caption">Aucun député dans cette position.</p>
+        }
+      </fd-tab>
+    }
+  </fd-tabs>
+} @else if (erreur()) {
+  <fd-alert
+    tone="danger"
+    title="Données momentanément indisponibles, réessayez dans une minute."
+    announce
+  />
+} @else {
+  <fd-spinner label="Chargement de la liste nominative" />
+}

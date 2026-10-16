@@ -1,1 +1,56 @@
-<h1 class="app-scrutin__titre">Scrutin</h1>
+@if (erreur()) {
+  @if (introuvable()) {
+    <h1 class="app-scrutin__titre title-1">Scrutin introuvable</h1>
+    <fd-empty-state
+      title="Ce scrutin n'est pas dans les données"
+      text="Le numéro est peut-être mal recopié. Les dernières lois votées sont sur la page d'accueil."
+    >
+      <a fdButton variant="secondary" routerLink="/">Voir les dernières lois</a>
+    </fd-empty-state>
+  } @else {
+    <fd-alert
+      tone="danger"
+      title="Données momentanément indisponibles, réessayez dans une minute."
+      announce
+    />
+  }
+} @else if (scrutin(); as scrutin) {
+  <fd-breadcrumb [items]="fil()" />
+
+  <header class="app-scrutin__entete">
+    <p class="caption">
+      {{ libelleType(scrutin.type) }} · <time [attr.datetime]="scrutin.date">{{ dateLongue(scrutin.date) }}</time>
+    </p>
+    <h1 class="app-scrutin__titre title-1">{{ scrutin.titre }}</h1>
+    <fd-badge [tone]="scrutin.adopte ? 'tokiwa' : 'enji'">{{ libelleAdoption(scrutin.adopte) }}</fd-badge>
+    <app-vote-bar [compte]="scrutin.compte" taille="md" />
+    <p class="app-scrutin__liens">
+      @if (scrutin.loi?.dossier; as dossier) {
+        <a
+          [routerLink]="['/lois', dossier]"
+          [appPrefetch]="'/api/lois/' + dossier"
+          >Voir la loi « {{ scrutin.loi?.titreCourt }} »</a
+        >
+      }
+      <a fdLink [href]="scrutin.urlOfficielle">Voir le scrutin sur le site de l'Assemblée</a>
+    </p>
+  </header>
+
+  <section class="app-scrutin__section" aria-labelledby="decompte">
+    <h2 id="decompte" class="title-2">Vote par groupe</h2>
+    <app-group-table [groupes]="scrutin.groupes" />
+  </section>
+
+  <section class="app-scrutin__section" aria-labelledby="nominatif">
+    <h2 id="nominatif" class="title-2">Qui a voté quoi</h2>
+    <div class="app-scrutin__nominatif">
+      @defer (on interaction; hydrate on interaction) {
+        <app-nominatif [numero]="scrutin.numero" />
+      } @placeholder {
+        <button fdButton variant="secondary" type="button">
+          Voir comment chaque député a voté
+        </button>
+      }
+    </div>
+  </section>
+}
