@@ -26,15 +26,19 @@ Une tâche est terminée quand `lint`, `typecheck`, `test` et `build` sont verts
 
 - `src/main.ts`, `src/main.server.ts`, `src/server.ts` : entrées navigateur, serveur de rendu et Express (routes `/api/*`).
 - `src/app/` : application. `app.routes.ts` (routes chargées par `loadComponent`), `app.routes.server.ts` (rendu : serveur partout, `/a-propos` pré-rendue), `pages/<page>/` (un dossier par page).
-- `src/server/` : BFF. `mock-bff.ts` (`appelerMock`, fixtures), `fixtures/bff/` (réponses conformes au contrat, écrites à partir des exports publics de NosParlementaires).
+- `src/server/` : BFF. `bff.ts` (`appelerBffActif`, choisit le mode), `routes.ts` (routes `/api/*`, `Cache-Control`, erreurs), `agregation.ts` (assemblage des réponses), `index-deputes.ts` (députés joints à Datan), `source/` (seul accès à data.gouv.fr : client tabulaire, limiteur, rid, colonnes), `cache.ts` (mémoire, périmé servi en cas de panne), `classify.ts` et `groupes.ts` (fonctions pures). `mock-bff.ts` (`appelerMock`) et `fixtures/bff/` servent le mode factice.
 - `src/shared/contrat.ts` : types du contrat, importés côté serveur et côté app avec l'alias `@contrat`.
 - `src/index.html` : `lang="fr"`, précharge la police du texte (latin 500), script en ligne qui pose `data-theme="dark"` avant le rendu.
 - `src/styles.scss` : Fuda (`fuda/styles/fuda.css`) et les polices latines seulement (Dela Gothic One 400, Zen Maru Gothic 500 et 700).
 
 ## Modes du BFF
 
-- `MOCK_BFF=1` : les routes `/api/*` servent les fixtures de `src/server/fixtures/bff/` avec un délai de 150 ms (`appelerMock`). C'est le mode de `npm start` tant que le vrai serveur (prompt 02) n'est pas livré.
-- Sans `MOCK_BFF` : `/api/*` répond 503 `{ erreur }` avec `Retry-After`, faute de BFF réel.
+- `MOCK_BFF=1` : les routes `/api/*` servent les fixtures de `src/server/fixtures/bff/` avec un délai de 150 ms (`appelerMock`). C'est le mode de `npm start`.
+- Sans `MOCK_BFF` : le BFF réel interroge l'API tabulaire (`TABULAR_API_BASE`, défaut `https://tabular-api.data.gouv.fr/api`), avec un limiteur (4 requêtes simultanées, 10 par seconde) et un cache mémoire. Une source en panne sans valeur en cache donne 503 avec `Retry-After: 60`. Le journal indique, par requête, le nombre d'appels à la source.
+
+### Identifiants de ressources à confirmer
+
+Les `rid` par défaut (`src/server/source/ressources.ts`), les noms de colonnes de Datan (`src/server/source/colonnes.ts`) et les couleurs des groupes (`src/server/groupes.ts`) sont **provisoires** : le prompt 00 n'a pas pu joindre data.gouv.fr. Les valeurs par défaut sont celles du faux serveur de test (`testing/univers.mjs`) ; sur la vraie source, elles ne correspondent à aucune ressource. Tant qu'elles ne sont pas confirmées, il faut surcharger `RID_SCRUTINS`, `RID_VOTES`, `RID_DEPUTES`, `RID_DATAN_DEPUTES` et `RID_DATAN_GROUPES`, puis exécuter le prompt 00 pour vérifier les colonnes Datan et reporter les valeurs dans `docs/API.md`. `RID_DATAN_GROUPES` n'est pas encore lu par le BFF.
 
 ## Conventions Angular
 

@@ -12,6 +12,8 @@ npm install
 npm start          # build puis serveur sur http://localhost:4000 avec les données factices
 ```
 
+Le BFF réel (sans `MOCK_BFF=1`) interroge l'API tabulaire. Ses identifiants de ressources (`RID_*`) et les colonnes de Datan sont à confirmer : voir la section « Identifiants de ressources à confirmer » de [CLAUDE.md](CLAUDE.md).
+
 Les commandes et conventions sont décrites dans [CLAUDE.md](CLAUDE.md). Le plan et le contrat entre le serveur et l'application sont dans [docs/PLAN.md](docs/PLAN.md) et [docs/CONTRAT.md](docs/CONTRAT.md).
 
 ## Licence
