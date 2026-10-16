@@ -1,1 +1,77 @@
-<h1 class="app-deputes__titre">Députés</h1>
+<h1 class="app-deputes__titre title-1">Députés</h1>
+<p class="app-deputes__intro body">
+  Les députés actifs de l'Assemblée nationale. Filtrez par groupe, par département ou par nom.
+</p>
+
+<div class="app-deputes__filtres" role="group" aria-label="Filtres">
+  <fd-select
+    label="Groupe"
+    [options]="optionsGroupes()"
+    [value]="groupe() ?? ''"
+    (valueChange)="filtrer('groupe', $event)"
+  />
+  <fd-select
+    label="Département"
+    [options]="optionsDepartements()"
+    [value]="dept() ?? ''"
+    (valueChange)="filtrer('dept', $event)"
+  />
+  <fd-text-field
+    label="Nom du député"
+    type="search"
+    icon="search"
+    placeholder="Ex. Durand"
+    [value]="q() ?? ''"
+    (valueChange)="filtrer('q', $event)"
+  />
+</div>
+
+@if (erreur()) {
+  <fd-alert
+    tone="danger"
+    title="Données momentanément indisponibles, réessayez dans une minute."
+    announce
+  />
+} @else if (liste()) {
+  <p class="app-deputes__compte caption" aria-live="polite">
+    {{ cartes().length }} {{ cartes().length > 1 ? 'députés' : 'député' }}
+  </p>
+
+  @if (visibles().length > 0) {
+    <ul class="app-deputes__liste">
+      @for (carte of visibles(); track carte.depute.slug) {
+        <li class="app-depute-carte">
+          <a
+            class="app-depute-carte__lien"
+            [routerLink]="['/deputes', carte.depute.slug]"
+            [appPrefetch]="'/api/deputes/' + carte.depute.slug"
+          >
+            <app-deputy-photo [nom]="carte.depute.nom" />
+            <span class="app-depute-carte__texte">
+              <span class="app-depute-carte__nom">{{ carte.depute.nom }}</span>
+              @if (carte.groupe; as groupe) {
+                <app-group-pill [groupe]="groupe" />
+              }
+              @if (carte.depute.circonscription; as circonscription) {
+                <span class="app-depute-carte__circonscription caption">{{ circonscription }}</span>
+              }
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    @if (cartes().length > limite()) {
+      <div class="app-deputes__suite">
+        <button fdButton variant="secondary" type="button" (click)="plus()">Afficher plus</button>
+      </div>
+    }
+  } @else {
+    <fd-empty-state
+      title="Aucun député ne correspond"
+      text="Essayez un autre nom, ou retirez un filtre."
+    />
+  }
+} @else {
+  <fd-spinner label="Chargement des députés" />
+}

@@ -5,7 +5,77 @@
 
 .app-deputes__titre {
   margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
   color: var(--ink);
+}
+
+.app-deputes__intro {
+  max-width: calc(var(--space-16) * 10);
+  margin: var(--space-2) 0 var(--space-6);
+  color: var(--ink-muted);
+}
+
+.app-deputes__filtres {
+  display: grid;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+@media (min-width: 40em) {
+  .app-deputes__filtres {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.app-deputes__compte {
+  margin: 0 0 var(--space-4);
+  color: var(--ink-muted);
+}
+
+.app-deputes__liste {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40em) {
+  .app-deputes__liste {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Une carte entière est un lien : toute la surface est une cible. */
+.app-depute-carte__lien {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--space-12);
+  padding: var(--space-3);
+  border: var(--border-hair) solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.app-depute-carte__texte {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: start;
+  min-width: 0;
+}
+
+.app-depute-carte__nom {
+  font-weight: 700;
+}
+
+.app-depute-carte__circonscription {
+  color: var(--ink-muted);
+}
+
+.app-deputes__suite {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
 }

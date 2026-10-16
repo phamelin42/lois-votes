@@ -1,1 +1,114 @@
-<h1 class="app-depute__titre">Député</h1>
+@if (erreur()) {
+  @if (introuvable()) {
+    <h1 class="app-depute__titre title-1">Député introuvable</h1>
+    <fd-empty-state
+      title="Ce député n'est pas dans les données"
+      text="Le lien est peut-être ancien. Retrouvez les députés actifs dans l'annuaire."
+    >
+      <a fdButton variant="secondary" routerLink="/deputes">Voir les députés</a>
+    </fd-empty-state>
+  } @else {
+    <fd-alert
+      tone="danger"
+      title="Données momentanément indisponibles, réessayez dans une minute."
+      announce
+    />
+  }
+} @else if (depute(); as depute) {
+  <fd-breadcrumb [items]="fil()" />
+
+  <header class="app-depute__entete">
+    <app-deputy-photo
+      class="app-depute__photo"
+      [src]="depute.photo"
+      [nom]="depute.nom"
+      [taille]="160"
+      [priority]="true"
+    />
+    <div class="app-depute__identite">
+      <h1 class="app-depute__titre title-1">{{ depute.nom }}</h1>
+      @if (depute.groupe; as groupe) {
+        <p class="app-depute__groupe">
+          <app-group-pill [groupe]="groupe" />
+          <span>{{ groupe.libelle }}</span>
+        </p>
+      }
+      @if (depute.circonscription; as circonscription) {
+        <p class="caption">Circonscription : {{ circonscription }}</p>
+      }
+      <a fdLink [href]="depute.urlFiche">Fiche officielle sur le site de l'Assemblée</a>
+    </div>
+  </header>
+
+  <section class="app-depute__section" aria-labelledby="chiffres">
+    <h2 id="chiffres" class="title-2">Chiffres clés</h2>
+    <ul class="app-depute__tuiles">
+      <li class="app-depute__tuile">
+        <h3 class="title-3">Participation aux scrutins</h3>
+        <p class="app-depute__chiffre title-1">{{ pourcent(depute.taux.participation) }}</p>
+        <p class="caption">Part des scrutins publics où il ou elle a voté, d'après Datan.</p>
+      </li>
+      <li class="app-depute__tuile">
+        <h3 class="title-3">Taux d'abstention</h3>
+        <p class="app-depute__chiffre title-1">{{ pourcent(depute.taux.abstention) }}</p>
+        <p class="caption">
+          Ses abstentions parmi ses votes exprimés (pour, contre, abstention), sur la législature.
+          Calcul à partir des données de NosParlementaires.
+        </p>
+      </li>
+      <li class="app-depute__tuile">
+        <h3 class="title-3">Vote avec son groupe</h3>
+        <p class="app-depute__chiffre title-1">{{ pourcent(depute.taux.loyaute) }}</p>
+        <p class="caption">
+          Part des scrutins où il ou elle vote comme la majorité de son groupe, d'après Datan.
+        </p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="app-depute__section" aria-labelledby="votes">
+    <h2 id="votes" class="title-2">Ses votes sur les 10 dernières lois</h2>
+    <div class="app-depute__defilement" role="region" aria-labelledby="votes" tabindex="0">
+      <table class="app-depute__table body">
+        <caption class="caption">
+          Sa position, celle de son groupe et le résultat, pour les dix derniers votes finaux.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Loi</th>
+            <th scope="col">Date</th>
+            <th scope="col">Sa position</th>
+            <th scope="col">Son groupe</th>
+            <th scope="col">Résultat</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (vote of depute.dernieresLois; track vote.numero) {
+            <tr [class.app-depute__ecart]="ecart(vote)">
+              <th scope="row">
+                <a [routerLink]="lienVote(vote)" [appPrefetch]="precharge(vote)">{{
+                  vote.loi.titreCourt
+                }}</a>
+                @if (ecart(vote)) {
+                  <span class="app-depute__mention caption">Différent de son groupe</span>
+                }
+              </th>
+              <td><time [attr.datetime]="vote.date">{{ dateCourte(vote.date) }}</time></td>
+              <td><app-position [position]="vote.position" /></td>
+              <td><app-position [position]="vote.positionGroupe" /></td>
+              <td>
+                <fd-badge [tone]="vote.adopte ? 'tokiwa' : 'enji'">{{
+                  libelleAdoption(vote.adopte)
+                }}</fd-badge>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5">Aucun vote final récent pour ce député.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

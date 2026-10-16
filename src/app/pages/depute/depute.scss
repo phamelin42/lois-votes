@@ -3,9 +3,127 @@
   padding: var(--space-6) var(--space-4);
 }
 
+.app-depute__entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-6);
+  margin: var(--space-4) 0 0;
+}
+
+.app-depute__photo {
+  flex: 0 0 auto;
+}
+
+.app-depute__identite {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  min-width: 0;
+}
+
 .app-depute__titre {
   margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
+  color: var(--ink);
+}
+
+.app-depute__groupe {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.app-depute__section {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+
+.app-depute__section > h2 {
+  margin: 0;
+  color: var(--ink);
+}
+
+.app-depute__tuiles {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40em) {
+  .app-depute__tuiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.app-depute__tuile {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-4);
+  border: var(--border-hair) solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.app-depute__tuile h3 {
+  margin: 0;
+  color: var(--ink);
+}
+
+.app-depute__tuile p {
+  margin: 0;
+}
+
+.app-depute__chiffre {
+  color: var(--ink);
+}
+
+.app-depute__tuile .caption {
+  color: var(--ink-muted);
+}
+
+/* La table défile horizontalement sur petit écran ; la zone est atteignable au clavier. */
+.app-depute__defilement {
+  overflow-x: auto;
+}
+
+.app-depute__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.app-depute__table caption {
+  padding-bottom: var(--space-2);
+  color: var(--ink-muted);
+  text-align: left;
+}
+
+.app-depute__table th,
+.app-depute__table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-hair) solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.app-depute__table th[scope='row'] a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--space-12);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* Un vote différent du groupe est annoncé par un texte, en plus du trait de la ligne. */
+.app-depute__ecart {
+  background: var(--sakura-soft);
+}
+
+.app-depute__mention {
+  display: block;
   color: var(--ink);
 }
