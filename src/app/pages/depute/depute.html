@@ -29,8 +29,8 @@
       <h1 class="app-depute__titre title-1">{{ depute.nom }}</h1>
       @if (depute.groupe; as groupe) {
         <p class="app-depute__groupe">
-          <app-group-pill [groupe]="groupe" />
           <span>{{ groupe.libelle }}</span>
+          <app-group-pill [groupe]="groupe" />
         </p>
       }
       @if (depute.circonscription; as circonscription) {
