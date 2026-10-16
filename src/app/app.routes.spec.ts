@@ -2,7 +2,7 @@ import { routes } from './app.routes';
 import { serverRoutes } from './app.routes.server';
 import { RenderMode } from '@angular/ssr';
 
-describe('routes de l\'application', () => {
+describe("routes de l'application", () => {
   it('déclare les 8 routes du plan, la dernière étant la 404', () => {
     expect(routes.map((r) => r.path)).toEqual([
       '',
@@ -23,11 +23,14 @@ describe('routes de l\'application', () => {
     }
   });
 
-  it.each(routes.map((r) => [r.path ?? '', r] as const))('la route « %s » se résout vers un composant', async (_chemin, route) => {
-    const composant = await route.loadComponent!();
+  it.each(routes.map((r) => [r.path ?? '', r] as const))(
+    'la route « %s » se résout vers un composant',
+    async (_chemin, route) => {
+      const composant = await route.loadComponent!();
 
-    expect(composant).toBeTypeOf('function');
-  });
+      expect(composant).toBeTypeOf('function');
+    },
+  );
 });
 
 describe('routes de rendu serveur', () => {

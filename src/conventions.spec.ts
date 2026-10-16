@@ -13,13 +13,17 @@ function fichiers(dossier: string, extensions: string[]): string[] {
     return [];
   }
   return readdirSync(chemin, { recursive: true, withFileTypes: true })
-    .filter((e) => e.isFile() && extensions.some((x) => e.name.endsWith(x)) && !e.name.endsWith('.spec.ts'))
+    .filter(
+      (e) =>
+        e.isFile() && extensions.some((x) => e.name.endsWith(x)) && !e.name.endsWith('.spec.ts'),
+    )
     .map((e) => join(e.parentPath, e.name));
 }
 
 const lire = (f: string) => readFileSync(f, 'utf8');
 const nom = (f: string) => relative(racine, f);
-const sansCommentaires = (code: string) => code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+const sansCommentaires = (code: string) =>
+  code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 const ts = fichiers('src/app', ['.ts']).filter((f) => !f.includes('/testing/'));
 const composants = ts.filter((f) => /@Component\(/.test(lire(f)));
@@ -37,7 +41,7 @@ describe('conventions Angular 22', () => {
     ['ngOnChanges', /ngOnChanges/],
     ['*ngIf', /\*ngIf/],
     ['*ngFor', /\*ngFor/],
-  ])('n\'utilise pas %s', (_nom, motif) => {
+  ])("n'utilise pas %s", (_nom, motif) => {
     const fautifs = [...ts, ...html].filter((f) => motif.test(sansCommentaires(lire(f)))).map(nom);
     expect(fautifs).toEqual([]);
   });
@@ -45,7 +49,12 @@ describe('conventions Angular 22', () => {
   it('chaque composant a son template et ses styles dans des fichiers séparés', () => {
     const fautifs = composants.filter((f) => {
       const code = lire(f);
-      return /\btemplate:\s*[`'"]/.test(code) || /\bstyles:\s*[[`'"]/.test(code) || !/templateUrl:/.test(code) || !/styleUrl:/.test(code);
+      return (
+        /\btemplate:\s*[`'"]/.test(code) ||
+        /\bstyles:\s*[[`'"]/.test(code) ||
+        !/templateUrl:/.test(code) ||
+        !/styleUrl:/.test(code)
+      );
     });
     expect(fautifs.map(nom)).toEqual([]);
   });
@@ -63,14 +72,18 @@ describe('conventions Angular 22', () => {
   });
 
   it('utilise host: {} et inject() plutôt que les décorateurs et le constructeur', () => {
-    const fautifs = ts.filter((f) => /constructor\s*\(\s*(private|public|protected|readonly)\s/.test(lire(f)));
+    const fautifs = ts.filter((f) =>
+      /constructor\s*\(\s*(private|public|protected|readonly)\s/.test(lire(f)),
+    );
     expect(fautifs.map(nom)).toEqual([]);
   });
 
   it('chaque @defer a son @placeholder', () => {
     const fautifs = html.filter((f) => {
       const code = lire(f);
-      return (code.match(/@defer\b/g)?.length ?? 0) !== (code.match(/@placeholder\b/g)?.length ?? 0);
+      return (
+        (code.match(/@defer\b/g)?.length ?? 0) !== (code.match(/@placeholder\b/g)?.length ?? 0)
+      );
     });
     expect(fautifs.map(nom)).toEqual([]);
   });
@@ -85,19 +98,24 @@ describe('conventions de style (tokens Fuda uniquement)', () => {
     ['courbe en dur', /\bcubic-bezier\s*\(/],
   ];
 
-  it.each(regles)('aucune %s en dur dans les .scss de l\'application', (_nom, motif) => {
+  it.each(regles)("aucune %s en dur dans les .scss de l'application", (_nom, motif) => {
     const fautifs = scss.flatMap((f) =>
       lire(f)
         .split('\n')
         .map((ligne, i) => ({ f, ligne, i }))
-        .filter(({ ligne }) => !ligne.includes('exception:') && !/^\s*(\/\/|\*|\/\*)/.test(ligne) && !ligne.includes('@media'))
+        .filter(
+          ({ ligne }) =>
+            !ligne.includes('exception:') &&
+            !/^\s*(\/\/|\*|\/\*)/.test(ligne) &&
+            !ligne.includes('@media'),
+        )
         .filter(({ ligne }) => motif.test(ligne))
         .map(({ f, i }) => `${nom(f)}:${i + 1}`),
     );
     expect(fautifs).toEqual([]);
   });
 
-  it('n\'utilise jamais prefers-color-scheme pour les couleurs (le thème Nuit est un choix explicite)', () => {
+  it("n'utilise jamais prefers-color-scheme pour les couleurs (le thème Nuit est un choix explicite)", () => {
     expect(scss.filter((f) => /prefers-color-scheme/.test(lire(f))).map(nom)).toEqual([]);
   });
 
@@ -109,25 +127,37 @@ describe('conventions de style (tokens Fuda uniquement)', () => {
 describe('règles du produit', () => {
   const textes = [...ts, ...html];
 
-  it('n\'écrit jamais « loi adoptée » : c\'est « Adopté par l\'Assemblée »', () => {
-    expect(textes.filter((f) => /loi adopt[ée]e/i.test(sansCommentaires(lire(f)))).map(nom)).toEqual([]);
+  it("n'écrit jamais « loi adoptée » : c'est « Adopté par l'Assemblée »", () => {
+    expect(
+      textes.filter((f) => /loi adopt[ée]e/i.test(sansCommentaires(lire(f)))).map(nom),
+    ).toEqual([]);
   });
 
-  it('n\'écrit « présence » que dans la page À propos, qui explique pourquoi on dit « participation »', () => {
-    const fautifs = textes.filter((f) => !f.includes('a-propos') && /présence/i.test(sansCommentaires(lire(f))));
+  it("n'écrit « présence » que dans la page À propos, qui explique pourquoi on dit « participation »", () => {
+    const fautifs = textes.filter(
+      (f) => !f.includes('a-propos') && /présence/i.test(sansCommentaires(lire(f))),
+    );
     expect(fautifs.map(nom)).toEqual([]);
   });
 
   it('le navigateur ne parle jamais directement à data.gouv.fr (tout passe par /api)', () => {
-    expect(textes.filter((f) => /tabular-api|fetch\(\s*['"`]https?:/.test(lire(f))).map(nom)).toEqual([]);
+    expect(
+      textes.filter((f) => /tabular-api|fetch\(\s*['"`]https?:/.test(lire(f))).map(nom),
+    ).toEqual([]);
   });
 
   it('ne contient aucune clé ni secret', () => {
-    expect(textes.filter((f) => /api[_-]?key|\bsecret\b|api[_-]?token/i.test(sansCommentaires(lire(f)))).map(nom)).toEqual([]);
+    expect(
+      textes
+        .filter((f) => /api[_-]?key|\bsecret\b|api[_-]?token/i.test(sansCommentaires(lire(f))))
+        .map(nom),
+    ).toEqual([]);
   });
 
-  it('ne modifie pas Fuda : aucun fichier de l\'application ne réécrit ses classes fd-* par composant', () => {
-    const fautifs = scss.filter((f) => /^\s*\.fd-[\w-]+\s*\{/m.test(lire(f)) && !f.includes('/ui/'));
+  it("ne modifie pas Fuda : aucun fichier de l'application ne réécrit ses classes fd-* par composant", () => {
+    const fautifs = scss.filter(
+      (f) => /^\s*\.fd-[\w-]+\s*\{/m.test(lire(f)) && !f.includes('/ui/'),
+    );
     expect(fautifs.map(nom)).toEqual([]);
   });
 });

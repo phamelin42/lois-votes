@@ -30,7 +30,9 @@ describe('BFF factice (MOCK_BFF=1)', () => {
     const depute = premier('deputes');
 
     expect((await appeler(`/api/lois/${loi}`)).body).toEqual(json(`lois/${loi}.json`));
-    expect((await appeler(`/api/scrutins/${scrutin}`)).body).toEqual(json(`scrutins/${scrutin}.json`));
+    expect((await appeler(`/api/scrutins/${scrutin}`)).body).toEqual(
+      json(`scrutins/${scrutin}.json`),
+    );
     expect((await appeler('/api/deputes')).body).toEqual(json('deputes.json'));
     expect((await appeler(`/api/deputes/${depute}`)).body).toEqual(json(`deputes/${depute}.json`));
   });
@@ -42,7 +44,7 @@ describe('BFF factice (MOCK_BFF=1)', () => {
     expect(reponse.body).toEqual({ erreur: expect.any(String) });
   });
 
-  it('ne répond qu\'après le délai de 150 ms', async () => {
+  it("ne répond qu'après le délai de 150 ms", async () => {
     let fini = false;
     appelerMock('/api/deputes').then(() => (fini = true));
 

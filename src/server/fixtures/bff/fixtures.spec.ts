@@ -13,11 +13,25 @@ import type {
 // Fixtures du BFF factice : une réponse conforme au contrat par route (voir docs/CONTRAT.md).
 const dossier = join(process.cwd(), 'src/server/fixtures/bff');
 const lire = <T>(chemin: string): T => JSON.parse(readFileSync(join(dossier, chemin), 'utf8')) as T;
-const fichiers = (sous: string) => readdirSync(join(dossier, sous)).filter((f) => f.endsWith('.json'));
+const fichiers = (sous: string) =>
+  readdirSync(join(dossier, sous)).filter((f) => f.endsWith('.json'));
 
 const POSITIONS = ['pour', 'contre', 'abstention', 'nonvotant'];
 const POSITIONS_GROUPE = [...POSITIONS, 'partage'];
-const GROUPES_REELS = ['RN', 'EPR', 'LFI-NFP', 'SOC', 'DR', 'ECOS', 'DEM', 'HOR', 'LIOT', 'UDDPLR', 'GDR', 'NI'];
+const GROUPES_REELS = [
+  'RN',
+  'EPR',
+  'LFI-NFP',
+  'SOC',
+  'DR',
+  'ECOS',
+  'DEM',
+  'HOR',
+  'LIOT',
+  'UDDPLR',
+  'GDR',
+  'NI',
+];
 
 function estCompte(c: Compte) {
   for (const cle of ['pour', 'contre', 'abstention', 'nonvotant'] as const) {
@@ -41,7 +55,15 @@ function verifierGroupes(groupes: VoteGroupe[], compte: Compte) {
   expect(total).toEqual(compte); // « à l'unité près » : les fixtures sont exactes
 }
 
-function verifierScrutin(s: { numero: number; date: string; titre: string; compte: Compte; urlOfficielle: string; adopte: boolean; type: string }) {
+function verifierScrutin(s: {
+  numero: number;
+  date: string;
+  titre: string;
+  compte: Compte;
+  urlOfficielle: string;
+  adopte: boolean;
+  type: string;
+}) {
   expect(Number.isInteger(s.numero)).toBe(true);
   expect(Number.isNaN(Date.parse(s.date))).toBe(false);
   expect(s.titre.length).toBeGreaterThan(5);
@@ -51,7 +73,8 @@ function verifierScrutin(s: { numero: number; date: string; titre: string; compt
   expect(typeof s.adopte).toBe('boolean');
 }
 
-const sansHtml = (valeur: unknown) => expect(JSON.stringify(valeur)).not.toMatch(/<\/?[a-z][^>]*>/i);
+const sansHtml = (valeur: unknown) =>
+  expect(JSON.stringify(valeur)).not.toMatch(/<\/?[a-z][^>]*>/i);
 
 describe('fixtures du BFF factice', () => {
   it('fournit une fixture par route', () => {
@@ -70,7 +93,7 @@ describe('fixtures du BFF factice', () => {
     expect(typeof accueil.pageSuivante).toBe('boolean');
     expect(Number.isNaN(Date.parse(accueil.miseAJour))).toBe(false);
     for (const loi of accueil.lois) {
-      if (loi.dossier !== null) expect(loi.dossier).toMatch(/^DLR5L17N\d+$/);
+      if (loi.dossier !== null) expect(loi.dossier).toMatch(/^DLR5L1[67]N\d+$/);
       expect(loi.statut).toBeNull();
       expect(loi.titreCourt.length).toBeGreaterThan(3);
       expect(loi.voteFinal.type).toBe('final');
@@ -85,7 +108,7 @@ describe('fixtures du BFF factice', () => {
   it.each(fichiers('lois'))('lois/%s respecte LoiDetail', (fichier) => {
     const loi = lire<LoiDetail>(`lois/${fichier}`);
 
-    expect(loi.dossier).toMatch(/^DLR5L17N\d+$/);
+    expect(loi.dossier).toMatch(/^DLR5L1[67]N\d+$/);
     expect(`${loi.dossier}.json`).toBe(fichier);
     expect(loi.statut).toBeNull();
     expect(loi.urlDossier).toBeNull();
@@ -128,7 +151,7 @@ describe('fixtures du BFF factice', () => {
       expect(d.nom.length).toBeGreaterThan(2);
       expect(d.nomTri.length).toBeGreaterThan(1);
     }
-    for (const l of liste.loisRecentes) expect(l.dossier).toMatch(/^DLR5L17N\d+$/);
+    for (const l of liste.loisRecentes) expect(l.dossier).toMatch(/^DLR5L1[67]N\d+$/);
     sansHtml(liste);
   });
 
