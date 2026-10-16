@@ -4,11 +4,12 @@ import { FdIconButton, FdThemeService } from 'fuda';
 import type { DeputeListe } from '@contrat';
 import { dateLongue } from '../data/format';
 import { AppSearch } from '../ui/search/search';
+import { AppLienVisible } from '../data/lien-visible';
 
 /** Cadre commun des pages : en-tête (nom, navigation, recherche, thème), contenu, pied avec les sources. */
 @Component({
   selector: 'app-shell',
-  imports: [RouterLink, RouterOutlet, FdIconButton, AppSearch],
+  imports: [RouterLink, RouterOutlet, FdIconButton, AppSearch, AppLienVisible],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   encapsulation: ViewEncapsulation.None,

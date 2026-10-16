@@ -1,4 +1,4 @@
-<a fdCard class="app-loi-card" [routerLink]="cible()">
+<a fdCard class="app-loi-card" [routerLink]="cible()" [appPrefetch]="precharge()">
   <span slot="meta">
     @if (loi().lecture; as lecture) {
       <span class="app-loi-card__lecture">{{ lecture }}</span> ·

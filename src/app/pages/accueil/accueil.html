@@ -1,1 +1,6 @@
-<h1 class="app-accueil__titre">Qui a voté quoi ?</h1>
+<app-accueil-vue
+  [donnees]="donnees()"
+  [chargement]="chargement()"
+  [erreur]="erreur()"
+  (pageSuivante)="voirPlus()"
+/>

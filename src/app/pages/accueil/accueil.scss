@@ -1,11 +1,1 @@
-.app-accueil {
-  display: block;
-  padding: var(--space-6) var(--space-4);
-}
-
-.app-accueil__titre {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  color: var(--ink);
-}
+/* La mise en page de l'accueil est dans accueil-vue.scss ; ce fichier ne porte que le lien avec le composant. */
