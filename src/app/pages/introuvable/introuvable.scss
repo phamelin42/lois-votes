@@ -4,8 +4,6 @@
 }
 
 .app-introuvable__titre {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
+  margin: var(--space-4) 0 0;
   color: var(--ink);
 }
