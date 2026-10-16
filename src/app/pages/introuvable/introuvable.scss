@@ -1,0 +1,11 @@
+.app-introuvable {
+  display: block;
+  padding: var(--space-6) var(--space-4);
+}
+
+.app-introuvable__titre {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--ink);
+}

@@ -1,0 +1,9 @@
+dist
+node_modules
+.angular
+package-lock.json
+docs/prompts
+tdd
+*.css
+docs
+.superpowers

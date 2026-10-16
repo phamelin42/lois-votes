@@ -1,0 +1,10 @@
+import { Component, ViewEncapsulation } from '@angular/core';
+
+@Component({
+  selector: 'app-loi-page',
+  templateUrl: './loi.html',
+  styleUrl: './loi.scss',
+  encapsulation: ViewEncapsulation.None,
+  host: { class: 'app-loi' },
+})
+export class LoiPage {}
