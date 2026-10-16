@@ -6,15 +6,30 @@
   method="get"
   (focusout)="onFocusOut($event, formulaire)"
 >
-  <fd-text-field
-    class="app-search__champ"
-    label="Rechercher"
-    placeholder="Un député, une loi…"
-    icon="search"
-    [value]="requete()"
-    (valueChange)="onSaisie($event)"
-    (keydown)="onKeydown($event)"
-  />
+  <div class="app-search__champ">
+    <label class="app-search__libelle" [attr.for]="champId">Rechercher</label>
+    <span class="app-search__saisie">
+      <svg fdIcon="search" class="app-search__icone"></svg>
+      <input
+        #saisie
+        class="app-search__input"
+        type="text"
+        name="q"
+        role="combobox"
+        autocomplete="off"
+        aria-autocomplete="list"
+        placeholder="Un député, une loi…"
+        [id]="champId"
+        [value]="requete()"
+        [attr.aria-controls]="listeId"
+        [attr.aria-expanded]="liste()"
+        [attr.aria-activedescendant]="actifId()"
+        (focus)="demanderIndex()"
+        (input)="onSaisie(saisie.value)"
+        (keydown)="onKeydown($event)"
+      />
+    </span>
+  </div>
   <p class="app-search__annonce caption" aria-live="polite">{{ annonce() }}</p>
   <div
     class="app-search__liste"

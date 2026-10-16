@@ -1,18 +1,14 @@
 import {
-  AfterViewInit,
-  afterRenderEffect,
   Component,
   computed,
-  ElementRef,
   inject,
   input,
   output,
   signal,
   ViewEncapsulation,
-  viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { FdTextField } from 'fuda';
+import { FdIcon } from 'fuda';
 import type { DeputeListe } from '@contrat';
 import { dateCourte, normaliser } from '../../data/format';
 
@@ -32,17 +28,18 @@ interface Section {
 }
 
 /**
- * Recherche d'un député ou d'une loi : combobox ARIA 1.2 sur le champ Fuda, dans un formulaire GET
- * qui fonctionne sans JavaScript. L'index n'est demandé qu'au premier focus.
+ * Recherche d'un député ou d'une loi : combobox ARIA 1.2 dans un formulaire GET qui fonctionne sans JavaScript.
+ * Le champ est un <input> natif, écrit dans le modèle : le rendu serveur porte son rôle, son nom et ses attributs
+ * (fd-text-field ne transmet pas d'attributs à son <input>). L'index n'est demandé qu'au premier focus.
  */
 @Component({
   selector: 'app-search',
-  imports: [FdTextField],
+  imports: [FdIcon],
   templateUrl: './search.html',
   styleUrl: './search.scss',
   encapsulation: ViewEncapsulation.None,
 })
-export class AppSearch implements AfterViewInit {
+export class AppSearch {
   /** Index des députés et des lois récentes ; `undefined` tant qu'il n'est pas chargé. */
   readonly index = input<DeputeListe | undefined>();
   /** Émis une seule fois, au premier focus du champ. */
@@ -50,8 +47,8 @@ export class AppSearch implements AfterViewInit {
 
   private readonly router = inject(Router);
   private readonly identifiant = `app-search-${instances++}`;
+  protected readonly champId = `${this.identifiant}-champ`;
   protected readonly listeId = `${this.identifiant}-liste`;
-  private readonly champ = viewChild.required(FdTextField, { read: ElementRef<HTMLElement> });
   private demandeFaite = false;
 
   protected readonly requete = signal('');
@@ -103,37 +100,21 @@ export class AppSearch implements AfterViewInit {
     return n === 1 ? '1 résultat' : `${n} résultats`;
   });
 
-  constructor() {
-    // Attributs ARIA et nom du champ, posés sur l'<input> natif que Fuda rend (il ne les expose pas).
-    afterRenderEffect(() => {
-      const saisie = this.champ().nativeElement.querySelector('input');
-      if (!saisie) return;
-      const actif = this.liste() && this.actif() >= 0 && this.actif() < this.total();
-
-      saisie.name = 'q';
-      saisie.setAttribute('autocomplete', 'off');
-      saisie.setAttribute('role', 'combobox');
-      saisie.setAttribute('aria-autocomplete', 'list');
-      saisie.setAttribute('aria-controls', this.listeId);
-      saisie.setAttribute('aria-expanded', String(this.liste()));
-      if (actif) saisie.setAttribute('aria-activedescendant', this.idOption(this.actif()));
-      else saisie.removeAttribute('aria-activedescendant');
-    });
-  }
-
-  ngAfterViewInit(): void {
-    // Le focus ne remonte pas du champ natif : l'écoute se fait sur l'<input> lui-même.
-    this.champ()
-      .nativeElement.querySelector('input')
-      ?.addEventListener('focus', () => {
-        if (this.demandeFaite) return;
-        this.demandeFaite = true;
-        this.besoinIndex.emit();
-      });
-  }
+  protected readonly actifId = computed(() =>
+    this.liste() && this.actif() >= 0 && this.actif() < this.total()
+      ? this.idOption(this.actif())
+      : null,
+  );
 
   protected idOption(rang: number): string {
     return `${this.identifiant}-option-${rang}`;
+  }
+
+  /** Premier focus : demande l'index (une seule fois). */
+  protected demanderIndex(): void {
+    if (this.demandeFaite) return;
+    this.demandeFaite = true;
+    this.besoinIndex.emit();
   }
 
   protected onSaisie(texte: string): void {

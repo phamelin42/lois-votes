@@ -41,7 +41,8 @@
       <app-group-table [groupes]="vote.groupes" />
 
       <div class="app-loi__nominatif">
-        @defer (on interaction; hydrate on interaction) {
+        <!-- Sans hydrate : le rendu serveur montre le bouton, la liste (et sa requête) n'arrive qu'au clic. -->
+        @defer (on interaction) {
           <app-nominatif [numero]="vote.numero" />
         } @placeholder {
           <button fdButton variant="secondary" type="button">

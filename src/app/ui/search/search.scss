@@ -8,6 +8,64 @@
   position: relative;
 }
 
+/* Champ de saisie : même apparence que fd-text-field de Fuda (son style n'est chargé que là où il est utilisé). */
+.app-search__champ {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.app-search__libelle {
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-weight: 700;
+}
+
+.app-search__saisie {
+  position: relative;
+  display: block;
+}
+
+.app-search__icone {
+  position: absolute;
+  top: 50%;
+  left: var(--space-3);
+  transform: translateY(-50%);
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
+.app-search__input {
+  width: 100%;
+  min-height: var(--space-12);
+  margin: 0;
+  padding: 0 var(--space-4) 0 var(--space-12);
+  border: var(--border-control) solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-weight: 500;
+  transition:
+    border-color var(--duration-quick) var(--ease-kaze),
+    box-shadow var(--duration-quick) var(--ease-kaze);
+}
+
+.app-search__input::placeholder {
+  color: var(--ink-muted);
+  opacity: 1;
+}
+
+.app-search__input:hover {
+  border-color: var(--ink);
+}
+
+.app-search__input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: var(--focus-ring);
+}
+
 .app-search__liste {
   position: absolute;
   top: 100%;
