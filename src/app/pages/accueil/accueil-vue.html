@@ -15,6 +15,7 @@
 
   @if (donnees(); as page) {
     @if (page.lois.length > 0) {
+      <h2 class="app-accueil__liste-titre">Lois votées, de la plus récente à la plus ancienne</h2>
       <ul class="app-accueil__liste">
         @for (loi of page.lois; track loi.voteFinal.numero) {
           <li><app-loi-card [loi]="loi" /></li>

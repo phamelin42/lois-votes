@@ -1,3 +1,5 @@
+@use '../../ui/shared/sr-only' as sr;
+
 .app-accueil__accroche {
   margin: 0;
   color: var(--ink);
@@ -35,4 +37,9 @@
   border-radius: var(--radius-lg);
   background: var(--surface-sunken);
   animation: fd-pulse var(--duration-slow) var(--ease-mizu) infinite;
+}
+
+/* Titre de la liste pour les lecteurs d'écran seulement : les cartes sont des h3 (niveaux sans saut). */
+.app-accueil__liste-titre {
+  @include sr.sr-only;
 }
