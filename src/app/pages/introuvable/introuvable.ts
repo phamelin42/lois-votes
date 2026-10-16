@@ -17,6 +17,9 @@ export class IntrouvablePage {
   constructor() {
     const init = inject(RESPONSE_INIT, { optional: true });
     if (init) init.status = 404;
-    inject(PageMeta).poser('Page introuvable', "Cette adresse n'existe pas sur « Qui a voté quoi ? ».");
+    inject(PageMeta).poser(
+      'Page introuvable',
+      "Cette adresse n'existe pas sur « Qui a voté quoi ? ».",
+    );
   }
 }

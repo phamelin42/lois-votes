@@ -34,7 +34,9 @@
       <p class="caption">
         <time [attr.datetime]="vote.date">{{ dateLongue(vote.date) }}</time>
       </p>
-      <fd-badge [tone]="vote.adopte ? 'tokiwa' : 'enji'">{{ libelleAdoption(vote.adopte) }}</fd-badge>
+      <fd-badge [tone]="vote.adopte ? 'tokiwa' : 'enji'">{{
+        libelleAdoption(vote.adopte)
+      }}</fd-badge>
       <app-vote-bar [compte]="vote.compte" taille="md" />
       <app-group-table [groupes]="vote.groupes" />
 
@@ -58,7 +60,9 @@
       <ul class="app-loi__liste">
         @for (lecture of loi.lectures; track lecture.numero) {
           <li class="app-loi__ligne">
-            <time class="caption" [attr.datetime]="lecture.date">{{ dateCourte(lecture.date) }}</time>
+            <time class="caption" [attr.datetime]="lecture.date">{{
+              dateCourte(lecture.date)
+            }}</time>
             <a
               [routerLink]="['/scrutins', lecture.numero]"
               [appPrefetch]="'/api/scrutins/' + lecture.numero"
@@ -69,7 +73,9 @@
             }}</fd-badge>
             <span class="caption">
               {{ lecture.compte.pour }} pour, {{ lecture.compte.contre }} contre,
-              {{ lecture.compte.abstention }} abstention{{ lecture.compte.abstention > 1 ? 's' : '' }}
+              {{ lecture.compte.abstention }} abstention{{
+                lecture.compte.abstention > 1 ? 's' : ''
+              }}
             </span>
           </li>
         }
@@ -83,11 +89,16 @@
       @defer (on viewport; hydrate on viewport) {
         <fd-accordion>
           @for (groupe of autres(); track groupe.id) {
-            <fd-accordion-item [id]="groupe.id" [title]="groupe.libelle + ' (' + groupe.scrutins.length + ')'">
+            <fd-accordion-item
+              [id]="groupe.id"
+              [title]="groupe.libelle + ' (' + groupe.scrutins.length + ')'"
+            >
               <ul class="app-loi__liste">
                 @for (scrutin of groupe.scrutins; track scrutin.numero) {
                   <li class="app-loi__ligne">
-                    <time class="caption" [attr.datetime]="scrutin.date">{{ dateCourte(scrutin.date) }}</time>
+                    <time class="caption" [attr.datetime]="scrutin.date">{{
+                      dateCourte(scrutin.date)
+                    }}</time>
                     <a
                       [routerLink]="['/scrutins', scrutin.numero]"
                       [appPrefetch]="'/api/scrutins/' + scrutin.numero"

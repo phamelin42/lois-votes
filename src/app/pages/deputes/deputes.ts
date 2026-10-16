@@ -1,13 +1,14 @@
-import {
-  Component,
-  computed,
-  inject,
-  input,
-  linkedSignal,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FdAlert, FdButton, FdEmptyState, FdSelect, FdSelectOption, FdSpinner, FdTextField } from 'fuda';
+import {
+  FdAlert,
+  FdButton,
+  FdEmptyState,
+  FdSelect,
+  FdSelectOption,
+  FdSpinner,
+  FdTextField,
+} from 'fuda';
 import type { DeputeIndex, Groupe } from '@contrat';
 import { DeputeApi } from '../../data/depute-api';
 import { normaliser } from '../../data/format';

@@ -19,10 +19,13 @@
 
   <header class="app-scrutin__entete">
     <p class="caption">
-      {{ libelleType(scrutin.type) }} · <time [attr.datetime]="scrutin.date">{{ dateLongue(scrutin.date) }}</time>
+      {{ libelleType(scrutin.type) }} ·
+      <time [attr.datetime]="scrutin.date">{{ dateLongue(scrutin.date) }}</time>
     </p>
     <h1 class="app-scrutin__titre title-1">{{ scrutin.titre }}</h1>
-    <fd-badge [tone]="scrutin.adopte ? 'tokiwa' : 'enji'">{{ libelleAdoption(scrutin.adopte) }}</fd-badge>
+    <fd-badge [tone]="scrutin.adopte ? 'tokiwa' : 'enji'">{{
+      libelleAdoption(scrutin.adopte)
+    }}</fd-badge>
     <app-vote-bar [compte]="scrutin.compte" taille="md" />
     <p class="app-scrutin__liens">
       @if (scrutin.loi; as loi) {

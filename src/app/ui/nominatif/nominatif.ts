@@ -27,7 +27,16 @@ interface BlocGroupe {
  */
 @Component({
   selector: 'app-nominatif',
-  imports: [RouterLink, AppGroupPill, AppLienVisible, AppPrefetch, FdAlert, FdSpinner, FdTab, FdTabs],
+  imports: [
+    RouterLink,
+    AppGroupPill,
+    AppLienVisible,
+    AppPrefetch,
+    FdAlert,
+    FdSpinner,
+    FdTab,
+    FdTabs,
+  ],
   templateUrl: './nominatif.html',
   styleUrl: './nominatif.scss',
   encapsulation: ViewEncapsulation.None,

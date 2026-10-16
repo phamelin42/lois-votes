@@ -93,7 +93,9 @@
                   <span class="app-depute__mention caption">Différent de son groupe</span>
                 }
               </th>
-              <td><time [attr.datetime]="vote.date">{{ dateCourte(vote.date) }}</time></td>
+              <td>
+                <time [attr.datetime]="vote.date">{{ dateCourte(vote.date) }}</time>
+              </td>
               <td><app-position [position]="vote.position" /></td>
               <td><app-position [position]="vote.positionGroupe" /></td>
               <td>

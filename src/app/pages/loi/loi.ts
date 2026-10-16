@@ -73,7 +73,11 @@ export class LoiPage {
   protected readonly autres = computed<GroupeAutres[]>(() => {
     const scrutins = this.loi()?.scrutins ?? [];
     return [
-      { id: 'articles', libelle: 'Articles', scrutins: scrutins.filter((s) => s.type === 'article') },
+      {
+        id: 'articles',
+        libelle: 'Articles',
+        scrutins: scrutins.filter((s) => s.type === 'article'),
+      },
       {
         id: 'amendements',
         libelle: 'Amendements',

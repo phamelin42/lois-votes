@@ -42,9 +42,7 @@ export class ScrutinPage {
   private readonly meta = inject(PageMeta);
   protected readonly ressource = this.api.detail(this.numero);
 
-  protected readonly scrutin = computed<ScrutinDetail | undefined>(() =>
-    valeurDe(this.ressource),
-  );
+  protected readonly scrutin = computed<ScrutinDetail | undefined>(() => valeurDe(this.ressource));
   protected readonly erreur = computed(() => this.ressource.error() !== undefined);
   protected readonly introuvable = computed(() => estIntrouvable(this.ressource.error()));
 

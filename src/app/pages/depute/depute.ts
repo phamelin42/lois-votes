@@ -72,7 +72,11 @@ export class DeputePage {
 
   /** Vrai quand le député a voté autrement que son groupe : le texte le dit, pas seulement la couleur. */
   protected ecart(vote: VoteDepute): boolean {
-    return vote.position !== null && vote.positionGroupe !== null && vote.position !== vote.positionGroupe;
+    return (
+      vote.position !== null &&
+      vote.positionGroupe !== null &&
+      vote.position !== vote.positionGroupe
+    );
   }
 
   /** Une loi mène à sa page ; un vote sans dossier mène à son scrutin. */

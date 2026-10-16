@@ -7,9 +7,7 @@
     announce
   />
 } @else if (!requete()) {
-  <p class="app-recherche__aide body">
-    Saisissez un nom de député ou un mot du titre d'une loi.
-  </p>
+  <p class="app-recherche__aide body">Saisissez un nom de député ou un mot du titre d'une loi.</p>
 } @else if (!liste()) {
   <fd-spinner label="Recherche en cours" />
 } @else if (deputes().length === 0 && lois().length === 0) {
@@ -46,11 +44,9 @@
       <ul class="app-recherche__liste">
         @for (loi of lois(); track loi.dossier) {
           <li>
-            <a
-              [routerLink]="['/lois', loi.dossier]"
-              [appPrefetch]="precharge(loi.dossier)"
-              >{{ loi.titreCourt }}</a
-            >
+            <a [routerLink]="['/lois', loi.dossier]" [appPrefetch]="precharge(loi.dossier)">{{
+              loi.titreCourt
+            }}</a>
             <span class="caption">{{ dateCourte(loi.date) }}</span>
           </li>
         }

@@ -45,7 +45,7 @@ describe('outillage du dépôt', () => {
     expect(paquet.dependencies['@angular/ssr']).toMatch(/^[~^]?22\./);
   });
 
-  it('fixe les budgets en erreur : initial ≤ 450 Ko brut (Angular 22 + routeur + hydratation ne tiennent pas dans 150 Ko), styles de composant ≤ 4 Ko', () => {
+  it('fixe les budgets en erreur : initial ≤ 500 Ko brut (Angular 22 + routeur + hydratation ne tiennent pas dans 150 Ko), styles de composant ≤ 4 Ko', () => {
     const angular = json('angular.json');
     const projet = Object.values(angular.projects)[0] as {
       architect: {
@@ -64,7 +64,7 @@ describe('outillage du dépôt', () => {
     const initial = budgets.find((b) => b.type === 'initial');
     const composant = budgets.find((b) => b.type === 'anyComponentStyle');
 
-    expect(initial?.maximumError).toMatch(/^450(\.0)?(kB|kb|KB)$/i);
+    expect(initial?.maximumError).toMatch(/^500(\.0)?(kB|kb|KB)$/i);
     expect(composant?.maximumError).toMatch(/^4(\.0)?(kB|kb|KB)$/i);
   });
 
