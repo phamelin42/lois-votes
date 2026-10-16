@@ -10,21 +10,26 @@ Rien n'est stocké chez nous : pas de base, pas de fichier, aucune clé API. Tou
 
 Node ≥ 22.22.3 (`.nvmrc` : 24).
 
-| Commande                          | Rôle                                                                                   |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| `npm start`                       | Build, puis serveur SSR avec le BFF factice (`MOCK_BFF=1`) sur le port 4000            |
-| `npm run build`                   | Build de production (`dist/lois-votes`)                                                |
-| `npm run serve:ssr`               | Lance le serveur SSR déjà construit (`MOCK_BFF=1 npm run serve:ssr` pour les fixtures) |
-| `npm test`                        | Tests unitaires (Vitest via `ng test`, jsdom)                                          |
-| `npm run lint`                    | ESLint (angular-eslint, règles Fuda adaptées au préfixe `app`)                         |
-| `npm run typecheck`               | `tsc` sur l'application, le serveur et les specs                                       |
-| `npm run format` / `format:check` | Prettier                                                                               |
+| Commande                          | Rôle                                                                                                         |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `npm start`                       | Build, puis serveur SSR avec le BFF factice (`MOCK_BFF=1`) sur le port 4000                                  |
+| `npm run build`                   | Build de production (`dist/lois-votes`)                                                                      |
+| `npm run serve:ssr`               | Lance le serveur SSR déjà construit (`MOCK_BFF=1 npm run serve:ssr` pour les fixtures)                       |
+| `npm test`                        | Tests unitaires (Vitest via `ng test`, jsdom)                                                                |
+| `npm run lint`                    | ESLint (angular-eslint, règles Fuda adaptées au préfixe `app`)                                               |
+| `npm run typecheck`               | `tsc` sur l'application, le serveur et les specs                                                             |
+| `npm run format` / `format:check` | Prettier                                                                                                     |
+| `npm run e2e`                     | Build, puis Playwright contre trois instances SSR et deux faux serveurs (voir « Tests e2e »)                 |
+| `npm run perf`                    | Build, puis Lighthouse mobile sur `/`, une loi et un député ; échoue sous 95 en performance ou accessibilité |
 
-Une tâche est terminée quand `lint`, `typecheck`, `test` et `build` sont verts, et que `MOCK_BFF=1 npm run serve:ssr` sert les 8 routes (`curl localhost:4000/api/accueil` renvoie la fixture).
+Une tâche est terminée quand `lint`, `typecheck`, `test` et `build` sont verts, et que `MOCK_BFF=1 npm run serve:ssr` sert les 8 routes (`curl localhost:4000/api/accueil` renvoie la fixture). `e2e` s'exécute aussi quand une page, la navigation ou le serveur changent.
 
 ## Structure
 
-- `src/main.ts`, `src/main.server.ts`, `src/server.ts` : entrées navigateur, serveur de rendu et Express (routes `/api/*`).
+- `src/main.ts`, `src/main.server.ts`, `src/server.ts` : entrées navigateur, serveur de rendu et Express (routes `/api/*`, `/robots.txt`, `/sitemap.xml`, en-têtes, Umami).
+- `src/server/umami.ts`, `seo.ts`, `en-tetes.ts` : fonctions pures du serveur (script Umami, robots et sitemap, CSP et Cache-Control).
+- `api/index.mjs`, `vercel.json` : déploiement Vercel (une fonction qui sert le serveur SSR, tout passe par elle).
+- `e2e/` : Playwright (`*.spec.ts`, `aide.ts`) et faux serveur HTTP de l'API tabulaire (`faux-tabulaire.mjs`). `scripts/perf.mjs` : Lighthouse. `.github/workflows/ci.yml` : CI.
 - `src/app/` : application. `app.routes.ts` (routes chargées par `loadComponent`), `app.routes.server.ts` (rendu : serveur partout, `/a-propos` pré-rendue), `pages/<page>/` (un dossier par page).
 - `src/server/` : BFF. `bff.ts` (`appelerBffActif`, choisit le mode), `routes.ts` (routes `/api/*`, `Cache-Control`, erreurs), `agregation.ts` (assemblage des réponses), `index-deputes.ts` (députés joints à Datan), `source/` (seul accès à data.gouv.fr : client tabulaire, limiteur, rid, colonnes), `cache.ts` (mémoire, périmé servi en cas de panne), `classify.ts` et `groupes.ts` (fonctions pures). `mock-bff.ts` (`appelerMock`) et `fixtures/bff/` servent le mode factice.
 - `src/shared/contrat.ts` : types du contrat, importés côté serveur et côté app avec l'alias `@contrat`.
@@ -69,9 +74,25 @@ Reprendre celles de Fuda (`/home/user/design-system-fuda/CLAUDE.md`) :
 - Les services ne s'abonnent jamais à la main. Une URL dépend d'un `Signal` ; tant qu'il vaut `undefined`, aucune requête n'est lancée. Les paramètres sont encodés avec `encodeURIComponent`.
 - Côté serveur, `serverApiInterceptor` (fourni seulement par `app.config.server.ts`, comme intercepteur racine) exécute `/api/*` en mémoire via `APPELER_BFF`, sans réseau. Comme intercepteur racine, il passe sous le cache de transfert HTTP, qui transmet ensuite les données au navigateur : pas de seconde requête à l'hydratation. Un intercepteur ordinaire qui court-circuite la requête empêche ce cache de voir la réponse.
 - `format.ts` fournit les formats partagés (`pourcent`, `dateCourte`, `dateLongue`, `normaliser`, `libellePosition`). Les dates s'affichent dans le fuseau `Europe/Paris`.
-- Hydratation : `@defer (on viewport; hydrate on viewport)` pour ce qui est sous la ligne de flottaison, `@defer (on interaction; hydrate on interaction)` pour les blocs interactifs lourds comme la liste nominative. Chaque `@defer` a son `@placeholder` de hauteur fixe.
+- Hydratation : `@defer (on viewport; hydrate on viewport)` pour ce qui est sous la ligne de flottaison. La liste nominative est `@defer (on interaction)` **sans** `hydrate` : `hydrate` ferait rendre la liste entière côté serveur, alors que le bouton « Voir comment chaque député a voté » doit être dans le HTML et la requête ne partir qu'au clic. Chaque `@defer` a son `@placeholder` de hauteur fixe.
 - Pré-chargement : `ViewportPreloadingStrategy` charge le code d'une route quand un `a[routerLink]` qui y mène entre dans l'écran (`AppLienVisible`). `appPrefetch="/api/…"` précharge les données au survol, au focus ou au toucher, par un seul `fetch` de priorité basse. Rien ne se précharge avec l'économiseur de données (`saveData`) ; le code d'une route ne se précharge pas non plus en 2g.
 
 ## Textes
 
 Tous les textes de l'interface et de la documentation sont en français, ainsi que les messages de commit.
+
+## Serveur et déploiement
+
+- **Umami** (`umami.ts`) : le script (`defer`, `data-website-id`) est ajouté avant `</head>` seulement si `UMAMI_WEBSITE_ID` est défini ; `UMAMI_SRC` doit être en https. Pas de cookie.
+- **Sécurité** (`en-tetes.ts`, posé par `server.ts`) : sur chaque réponse, `nosniff`, `Referrer-Policy`, `Permissions-Policy`. Les pages HTML ont en plus leur CSP : `script-src` autorise, pour _cette_ page, l'empreinte (sha256) de chacun de ses scripts en ligne. Angular en génère qui changent d'une page à l'autre (`ng-event-dispatch-contract`, `__jsaction_bootstrap` avec la liste des événements), donc pas de liste d'empreintes figée au démarrage. Pas de `unsafe-inline` pour les scripts. Umami n'est autorisé que s'il est configuré.
+- **Cache** : une page rendue en 200 est `public, s-maxage=600, stale-while-revalidate=86400` ; une indisponibilité (503) ou une redirection est `no-store` (`cacheControlPage`). Les fichiers du build sont `public, max-age=31536000, immutable`.
+- **Indisponibilité** : une page de données dont la source est en panne répond 503 (`statutDePage`), `/a-propos` reste 200 (pré-rendue).
+- **SEO** : `/robots.txt` autorise tout et pointe vers le sitemap ; `/sitemap.xml` (`seo.ts`) liste l'accueil, les députés, les lois récentes et les députés actifs, tirés en une requête `/api/deputes`, gardés un jour en mémoire.
+- **Vercel** : `vercel.json` ne déclare aucune sortie statique : la fonction `api/index.mjs` (qui réexporte `reqHandler`) sert tout, y compris les fichiers du build (`includeFiles: dist/lois-votes/**`). Le préréglage Angular n'a pas été vérifié.
+
+## Tests e2e
+
+- `playwright.config.ts` lance cinq serveurs : le faux serveur sain sur 4010 et celui qui répond 500 sur 4011 (`FAUX_ERREUR=500`) ; le site normal sur 4000 (`TABULAR_API_BASE` sur 4010, sans Umami), le site « panne » sur 4001 (sur 4011), le site Umami sur 4002 (`UMAMI_WEBSITE_ID=site-de-test`, sur 4010). Les specs `degradation` et `umami` visent ces ports.
+- Le jeu de données est `src/server/testing/univers.mjs` ; `e2e/faux-tabulaire.mjs` le sert en HTTP (`demarrer({ port, erreur })`).
+- Chromium : `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/chemin/chrome npm run e2e`. Le rendu du texte est épinglé par `--font-render-hinting=none`.
+- `e2e/accessibilite.spec.ts` passe axe (WCAG 2.2 AA) sur chaque page, en Jour et en Nuit.
