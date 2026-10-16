@@ -3,10 +3,10 @@ import { Router, provideRouter } from '@angular/router';
 import { deputeListe } from '../../testing/builders';
 import { AppSearch } from './search';
 
-function monter(index = deputeListe() as ReturnType<typeof deputeListe> | undefined) {
+function monter(index: ReturnType<typeof deputeListe> | null = deputeListe()) {
   TestBed.configureTestingModule({ providers: [provideRouter([])] });
   const fixture = TestBed.createComponent(AppSearch);
-  fixture.componentRef.setInput('index', index);
+  fixture.componentRef.setInput('index', index ?? undefined);
   fixture.detectChanges();
   const racine = fixture.nativeElement as HTMLElement;
   const champ = racine.querySelector('input') as HTMLInputElement;
@@ -53,7 +53,7 @@ describe('AppSearch', () => {
   });
 
   it("demande l'index au premier focus, une seule fois", () => {
-    const { fixture, champ } = monter(undefined);
+    const { fixture, champ } = monter(null);
     const demande = vi.fn();
     fixture.componentInstance.besoinIndex.subscribe(demande);
 
@@ -191,7 +191,7 @@ describe('AppSearch', () => {
   });
 
   it("ne plante pas tant que l'index n'est pas chargé", async () => {
-    const { saisir, options } = monter(undefined);
+    const { saisir, options } = monter(null);
 
     await saisir('martin');
 

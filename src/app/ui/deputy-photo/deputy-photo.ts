@@ -1,4 +1,11 @@
-import { booleanAttribute, Component, computed, input, signal, ViewEncapsulation } from '@angular/core';
+import {
+  booleanAttribute,
+  Component,
+  computed,
+  input,
+  signal,
+  ViewEncapsulation,
+} from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { FdAvatar } from 'fuda';
 

@@ -44,8 +44,11 @@ describe('AccueilVue', () => {
     expect(titres).toEqual(['Loi numéro 1-1', 'Loi numéro 1-2', 'Loi numéro 1-3']);
   });
 
-  it('propose « Voir plus » seulement quand une page suivante existe', () => {
+  it('propose « Voir plus » quand une page suivante existe', () => {
     expect(bouton(monter().racine)).toBeDefined();
+  });
+
+  it('ne propose pas « Voir plus » sans page suivante', () => {
     expect(bouton(monter({ donnees: accueil(3, 1, false) }).racine)).toBeUndefined();
   });
 

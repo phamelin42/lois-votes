@@ -123,11 +123,13 @@ export class AppSearch implements AfterViewInit {
 
   ngAfterViewInit(): void {
     // Le focus ne remonte pas du champ natif : l'écoute se fait sur l'<input> lui-même.
-    this.champ().nativeElement.querySelector('input')?.addEventListener('focus', () => {
-      if (this.demandeFaite) return;
-      this.demandeFaite = true;
-      this.besoinIndex.emit();
-    });
+    this.champ()
+      .nativeElement.querySelector('input')
+      ?.addEventListener('focus', () => {
+        if (this.demandeFaite) return;
+        this.demandeFaite = true;
+        this.besoinIndex.emit();
+      });
   }
 
   protected idOption(rang: number): string {

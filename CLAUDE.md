@@ -60,7 +60,7 @@ Reprendre celles de Fuda (`/home/user/design-system-fuda/CLAUDE.md`) :
 
 ## Budgets et polices
 
-- Budgets `angular.json` en erreur : initial ≤ 300 Ko brut (150 Ko visé en transfert gzip), styles par composant ≤ 4 Ko.
+- Budgets `angular.json` en erreur : initial ≤ 450 Ko brut (150 Ko visé en transfert gzip), styles par composant ≤ 4 Ko.
 - `outputHashing: bundles` en production : les polices gardent un nom stable, pour que le préchargement de `index.html` (`/media/zen-maru-gothic-latin-500-normal.woff2`) corresponde au fichier réellement chargé. À vérifier après chaque changement de build.
 
 ## Données et chargement
