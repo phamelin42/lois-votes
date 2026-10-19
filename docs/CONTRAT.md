@@ -28,7 +28,7 @@ export interface Groupe {
 
 export interface VoteGroupe {
   groupe: Groupe;
-  position: PositionGroupe;
+  position: PositionGroupe; // calculée sur les décomptes du groupe (la plus votée), jamais la positionMajoritaire de l'archive
   compte: Compte;
 }
 
@@ -46,7 +46,7 @@ export interface LoiCarte {
   dossier: string | null; // dossier_ref (« DLR5L17N54372 ») ; null si le scrutin n'est rattaché à aucun dossier
   titreCourt: string;     // dérivé du titre du scrutin final (« Projet de loi relatif à … »)
   titreOfficiel: string;  // titre du scrutin final (sert de résumé, tronqué à 2 lignes sur l'accueil)
-  lecture: string | null; // « première lecture », « lecture définitive »… si le titre l'indique
+  lecture: string | null; // « première lecture », « lecture définitive »… ; peut valoir « texte de la commission mixte paritaire »
   statut: null;           // l'archive des scrutins ne le fournit pas ; gardé pour plus tard
   voteFinal: ScrutinResume;
   groupes: VoteGroupe[]; // triés par nombre de sièges décroissant
@@ -75,7 +75,7 @@ export interface LoiDetail {
 
 export interface DeputeMini {
   slug: string;
-  nom: string; // nom complet
+  nom: string; // nom complet ; peut porter une précision d'homonyme entre parenthèses (« Alexandra Martin (Gironde) »)
 }
 
 /** GET /api/scrutins/:numero */
@@ -105,7 +105,7 @@ export interface VoteDepute {
   loi: { dossier: string | null; titreCourt: string };
   numero: number;
   date: string;
-  position: Position | null;            // null : n'était pas député ou absent de la liste
+  position: Position | null;            // null : absent (case X : en mandat mais dans aucune liste) ou pas en mandat
   positionGroupe: PositionGroupe | null; // position majoritaire de son groupe sur ce scrutin
   adopte: boolean;
 }
@@ -114,7 +114,7 @@ export interface VoteDepute {
 export interface DeputeDetail {
   slug: string;
   nom: string;
-  photo: string | null; // photo officielle : https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/<numéro du PA>.jpg
+  photo: string | null; // photo officielle : https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/<numéro SANS le préfixe PA>.jpg (avec PA : 404)
   groupe: Groupe | null;
   circonscription: string | null;
   urlFiche: string;   // fiche officielle : https://www.assemblee-nationale.fr/dyn/deputes/<PA>

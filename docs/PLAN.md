@@ -43,6 +43,12 @@ Téléchargement échoué    le build échoue : l'ancien déploiement reste en l
 - **Mode `fixtures`** : `DONNEES_DEPUIS=fixtures npm run donnees` construit `data/` à partir d'un mini-jeu d'archives réelles réduites (`src/server/fixtures/officiel/`). C'est le mode des tests, des e2e et de la CI, qui ne dépendent donc pas du réseau.
 - Le format des fichiers est dans [DONNEES.md](DONNEES.md), les formats de l'API interne dans [CONTRAT.md](CONTRAT.md).
 
+### Décisions validées (après le prompt 08)
+
+- **Position d'un groupe calculée par nous** : la plus votée parmi pour, contre, abstention ; `partage` à égalité ; `nonvotant` si aucun suffrage exprimé. La `positionMajoritaire` de l'archive est inutilisable (fausse dans 5,3 % des entrées, jamais `partage`, « pour » dans 9 547 entrées sans aucun votant) ; elle n'est jamais appliquée.
+- **Absents** : les listes nominatives n'en contiennent pas (en médiane, 132 des 577 députés sont listés par scrutin). `votes.txt` code `X` un député en mandat ce jour-là mais absent de toutes les listes. Participation = (P+C+A) / (P+C+A+N+X) sur les scrutins où sa case n'est pas `-` ; `X` donne `position: null` dans `VoteDepute`.
+- **Limites à dire dans `/a-propos`** : les mises au point (corrections de vote après coup) ne sont pas appliquées (18 % des scrutins) ; 66 % des scrutins n'ont pas de dossier législatif, dont 154 des 235 votes finaux (ils s'ouvrent sur `/scrutins/:numero`, pas sur une page de loi) ; une « lecture » peut être « texte de la commission mixte paritaire » ; la fiche d'un député montre son groupe actuel, les scrutins le groupe du jour du vote ; la participation n'est pas la présence en séance.
+
 ### Pipeline : `scripts/donnees/`
 
 - Téléchargement (ETag, échec si statut ≠ 200), dézippage en mémoire avec `fflate` (dépendance de dev), parsing, réduction, écriture dans `data/`.
