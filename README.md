@@ -43,8 +43,8 @@ Le site se déploie sur Vercel avec `vercel.json` (fonction `api/index.mjs` qui 
 
 1. **Créer le projet Vercel** relié au dépôt Git (aucune configuration de framework : `vercel.json` la fixe).
 2. **Ajouter les variables facultatives** dans les réglages du projet, si la mesure d'audience est voulue : `UMAMI_WEBSITE_ID` (et `UMAMI_SRC` si Umami n'est pas hébergé chez Umami Cloud). Ajouter les `RID_*` une fois confirmés.
-3. **Ajouter le domaine** `quiavotequi.phamelin.fr` au projet dans les réglages « Domains ».
-4. **Créer le CNAME** chez le registraire de `phamelin.fr` : `quiavotequi` → `cname.vercel-dns.com`.
+3. **Ajouter le domaine** `quiavotequoi.phamelin.fr` au projet dans les réglages « Domains ».
+4. **Créer le CNAME** chez le registraire de `phamelin.fr` : `quiavotequoi` → `cname.vercel-dns.com`.
 
 Le préréglage « Angular » de Vercel n'a pas pu être vérifié dans sa documentation depuis l'environnement de développement : le projet passe donc par la fonction explicite de `api/index.mjs`.
 
