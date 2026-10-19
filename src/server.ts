@@ -15,7 +15,7 @@ import { genererRobots, genererSitemap } from './server/seo';
 import { injecterUmami, scriptUmami, sourceUmami } from './server/umami';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
-const ADRESSE_DU_SITE = 'https://quiavotequi.phamelin.fr';
+const ADRESSE_DU_SITE = 'https://quiavotequoi.phamelin.fr';
 
 const umamiActif = scriptUmami(process.env) !== '';
 
