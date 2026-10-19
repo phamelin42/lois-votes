@@ -4,7 +4,7 @@ Branche : `lv/04-ui`, créée depuis `claude/bold-fermi-zihw5t` **après la fusi
 
 ## Contexte commun
 
-Tu travailles sur le dépôt `phamelin42/lois-votes`, le site « Qui a voté quoi ? » (`quiavotequi.phamelin.fr`) : quel parti a voté quoi pour chaque loi à l'Assemblée nationale (17ᵉ législature).
+Tu travailles sur le dépôt `phamelin42/lois-votes`, le site « Qui a voté quoi ? » (`quiavotequoi.phamelin.fr`) : quel parti a voté quoi pour chaque loi à l'Assemblée nationale (17ᵉ législature).
 
 Avant tout, lis :
 - `docs/PLAN.md` : décisions, architecture, constats sur les données ;
