@@ -21,6 +21,10 @@ export const URL_ACTEURS = `${RACINE}/amo/tous_acteurs_mandats_organes_xi_legisl
 /** En dessous, l'archive est tronquée ou n'est pas l'archive (page d'erreur) : on échoue. */
 export const TAILLE_MINIMALE = 1024 * 1024;
 
+/** Une archive est une donnée non fiable : on refuse une entrée ou un ensemble anormalement gros (bombe de décompression). */
+export const TAILLE_MAXIMALE_ENTREE = 20 * 1024 * 1024;
+export const TAILLE_MAXIMALE_TOTALE = 1024 * 1024 * 1024;
+
 /** Pauses entre deux tentatives (ms) quand le réseau coupe ou que le serveur répond 5xx. */
 export const PAUSES_PAR_DEFAUT = [2000, 4000, 8000, 16000];
 
@@ -153,14 +157,26 @@ function verifierTaille(url, taille) {
  * @param {Uint8Array} zip
  * @param {(nom: string) => boolean} accepte
  * @param {number} [tailleLot]
+ * @param {{ entree?: number, total?: number }} [limites] Tailles décompressées maximales (une entrée, l'ensemble).
  * @returns {Generator<[string, Uint8Array]>}
  */
-export function* entreesZip(zip, accepte, tailleLot = 400) {
+export function* entreesZip(zip, accepte, tailleLot = 400, limites = {}) {
+  const { entree: maxEntree = TAILLE_MAXIMALE_ENTREE, total: maxTotal = TAILLE_MAXIMALE_TOTALE } =
+    limites;
   const noms = [];
+  let total = 0;
   // Premier passage : le filtre voit chaque entrée du répertoire central, sans rien décompresser.
   unzipSync(zip, {
-    filter: ({ name }) => {
-      if (accepte(name)) noms.push(name);
+    filter: ({ name, originalSize }) => {
+      if (!accepte(name)) return false;
+      total += originalSize;
+      if (originalSize > maxEntree)
+        throw new Error(
+          `${name} : ${originalSize} octets décompressés, au plus ${maxEntree} attendus`,
+        );
+      if (total > maxTotal)
+        throw new Error(`archive trop volumineuse : plus de ${maxTotal} octets décompressés`);
+      noms.push(name);
       return false;
     },
   });

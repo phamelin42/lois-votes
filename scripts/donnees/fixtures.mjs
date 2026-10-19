@@ -11,7 +11,7 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { classerTous } from '../../src/shared/classer.ts';
+import { classerTous } from './classer.mjs';
 import { liste, lireActeur, lireOrgane, lireScrutin } from './lire.mjs';
 import { estOrgane, ouvrirArchives } from './telecharger.mjs';
 

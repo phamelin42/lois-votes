@@ -271,6 +271,24 @@ describe('entreesZip', () => {
     }
   });
 
+  it('refuse une entrée ou un ensemble décompressé anormalement gros', () => {
+    const gros = zipSync({
+      'json/a.json': new Uint8Array(1000),
+      'json/b.json': new Uint8Array(1000),
+    });
+    expect(() => [...entreesZip(gros, () => true, 400, { entree: 500 })]).toThrow(
+      /json\/a\.json : 1000 octets décompressés, au plus 500/,
+    );
+    expect(() => [...entreesZip(gros, () => true, 400, { total: 1500 })]).toThrow(
+      /archive trop volumineuse/,
+    );
+    expect([...entreesZip(gros, () => true, 400, { entree: 1000, total: 2000 })]).toHaveLength(2);
+    // les limites ne regardent que les entrées acceptées
+    expect([
+      ...entreesZip(gros, (nom) => nom.endsWith('a.json'), 400, { total: 1000 }),
+    ]).toHaveLength(1);
+  });
+
   it("ne renvoie rien quand aucune entrée n'est acceptée", () => {
     expect([...entreesZip(zip, () => false)]).toEqual([]);
   });

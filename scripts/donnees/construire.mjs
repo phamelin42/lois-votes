@@ -2,7 +2,7 @@
 // lecture ni écriture de fichier. Les garde-fous font échouer le build plutôt que de publier des données fausses.
 
 import { CARACTERES_GROUPE } from '../../src/server/donnees.types.ts';
-import { classerTous } from '../../src/shared/classer.ts';
+import { classerTous } from './classer.mjs';
 
 /** Seuils du plan : en dessous, l'archive est incomplète ou ce n'est pas la bonne. */
 export const SEUILS_OFFICIELS = { scrutins: 8000, deputes: 570 };
