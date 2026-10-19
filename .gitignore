@@ -6,6 +6,11 @@
 /out-tsc
 /bazel-out
 
+# Données officielles préparées par `npm run donnees` (scripts/donnees/) et leur cache de téléchargement
+/data
+/data.*
+/.cache
+
 # Node
 /node_modules
 npm-debug.log

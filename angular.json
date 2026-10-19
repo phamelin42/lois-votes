@@ -76,7 +76,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "tsconfig.spec.json",
-            "include": ["src/**/*.spec.ts"]
+            "include": ["src/**/*.spec.ts", "../scripts/**/*.spec.ts"]
           }
         }
       }
