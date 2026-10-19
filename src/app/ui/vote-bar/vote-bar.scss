@@ -31,14 +31,15 @@
   background: var(--yamabuki);
 }
 
-.app-vote-bar__segment--nonvotant {
-  background: var(--surface-sunken);
-  box-shadow: inset 0 0 0 var(--border-hair) var(--line-strong);
-}
-
 .app-vote-bar__chiffres {
   margin: 0;
   color: var(--ink-muted);
+}
+
+.app-vote-bar__absents {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 700;
 }
 
 .app-vote-bar--sm .app-vote-bar__barre {
@@ -46,6 +47,7 @@
 }
 
 /* Dans un tableau, les chiffres sont déjà dans les cellules. */
-.app-vote-bar--sm .app-vote-bar__chiffres {
+.app-vote-bar--sm .app-vote-bar__chiffres,
+.app-vote-bar--sm .app-vote-bar__absents {
   display: none;
 }

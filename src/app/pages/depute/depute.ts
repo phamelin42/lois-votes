@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, input, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FdAlert, FdBadge, FdBreadcrumb, FdButton, FdEmptyState, FdLink } from 'fuda';
-import type { DeputeDetail, VoteDepute } from '@contrat';
+import type { Compte, DeputeDetail, VoteDepute } from '@contrat';
 import { DeputeApi } from '../../data/depute-api';
 import { dateCourte, libelleAdoption, pourcent } from '../../data/format';
 import { AppLienVisible } from '../../data/lien-visible';
@@ -12,8 +12,11 @@ import { estIntrouvable, statutDePage } from '../../data/statut-de-page';
 import { AppDeputyPhoto } from '../../ui/deputy-photo/deputy-photo';
 import { AppGroupPill } from '../../ui/group-pill/group-pill';
 import { AppPosition } from '../../ui/position/position';
+import { AppVoteBar } from '../../ui/vote-bar/vote-bar';
 
-/** Profil d'un député : identité, trois chiffres clés, ses votes sur les dix dernières lois. */
+const nombreFr = new Intl.NumberFormat('fr-FR');
+
+/** Profil d'un député : identité, chiffres clés (participation, ses votes, abstention, loyauté), ses votes sur les dix dernières lois. */
 @Component({
   selector: 'app-depute-page',
   imports: [
@@ -22,6 +25,7 @@ import { AppPosition } from '../../ui/position/position';
     AppLienVisible,
     AppPosition,
     AppPrefetch,
+    AppVoteBar,
     FdAlert,
     FdBadge,
     FdBreadcrumb,
@@ -45,6 +49,28 @@ export class DeputePage {
   protected readonly depute = computed<DeputeDetail | undefined>(() => valeurDe(this.ressource));
   protected readonly erreur = computed(() => this.ressource.error() !== undefined);
   protected readonly introuvable = computed(() => estIntrouvable(this.ressource.error()));
+
+  /** Ses votes exprimés pour la barre « Ses votes » : pour, contre, abstention (les non-votes n'y entrent pas). */
+  protected readonly compteVotes = computed<Compte>(() => {
+    const { pour, contre, abstention } = this.depute()?.scrutins ?? {
+      pour: 0,
+      contre: 0,
+      abstention: 0,
+    };
+    return { pour, contre, abstention, nonvotant: 0 };
+  });
+
+  /** « A voté à 1 156 scrutins sur 5 235 en mandat, n'a pas voté à 4 079. » : formulation neutre. */
+  protected readonly detailParticipation = computed(() => {
+    const scrutins = this.depute()?.scrutins;
+    if (!scrutins || scrutins.enMandat === 0) return 'Aucun scrutin pendant son mandat.';
+    const votes = scrutins.pour + scrutins.contre + scrutins.abstention;
+    const nombre = (n: number) => nombreFr.format(n);
+    return (
+      `A voté à ${nombre(votes)} ${votes > 1 ? 'scrutins' : 'scrutin'} sur ` +
+      `${nombre(scrutins.enMandat)} en mandat, n'a pas voté à ${nombre(scrutins.nonVote)}.`
+    );
+  });
 
   protected readonly fil = computed(() => [
     { label: 'Députés', link: '/deputes' },

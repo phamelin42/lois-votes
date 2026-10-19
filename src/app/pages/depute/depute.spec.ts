@@ -55,7 +55,7 @@ describe('DeputePage', () => {
     ).toBe(true);
   });
 
-  it('montre les trois chiffres clés avec leur nom exact', async () => {
+  it('montre les chiffres clés avec leur nom exact', async () => {
     const { racine } = await afficher();
 
     expect(sansEspaces(tuile(racine, 'Participation aux scrutins')!.textContent)).toContain('91 %');
@@ -63,10 +63,71 @@ describe('DeputePage', () => {
     expect(sansEspaces(tuile(racine, 'Vote avec son groupe')!.textContent)).toContain('99 %');
   });
 
+  it("détaille la participation : a voté à n scrutins sur m en mandat, n'a pas voté à k", async () => {
+    const { racine } = await afficher();
+    const texte = sansEspaces(tuile(racine, 'Participation aux scrutins')!.textContent);
+
+    // 120 + 40 + 22 = 182 scrutins votés sur 200 en mandat ; 18 sans vote.
+    expect(texte).toContain("A voté à 182 scrutins sur 200 en mandat, n'a pas voté à 18.");
+  });
+
+  it('accorde « scrutin » au singulier et écrit les milliers à la française', async () => {
+    const un = await afficher(
+      deputeDetail({ scrutins: { enMandat: 3, pour: 1, contre: 0, abstention: 0, nonVote: 2 } }),
+    );
+    expect(sansEspaces(tuile(un.racine, 'Participation aux scrutins')!.textContent)).toContain(
+      "A voté à 1 scrutin sur 3 en mandat, n'a pas voté à 2.",
+    );
+  });
+
+  it('écrit les milliers à la française', async () => {
+    const { racine } = await afficher(
+      deputeDetail({
+        scrutins: { enMandat: 5235, pour: 800, contre: 300, abstention: 56, nonVote: 4079 },
+      }),
+    );
+
+    expect(
+      sansEspaces(tuile(racine, 'Participation aux scrutins')!.textContent).replace(/\s/g, ' '),
+    ).toContain("A voté à 1 156 scrutins sur 5 235 en mandat, n'a pas voté à 4 079.");
+  });
+
+  it('dit « aucun scrutin » sans scrutin en mandat, sans NaN', async () => {
+    const { racine } = await afficher(
+      deputeDetail({
+        taux: { participation: null, abstention: null, loyaute: null },
+        scrutins: { enMandat: 0, pour: 0, contre: 0, abstention: 0, nonVote: 0 },
+      }),
+    );
+
+    expect(sansEspaces(tuile(racine, 'Participation aux scrutins')!.textContent)).toContain(
+      'Aucun scrutin pendant son mandat.',
+    );
+    expect(sansEspaces(racine.textContent)).not.toMatch(/NaN|Infinity/);
+  });
+
+  it('montre la tuile « Ses votes » : petite barre et pourcentages de pour, contre et abstention', async () => {
+    const { racine } = await afficher();
+    const t = tuile(racine, 'Ses votes')!;
+
+    expect(t.querySelector('app-vote-bar')).not.toBeNull();
+    // 120 pour, 40 contre, 22 abstention sur 182 votes : 66 %, 22 %, 12 %.
+    expect(sansEspaces(t.textContent)).toMatch(
+      /66\s%\spour \(120\) · 22\s%\scontre \(40\) · 12\s%\sabst\. \(22\)/,
+    );
+    // Les non-votes ne sont pas des votes : pas de ligne « n'ont pas voté » dans cette tuile.
+    expect(sansEspaces(t.textContent)).not.toContain('pas voté');
+  });
+
   it("présente chaque chiffre comme calculé d'après les scrutins publics, avec son calcul", async () => {
     const { racine } = await afficher();
 
-    for (const nom of ['Participation aux scrutins', "Taux d'abstention", 'Vote avec son groupe']) {
+    for (const nom of [
+      'Participation aux scrutins',
+      'Ses votes',
+      "Taux d'abstention",
+      'Vote avec son groupe',
+    ]) {
       expect(sansEspaces(tuile(racine, nom)!.textContent)).toContain(
         "Calculé d'après les scrutins publics",
       );

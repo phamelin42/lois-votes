@@ -37,8 +37,8 @@
       <fd-badge [tone]="vote.adopte ? 'tokiwa' : 'enji'">{{
         libelleAdoption(vote.adopte)
       }}</fd-badge>
-      <app-vote-bar [compte]="vote.compte" taille="md" />
-      <app-group-table [groupes]="vote.groupes" />
+      <app-vote-bar [compte]="vote.compte" [enMandat]="vote.enMandat" taille="md" />
+      <app-group-table [groupes]="vote.groupes" [sansVotant]="vote.groupesSansVotant" />
 
       <div class="app-loi__nominatif">
         <!-- Sans hydrate : le rendu serveur montre le bouton, la liste (et sa requête) n'arrive qu'au clic. -->

@@ -1,7 +1,7 @@
 import { By, Title } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { AppPrefetch } from '../../data/prefetch';
-import { loiDetail, scrutin } from '../../testing/builders';
+import { LFI, loiDetail, scrutin } from '../../testing/builders';
 import { configurerPage, monter, sansEspaces, stabiliser } from '../../testing/page';
 import { LoiPage } from './loi';
 
@@ -46,6 +46,24 @@ describe('LoiPage', () => {
     expect(racine.querySelector('app-vote-bar')).not.toBeNull();
     expect(racine.querySelector('app-group-table table')).not.toBeNull();
     expect(racine.querySelector('time')).not.toBeNull();
+  });
+
+  it("écrit combien de députés en mandat n'ont pas voté sur le vote final", async () => {
+    const { racine } = await afficher();
+
+    expect(sansEspaces(racine.querySelector('app-vote-bar')!.textContent)).toContain(
+      "46 n'ont pas voté sur 577 en mandat",
+    );
+  });
+
+  it('nomme les groupes sans aucun votant du vote final', async () => {
+    const detail = loiDetail();
+    detail.voteFinal = { ...detail.voteFinal!, groupesSansVotant: [LFI] };
+    const { racine } = await afficher(detail);
+
+    expect(sansEspaces(racine.querySelector('app-group-table')!.textContent)).toContain(
+      'Groupes sans aucun votant sur ce scrutin : LFI-NFP.',
+    );
   });
 
   it("n'affiche aucun statut, que la source ne fournit pas", async () => {

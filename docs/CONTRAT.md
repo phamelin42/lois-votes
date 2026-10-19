@@ -142,5 +142,6 @@ export interface DeputeDetail {
 - Les montants sont des entiers et les taux des nombres entre 0 et 1 (l'application les formate en %, en `fr-FR`).
 - Pour un même scrutin, la somme des `compte` de tous les groupes égale le `compte` du scrutin. Un test le vérifie.
 - Le groupe d'un député sur un scrutin est son groupe **au jour du vote** (ventilation officielle). `DeputeDetail.groupe` et `DeputeIndex.groupe` sont son groupe **actuel**.
+- `enMandat ≥ pour + contre + abstention` pour chaque scrutin, et pour chaque député `scrutins.pour + scrutins.contre + scrutins.abstention + scrutins.nonVote = scrutins.enMandat`. L'interface dit « ont voté » et « n'ont pas voté », jamais « présents » ni « absents » (l'Assemblée ne publie pas la présence en séance). Un test le vérifie.
 - Les taux sont calculés par nous à partir des scrutins publics : l'interface le dit (« calculé d'après les scrutins publics »). Ce ne sont pas des chiffres de l'Assemblée.
 - Les textes affichés sont en français. Aucun champ ne contient de HTML.

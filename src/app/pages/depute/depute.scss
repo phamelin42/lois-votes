@@ -53,17 +53,11 @@
 
 .app-depute__tuiles {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, calc(var(--space-16) * 4)), 1fr));
   gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-@media (min-width: 40em) {
-  .app-depute__tuiles {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 .app-depute__tuile {
@@ -86,7 +80,8 @@
   margin: 0;
 }
 
-.app-depute__chiffre {
+.app-depute__chiffre,
+.app-depute__detail {
   color: var(--ink);
 }
 

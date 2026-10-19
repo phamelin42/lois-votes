@@ -1,6 +1,6 @@
 import { Title } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
-import { scrutinDetail } from '../../testing/builders';
+import { LFI, SOC, scrutinDetail } from '../../testing/builders';
 import { configurerPage, monter, sansEspaces, stabiliser } from '../../testing/page';
 import { ScrutinPage } from './scrutin';
 
@@ -24,6 +24,29 @@ describe('ScrutinPage', () => {
     expect(racine.querySelector('app-vote-bar')).not.toBeNull();
     expect(racine.querySelector('app-group-table table')).not.toBeNull();
     expect(racine.querySelector('time')).not.toBeNull();
+  });
+
+  it("écrit combien de députés en mandat n'ont pas voté", async () => {
+    const { racine } = await afficher();
+
+    // 577 en mandat, 531 votants : 46 n'ont pas voté.
+    expect(sansEspaces(racine.querySelector('app-vote-bar')!.textContent)).toContain(
+      "46 n'ont pas voté sur 577 en mandat",
+    );
+  });
+
+  it('nomme les groupes sans aucun votant sous le tableau', async () => {
+    const { racine } = await afficher(scrutinDetail({ groupesSansVotant: [LFI, SOC] }));
+
+    expect(sansEspaces(racine.querySelector('app-group-table')!.textContent)).toContain(
+      'Groupes sans aucun votant sur ce scrutin : LFI-NFP, SOC.',
+    );
+  });
+
+  it("n'écrit pas la note quand aucun groupe n'est sans votant", async () => {
+    const { racine } = await afficher();
+
+    expect(sansEspaces(racine.textContent)).not.toContain('Groupes sans aucun votant');
   });
 
   it('renvoie vers la loi quand elle est connue, et vers la page officielle', async () => {
