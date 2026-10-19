@@ -1,0 +1,7 @@
+// Fuda : tokens et fondations (le style de chaque composant est embarqué avec lui).
+@import 'fuda/styles/fuda.css';
+
+// Polices latines seulement (pas de japonais) : fonts.css de Fuda charge aussi le japonais.
+@import '@fontsource/dela-gothic-one/latin-400.css';
+@import '@fontsource/zen-maru-gothic/latin-500.css';
+@import '@fontsource/zen-maru-gothic/latin-700.css';

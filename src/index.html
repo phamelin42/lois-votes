@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Qui a voté quoi ?</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/media/zen-maru-gothic-latin-500-normal.woff2"
+      crossorigin
+    />
+    <script>
+      // Thème Nuit choisi par l'utilisateur : posé avant le rendu, pour éviter le flash du thème Jour.
+      try {
+        if (localStorage['fuda-theme'] === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch {
+        // Stockage indisponible (navigation privée, données bloquées) : on reste en Jour.
+      }
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

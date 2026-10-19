@@ -1,0 +1,9 @@
+/dist
+/.angular
+/coverage
+/out-tsc
+package-lock.json
+# Documents écrits en amont (plan, contrat, prompts) : pas de reformatage automatique
+/docs
+# Copie exacte du bloc TypeScript de docs/CONTRAT.md
+src/shared/contrat.ts
