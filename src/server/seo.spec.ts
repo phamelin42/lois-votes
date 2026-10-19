@@ -1,6 +1,6 @@
 import { genererRobots, genererSitemap } from './seo';
 
-const BASE = 'https://quiavotequi.phamelin.fr';
+const BASE = 'https://quiavotequoi.phamelin.fr';
 
 describe('robots.txt', () => {
   it('autorise tout et pointe vers le sitemap', () => {
@@ -8,7 +8,7 @@ describe('robots.txt', () => {
 
     expect(robots).toMatch(/^User-agent: \*$/m);
     expect(robots).toMatch(/^Allow: \/$/m);
-    expect(robots).toMatch(/^Sitemap: https:\/\/quiavotequi\.phamelin\.fr\/sitemap\.xml$/m);
+    expect(robots).toMatch(/^Sitemap: https:\/\/quiavotequoi\.phamelin\.fr\/sitemap\.xml$/m);
     expect(robots).not.toMatch(/Disallow: \/\s*$/m);
   });
 });
