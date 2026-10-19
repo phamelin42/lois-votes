@@ -252,6 +252,7 @@ describe('lireActeur', () => {
         debut: '2024-07-19',
         fin: null,
         organe: 'PO845401',
+        qualite: null,
         lieu: null,
       },
       {
@@ -261,9 +262,87 @@ describe('lireActeur', () => {
         debut: '2024-06-30',
         fin: null,
         organe: 'PO838901',
+        qualite: null,
         lieu: { departement: 'Nord', numDepartement: '59', numCirco: '19' },
       },
     ]);
+  });
+
+  it("lit la qualité d'un mandat, accordée au genre quand l'archive la donne", () => {
+    const bureau = {
+      ...mandatGp,
+      typeOrgane: 'BUREAU',
+      infosQualite: {
+        codeQualite: 'Vice-Président',
+        libQualite: "Vice-président de l'Assemblée nationale",
+        libQualiteSex: "Vice-présidente de l'Assemblée nationale",
+      },
+    };
+    const sansGenre = { ...bureau, infosQualite: { libQualite: 'Membre' } };
+    expect(lireActeur(brutActeur([bureau, sansGenre])).mandats.map((m) => m.qualite)).toEqual([
+      "Vice-présidente de l'Assemblée nationale",
+      'Membre',
+    ]);
+  });
+
+  it("lit l'état civil, la profession, l'adresse HATVP et les liens du député", () => {
+    const brut = brutActeur([mandatAssemblee]);
+    Object.assign(brut.acteur, {
+      etatCivil: {
+        ...brut.acteur.etatCivil,
+        infoNaissance: {
+          dateNais: '1973-04-13',
+          villeNais: 'Beauvais',
+          depNais: 'Oise',
+          paysNais: 'France',
+        },
+        dateDeces: { '@xsi:nil': 'true' },
+      },
+      profession: { libelleCourant: 'Conseiller en communication' },
+      uri_hatvp: 'https://www.hatvp.fr/pages_nominatives/chenu-sebastien',
+      adresses: {
+        adresse: [
+          { typeLibelle: 'Téléphone', valElec: '01.40.63.01.03' },
+          { typeLibelle: 'Mèl', valElec: 'Sebastien.Chenu@assemblee-nationale.fr' },
+          { typeLibelle: 'Twitter', valElec: '@sebchenu' },
+          { typeLibelle: 'Facebook', valElec: 'chenu.sebastien' },
+        ],
+      },
+    });
+    const acteur = lireActeur(brut);
+
+    expect(acteur).toMatchObject({
+      naissance: { date: '1973-04-13', lieu: 'Beauvais' },
+      deces: null,
+      profession: 'Conseiller en communication',
+      hatvp: 'https://www.hatvp.fr/pages_nominatives/chenu-sebastien',
+      liens: {
+        siteWeb: null,
+        x: 'https://x.com/sebchenu',
+        facebook: 'https://www.facebook.com/chenu.sebastien',
+      },
+    });
+    // Ni téléphone, ni e-mail, ni adresse postale : rien de personnel ne passe.
+    expect(JSON.stringify(acteur)).not.toMatch(/01\.40|assemblee-nationale\.fr|Mèl|Téléphone/);
+  });
+
+  it("n'invente rien quand l'acteur n'a ni état civil détaillé, ni profession, ni adresse", () => {
+    const acteur = lireActeur(brutActeur([]));
+
+    expect(acteur).toMatchObject({
+      naissance: null,
+      deces: null,
+      profession: null,
+      hatvp: null,
+      liens: { siteWeb: null, x: null, facebook: null },
+    });
+  });
+
+  it("lit la date de décès d'un député décédé", () => {
+    const brut = brutActeur([]);
+    Object.assign(brut.acteur.etatCivil, { dateDeces: '2025-07-07' });
+
+    expect(lireActeur(brut).deces).toBe('2025-07-07');
   });
 
   it('accepte un mandat unique (objet) et une absence de mandats', () => {

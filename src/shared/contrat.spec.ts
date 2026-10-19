@@ -42,6 +42,7 @@ describe('contrat BFF ↔ application', () => {
     'ScrutinDetail',
     'DeputeIndex',
     'DeputeListe',
+    'LiensDepute',
     'VoteDepute',
     'DeputeDetail',
   ])('exporte %s', (nom) => {

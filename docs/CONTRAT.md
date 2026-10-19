@@ -94,6 +94,7 @@ export interface ScrutinDetail extends ScrutinResume {
 
 export interface DeputeIndex {
   slug: string;
+  pa: string;           // numéro de l'acteur SANS le préfixe « PA » (7 caractères au plus) : photoDe(pa) donne l'URL de sa photo. Pas de champ photo : l'index reste petit
   nom: string;          // nom complet
   nomTri: string;       // nom de famille, pour le tri
   groupe: string | null; // abrégé
@@ -117,14 +118,34 @@ export interface VoteDepute {
   adopte: boolean;
 }
 
+/** Liens externes d'un député : un lien absent est null, jamais une adresse devinée. */
+export interface LiensDepute {
+  assemblee: string;        // fiche officielle : https://www.assemblee-nationale.fr/dyn/deputes/<PA>
+  hatvp: string | null;     // déclarations : page nominative de la HATVP (https://www.hatvp.fr/pages_nominatives/…), donnée officielle ; null pour les anciens députés
+  wikipedia: string | null; // article en français (https://fr.wikipedia.org/wiki/…), via Wikidata : source communautaire, non officielle
+  siteWeb: string | null;   // site personnel déclaré à l'Assemblée, seulement s'il est écrit en https:// valide
+  x: string | null;         // https://x.com/<compte>, seulement si le compte déclaré est un identifiant valide
+  facebook: string | null;  // https://www.facebook.com/<page>, seulement si la page déclarée est un identifiant valide
+}
+
 /** GET /api/deputes/:slug */
 export interface DeputeDetail {
   slug: string;
   nom: string;
-  photo: string | null; // photo officielle : https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/<numéro SANS le préfixe PA>.jpg (avec PA : 404)
-  groupe: Groupe | null;
+  photo: string | null; // photo officielle : photoDe(pa) = https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/<numéro SANS le préfixe PA>.jpg (avec PA : 404)
+  groupe: Groupe | null; // groupe actuel (le dernier connu pour un ancien député)
   circonscription: string | null;
-  urlFiche: string;   // fiche officielle : https://www.assemblee-nationale.fr/dyn/deputes/<PA>
+  naissance: { date: string; age: number; lieu: string | null } | null; // date ISO ; age calculé à la requête (date du jour à Paris), à son décès si deces n'est pas null ; lieu : « Beauvais », « Alger (Algérie) »
+  deces: string | null; // date ISO du décès
+  profession: string | null; // libellé déclaré à l'Assemblée, sans le préfixe de code INSEE
+  /** Mandat de député (17ᵉ législature) en cours, sinon le dernier : fin est null tant qu'il est en cours. legislatures : toutes celles où il ou elle a été député, de la plus ancienne à la plus récente. */
+  mandat: { depuis: string; fin: string | null; legislatures: number[] } | null;
+  /** Ses groupes dans la 17ᵉ législature, du plus ancien au plus récent (fin null : groupe actuel). Les périodes contiguës d'un même groupe sont fusionnées. */
+  groupes: { groupe: Groupe; debut: string; fin: string | null }[];
+  /** Fonctions en cours à l'Assemblée (bureau, commission permanente), pour un député en mandat : { organe: « Commission des affaires étrangères », qualite: « Membre », depuis }. */
+  fonctions: { organe: string; qualite: string; depuis: string }[];
+  partiRattachement: string | null; // parti de rattachement en cours (financement des partis), tel que déclaré à l'Assemblée
+  liens: LiensDepute;
   taux: {
     participation: number | null; // 0..1, calculé : votes exprimés / scrutins où le député était membre (« participation aux scrutins publics »)
     abstention: number | null;    // 0..1, calculé : abstentions / votes exprimés
@@ -145,3 +166,5 @@ export interface DeputeDetail {
 - `enMandat ≥ pour + contre + abstention` pour chaque scrutin, et pour chaque député `scrutins.pour + scrutins.contre + scrutins.abstention + scrutins.nonVote = scrutins.enMandat`. L'interface dit « ont voté » et « n'ont pas voté », jamais « présents » ni « absents » (l'Assemblée ne publie pas la présence en séance). Un test le vérifie.
 - Les taux sont calculés par nous à partir des scrutins publics : l'interface le dit (« calculé d'après les scrutins publics »). Ce ne sont pas des chiffres de l'Assemblée.
 - Les textes affichés sont en français. Aucun champ ne contient de HTML.
+- **Rien de personnel** : l'API ne publie ni téléphone, ni e-mail, ni adresse postale, même s'ils sont dans l'archive. Un lien externe n'est présent que si l'extraction est fiable ; sinon il est `null` et l'interface ne l'affiche pas.
+- **Sources** : tout vient de l'Assemblée nationale (état civil, profession, mandats, groupes, fonctions, parti de rattachement, adresse de la page HATVP) sauf `liens.wikipedia`, qui vient de Wikidata (communautaire, non officielle) ; l'interface le dit. L'âge est calculé à la requête, jamais à la préparation des données.

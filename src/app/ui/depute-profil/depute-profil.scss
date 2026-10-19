@@ -1,0 +1,49 @@
+.app-depute-profil {
+  display: block;
+}
+
+.app-depute-profil__liste {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  border: var(--border-hair) solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.app-depute-profil__ligne {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-hair) solid var(--line);
+}
+
+.app-depute-profil__ligne:last-child {
+  border-bottom: 0;
+}
+
+.app-depute-profil__ligne dt {
+  color: var(--ink-muted);
+  font-weight: 700;
+}
+
+.app-depute-profil__ligne dd {
+  margin: 0;
+  color: var(--ink);
+}
+
+.app-depute-profil__sous-liste {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40em) {
+  .app-depute-profil__ligne {
+    grid-template-columns: calc(var(--space-16) * 3) minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+}

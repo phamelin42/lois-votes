@@ -1,4 +1,4 @@
-import { By, Title } from '@angular/platform-browser';
+import { By, Meta, Title } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { AppPrefetch } from '../../data/prefetch';
 import { deputeDetail } from '../../testing/builders';
@@ -53,6 +53,101 @@ describe('DeputePage', () => {
         (a) => a.getAttribute('href') === 'https://www.assemblee-nationale.fr/dyn/deputes/PA1001',
       ),
     ).toBe(true);
+  });
+
+  describe('informations et liens externes', () => {
+    const libellesDesLiens = (racine: HTMLElement) =>
+      Array.from(racine.querySelectorAll('app-depute-liens a')).map((a) =>
+        sansEspaces(a.textContent!).replace(' (nouvel onglet)', ''),
+      );
+
+    it('montre le bloc d’informations : naissance avec âge, profession, groupes, fonctions et parti', async () => {
+      const { racine } = await afficher();
+      const bloc = racine.querySelector('app-depute-profil')!;
+      const texte = sansEspaces(bloc.textContent);
+
+      expect(racine.querySelector('h2#infos')!.textContent).toContain('Informations');
+      expect(texte).toContain('13 avril 1973 (52 ans), à Beauvais');
+      expect(texte).toContain('Conseillère en communication');
+      expect(texte).toContain('Rhône (7)');
+      expect(texte).toContain('Non inscrits (NI), du 1 juillet 2024 au 18 juillet 2024');
+      expect(texte).toContain("Vice-présidente de l'Assemblée nationale");
+      expect(texte).toContain('Rassemblement national');
+    });
+
+    it('affiche la rangée de liens : Assemblée, HATVP, Wikipédia, site, X et Facebook', async () => {
+      const { racine } = await afficher();
+
+      expect(libellesDesLiens(racine)).toEqual([
+        "Fiche à l'Assemblée",
+        'Déclarations HATVP',
+        'Page Wikipédia',
+        'Site web',
+        'Compte X',
+        'Page Facebook',
+      ]);
+    });
+
+    it("n'affiche pas un lien absent (aucune adresse devinée)", async () => {
+      const liens = {
+        ...deputeDetail().liens,
+        hatvp: null,
+        wikipedia: null,
+        siteWeb: null,
+        x: null,
+        facebook: null,
+      };
+      const { racine } = await afficher(deputeDetail({ liens }));
+
+      expect(libellesDesLiens(racine)).toEqual(["Fiche à l'Assemblée"]);
+      expect(racine.querySelectorAll('a[href*="hatvp"], a[href*="wikipedia"]')).toHaveLength(0);
+    });
+
+    it('ouvre les liens externes dans un nouvel onglet, avec rel="noopener noreferrer"', async () => {
+      const { racine } = await afficher();
+      const externes = Array.from(racine.querySelectorAll<HTMLAnchorElement>('app-depute-liens a'));
+
+      expect(externes).toHaveLength(6);
+      for (const lien of externes) {
+        expect(lien.getAttribute('target')).toBe('_blank');
+        expect(lien.getAttribute('rel')).toBe('noopener noreferrer');
+      }
+    });
+
+    it('dit que le lien Wikipédia vient de Wikidata, source communautaire non officielle', async () => {
+      const { racine } = await afficher();
+
+      expect(sansEspaces(racine.textContent)).toMatch(
+        /Wikidata, une source communautaire et non officielle/,
+      );
+    });
+
+    it("ne parle pas de Wikidata quand il n'y a pas de lien Wikipédia", async () => {
+      const { racine } = await afficher(
+        deputeDetail({ liens: { ...deputeDetail().liens, wikipedia: null } }),
+      );
+
+      expect(sansEspaces(racine.textContent)).not.toMatch(/Wikidata/);
+    });
+
+    it('garde un titre et une description propres : ni âge, ni lieu de naissance, ni liens', async () => {
+      await afficher();
+
+      expect(TestBed.inject(Title).getTitle()).toBe('Alice Durand · Qui a voté quoi ?');
+      const description = TestBed.inject(Meta).getTag('name="description"')!.content;
+      expect(description).toBe(
+        'Participation aux scrutins, abstentions et votes de Alice Durand (Rassemblement National).',
+      );
+      expect(description).not.toMatch(/ans|Beauvais|1973|http/);
+    });
+
+    it("n'affiche pas d'âge ni de lieu quand la naissance est inconnue", async () => {
+      const { racine } = await afficher(deputeDetail({ naissance: null }));
+
+      expect(sansEspaces(racine.querySelector('app-depute-profil')!.textContent)).not.toContain(
+        'Naissance',
+      );
+    });
   });
 
   it('montre les chiffres clés avec leur nom exact', async () => {

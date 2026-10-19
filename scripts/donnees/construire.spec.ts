@@ -82,11 +82,23 @@ const mandatAn = (debut: string, fin: string | null = null, lieu: object | null 
   organe: 'PO838901',
   lieu,
 });
-const acteur = (pa: string, prenom: string, nom: string, mandats: unknown[]) => ({
+const acteur = (
+  pa: string,
+  prenom: string,
+  nom: string,
+  mandats: unknown[],
+  plus: Record<string, unknown> = {},
+) => ({
   pa,
   prenom,
   nom,
+  naissance: null,
+  deces: null,
+  profession: null,
+  hatvp: null,
+  liens: { siteWeb: null, x: null, facebook: null },
   mandats,
+  ...plus,
 });
 
 const compter = (votants: Votants) => ({
@@ -253,7 +265,20 @@ describe('construire : groupes', () => {
 describe('construire : députés', () => {
   it("liste les votants par numéro d'acteur, avec nom, groupe actuel, circonscription et statut", () => {
     const { donnees } = construire(base());
-    expect(donnees.deputes).toEqual([
+    expect(
+      donnees.deputes.map(
+        ({ pa, slug, nom, nomTri, groupe, departement, circonscription, actif }) => ({
+          pa,
+          slug,
+          nom,
+          nomTri,
+          groupe,
+          departement,
+          circonscription,
+          actif,
+        }),
+      ),
+    ).toEqual([
       {
         pa: 'PA1',
         slug: 'ana-martin',
@@ -589,6 +614,8 @@ describe('construire : garde-fous', () => {
   });
 });
 
+const VIDE = { wikipedia: 0, hatvp: 0, profession: 0, naissance: 0, siteWeb: 0, x: 0, facebook: 0 };
+
 describe('construire : meta et fichiers', () => {
   it('écrit les six fichiers, en JSON compact', () => {
     const { fichiers } = construire(base());
@@ -611,6 +638,18 @@ describe('construire : meta et fichiers', () => {
       scrutins: 3,
       deputes: 4,
       groupes: 4,
+      // Le groupe SOC, où Bob a siégé, n'apparaît dans aucun scrutin du jeu : il n'a pas d'index.
+      autresGroupes: [
+        {
+          id: 'PO2',
+          abrege: 'SOC',
+          libelle: 'Groupe SOC',
+          couleur: '#123456',
+          debut: '2024-07-18',
+          fin: null,
+        },
+      ],
+      avertissements: [],
       sources: SOURCES,
       statistiques: {
         adoptes: 2,
@@ -619,6 +658,10 @@ describe('construire : meta et fichiers', () => {
         misesAuPoint: 0,
         groupesRattaches: 0,
         nonVotantsCorriges: [],
+        couverture: {
+          actifs: { ...VIDE, deputes: 3 },
+          tous: { ...VIDE, deputes: 4 },
+        },
       },
     });
   });

@@ -157,6 +157,7 @@ export function scrutinDetail(surcharge: Partial<ScrutinDetail> = {}): ScrutinDe
 export function deputeListe(): DeputeListe {
   const d = (
     slug: string,
+    pa: string,
     nom: string,
     nomTri: string,
     groupe: string | null,
@@ -164,6 +165,7 @@ export function deputeListe(): DeputeListe {
     circonscription: string,
   ) => ({
     slug,
+    pa,
     nom,
     nomTri,
     groupe,
@@ -172,11 +174,11 @@ export function deputeListe(): DeputeListe {
   });
   return {
     deputes: [
-      d('alice-durand', 'Alice Durand', 'Durand', 'RN', '69', 'Rhône (7)'),
-      d('bruno-martin', 'Bruno Martin', 'Martin', 'RN', '13', 'Bouches-du-Rhône (3)'),
-      d('elodie-roux', 'Élodie Roux', 'Roux', 'LFI-NFP', '75', 'Paris (11)'),
-      d('emilie-laurent', 'Émilie Laurent', 'Laurent', 'SOC', '69', 'Rhône (2)'),
-      d('julie-fournier', 'Julie Fournier', 'Fournier', null, '69', 'Rhône (1)'),
+      d('alice-durand', '1001', 'Alice Durand', 'Durand', 'RN', '69', 'Rhône (7)'),
+      d('bruno-martin', '1002', 'Bruno Martin', 'Martin', 'RN', '13', 'Bouches-du-Rhône (3)'),
+      d('elodie-roux', '1003', 'Élodie Roux', 'Roux', 'LFI-NFP', '75', 'Paris (11)'),
+      d('emilie-laurent', '1004', 'Émilie Laurent', 'Laurent', 'SOC', '69', 'Rhône (2)'),
+      d('julie-fournier', '1005', 'Julie Fournier', 'Fournier', null, '69', 'Rhône (1)'),
     ],
     groupes: [RN, SOC, LFI, NI],
     loisRecentes: [
@@ -201,7 +203,31 @@ export function deputeDetail(surcharge: Partial<DeputeDetail> = {}): DeputeDetai
     photo: 'https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/1001.jpg',
     groupe: RN,
     circonscription: 'Rhône (7)',
-    urlFiche: 'https://www.assemblee-nationale.fr/dyn/deputes/PA1001',
+    naissance: { date: '1973-04-13', age: 52, lieu: 'Beauvais' },
+    deces: null,
+    profession: 'Conseillère en communication',
+    mandat: { depuis: '2024-06-30', fin: null, legislatures: [16, 17] },
+    groupes: [
+      { groupe: NI, debut: '2024-07-01', fin: '2024-07-18' },
+      { groupe: RN, debut: '2024-07-19', fin: null },
+    ],
+    fonctions: [
+      {
+        organe: "Bureau de l'Assemblée nationale",
+        qualite: "Vice-présidente de l'Assemblée nationale",
+        depuis: '2025-10-01',
+      },
+      { organe: 'Commission des affaires étrangères', qualite: 'Membre', depuis: '2024-07-20' },
+    ],
+    partiRattachement: 'Rassemblement national',
+    liens: {
+      assemblee: 'https://www.assemblee-nationale.fr/dyn/deputes/PA1001',
+      hatvp: 'https://www.hatvp.fr/pages_nominatives/durand-alice',
+      wikipedia: 'https://fr.wikipedia.org/wiki/Alice_Durand',
+      siteWeb: 'https://www.alice-durand.fr/',
+      x: 'https://x.com/aliceDurand',
+      facebook: 'https://www.facebook.com/alice.durand',
+    },
     taux: { participation: 0.91, abstention: 0.12, loyaute: 0.99 },
     scrutins: { enMandat: 200, pour: 120, contre: 40, abstention: 22, nonVote: 18 },
     dernieresLois: [

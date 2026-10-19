@@ -16,6 +16,57 @@ async function afficher(entrees: Record<string, unknown> = {}, liste = deputeLis
 }
 
 describe('DeputesPage', () => {
+  describe('photos', () => {
+    it('affiche la photo officielle de chaque député dans sa carte, avec son nom en alternative textuelle', async () => {
+      const { racine } = await afficher();
+      const images = Array.from(racine.querySelectorAll<HTMLImageElement>('.app-depute-carte img'));
+
+      expect(images).toHaveLength(5);
+      const alice = images.find((i) => i.getAttribute('alt') === 'Alice Durand')!;
+      expect(alice.getAttribute('src')).toBe(
+        'https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/1001.jpg',
+      );
+      for (const image of images) {
+        expect(image.getAttribute('alt')).not.toBe('');
+        expect(image.getAttribute('src')).toMatch(/\/photos\/carre\/\d+\.jpg$/);
+        expect(image.getAttribute('src')).not.toContain('/PA');
+      }
+    });
+
+    it('donne à chaque image ses dimensions (64 px) pour éviter tout décalage, et la charge sans bloquer', async () => {
+      const { racine } = await afficher();
+
+      for (const image of Array.from(racine.querySelectorAll('.app-depute-carte img'))) {
+        expect(image.getAttribute('width')).toBe('64');
+        expect(image.getAttribute('height')).toBe('64');
+        expect(image.getAttribute('loading')).toBe('lazy');
+        expect(image.getAttribute('decoding')).toBe('async');
+        expect(image.getAttribute('fetchpriority')).not.toBe('high');
+      }
+    });
+
+    it("se replie sur les initiales quand l'image échoue, dans la même carte", async () => {
+      const { racine, fixture } = await afficher();
+      const carte = racine.querySelector('.app-depute-carte')!;
+
+      carte.querySelector('img')!.dispatchEvent(new Event('error'));
+      await stabiliser(fixture);
+
+      expect(carte.querySelector('img')).toBeNull();
+      expect(carte.querySelector('fd-avatar')).not.toBeNull();
+      expect(carte.querySelector('.app-depute-carte__nom')).not.toBeNull();
+    });
+
+    it("garde un seul lien par carte : l'image est dans le lien, pas un second lien", async () => {
+      const { racine } = await afficher();
+
+      for (const carte of Array.from(racine.querySelectorAll('.app-depute-carte'))) {
+        expect(carte.querySelectorAll('a')).toHaveLength(1);
+        expect(carte.querySelector('a img')).not.toBeNull();
+      }
+    });
+  });
+
   it('liste les députés triés par nom de famille', async () => {
     const { noms, racine } = await afficher();
 
@@ -39,6 +90,7 @@ describe('DeputesPage', () => {
     const liste = deputeListe();
     liste.deputes.push({
       slug: 'eric-ciotti',
+      pa: '1100',
       nom: 'Éric Ciotti',
       nomTri: 'Ciotti',
       groupe: 'UDR',
@@ -116,6 +168,7 @@ describe('DeputesPage', () => {
     const liste = deputeListe();
     liste.deputes = Array.from({ length: 70 }, (_, i) => ({
       slug: `depute-${String(i).padStart(2, '0')}`,
+      pa: String(2000 + i),
       nom: `Député ${String(i).padStart(2, '0')}`,
       nomTri: `Député ${String(i).padStart(2, '0')}`,
       groupe: 'RN',

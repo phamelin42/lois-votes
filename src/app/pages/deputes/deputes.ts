@@ -10,6 +10,7 @@ import {
   FdTextField,
 } from 'fuda';
 import type { DeputeIndex, Groupe } from '@contrat';
+import { photoDe } from '../../../shared/photo';
 import { DeputeApi } from '../../data/depute-api';
 import { normaliser } from '../../data/format';
 import { AppLienVisible } from '../../data/lien-visible';
@@ -103,6 +104,8 @@ export class DeputesPage {
   });
 
   protected readonly visibles = computed(() => this.cartes().slice(0, this.limite()));
+
+  protected readonly photoDe = photoDe;
 
   protected readonly optionsGroupes = computed<FdSelectOption[]>(() => [
     { value: '', label: 'Tous les groupes' },

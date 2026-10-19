@@ -9,6 +9,7 @@ import { construire, SEUILS_OFFICIELS } from './construire.mjs';
 import { ecrireAtomique } from './ecrire.mjs';
 import { lireActeur, lireOrgane, lireScrutin } from './lire.mjs';
 import { estOrgane, ouvrirArchives } from './telecharger.mjs';
+import { chargerWikipedia } from './wikipedia.mjs';
 
 const texte = new TextDecoder();
 const json = (octets) => JSON.parse(texte.decode(octets));
@@ -24,6 +25,7 @@ const mo = (octets) => `${(octets / 1024 / 1024).toFixed(0)} Mo`;
  * @param {string} [options.fixtures]
  * @param {(message: string) => void} [options.journal]
  * @param {typeof fetch} [options.fetch]
+ * @param {number[]} [options.pausesWikidata] Pauses entre deux essais de Wikidata (ms).
  * @param {Date} [options.maintenant]
  */
 export async function executer({
@@ -33,6 +35,7 @@ export async function executer({
   fixtures = join('src', 'server', 'fixtures', 'officiel'),
   journal = console.log,
   fetch: requete,
+  pausesWikidata,
   maintenant = new Date(),
 } = {}) {
   const depuis = env['DONNEES_DEPUIS'] || 'officiel';
@@ -47,6 +50,15 @@ export async function executer({
     journal: (m) => journal(`[donnees] ${m}`),
   });
   journal(`[donnees] archives prêtes en ${secondes(debut)}`);
+
+  // Les liens Wikipédia (Wikidata, source facultative) se cherchent pendant la lecture des archives.
+  const wikipedia = chargerWikipedia({
+    depuis,
+    fixtures,
+    fetch: requete,
+    pauses: pausesWikidata,
+    journal: (m) => journal(`[donnees] ${m}`),
+  });
 
   const lecture = performance.now();
   const scrutins = [];
@@ -71,6 +83,8 @@ export async function executer({
     `[donnees] lu : ${scrutins.length} scrutins, ${acteurs.length} acteurs, ${organes.length} organes en ${secondes(lecture)}`,
   );
 
+  const { liens: liensWikipedia, avertissements } = await wikipedia;
+
   // Le mini-jeu de fixtures est petit par construction : les seuils du plan ne s'y appliquent pas.
   const seuils = depuis === 'fixtures' ? { scrutins: 1, deputes: 1 } : SEUILS_OFFICIELS;
   const reduction = performance.now();
@@ -79,6 +93,8 @@ export async function executer({
     acteurs,
     organes,
     sources: archives.sources,
+    wikipedia: liensWikipedia,
+    avertissements,
     maintenant,
     seuils,
   });
@@ -95,6 +111,16 @@ export async function executer({
         ? `, non-votants corrigés : scrutin(s) ${stat.nonVotantsCorriges.join(', ')}`
         : ''),
   );
+  for (const [qui, c] of Object.entries(stat.couverture)) {
+    const part = (n) => `${n} (${c.deputes ? Math.round((n * 100) / c.deputes) : 0} %)`;
+    journal(
+      `[donnees] couverture, ${qui === 'actifs' ? 'députés en mandat' : 'tous les députés'} (${c.deputes}) : ` +
+        `Wikipédia ${part(c.wikipedia)}, HATVP ${part(c.hatvp)}, profession ${part(c.profession)}, ` +
+        `naissance ${part(c.naissance)}, site ${part(c.siteWeb)}, X ${part(c.x)}, Facebook ${part(c.facebook)}`,
+    );
+  }
+  if (meta.avertissements.length)
+    journal(`[donnees] avertissements : ${meta.avertissements.join(', ')}`);
   journal(
     `[donnees] terminé en ${secondes(debut)} (mémoire maximale ${mo(process.resourceUsage().maxRSS * 1024)})`,
   );

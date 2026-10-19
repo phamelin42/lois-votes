@@ -1,4 +1,8 @@
 import {
+  aLieu,
+  ans,
+  ordinalLegislature,
+  periode,
   dateCourte,
   dateLongue,
   libellePosition,
@@ -104,5 +108,36 @@ describe('libellePosition', () => {
     expect(libellePosition('abstention')).toBe('Abstention');
     expect(libellePosition('nonvotant')).toBe('Non-votant');
     expect(libellePosition('partage')).toBe('Partagé');
+  });
+});
+
+describe('aLieu', () => {
+  it("écrit « à » devant un nom de ville et contracte l'article défini", () => {
+    expect(aLieu('Beauvais')).toBe('à Beauvais');
+    expect(aLieu('Alger (Algérie)')).toBe('à Alger (Algérie)');
+    expect(aLieu('La Rochelle')).toBe('à La Rochelle');
+    expect(aLieu('Le Havre')).toBe('au Havre');
+    expect(aLieu('Les Lilas')).toBe('aux Lilas');
+  });
+});
+
+describe('ans', () => {
+  it('accorde l’unité', () => {
+    expect(ans(52)).toBe('52 ans');
+    expect(ans(1)).toBe('1 an');
+  });
+});
+
+describe('ordinalLegislature', () => {
+  it('écrit la législature en ordinal', () => {
+    expect(ordinalLegislature(17)).toBe('17ᵉ');
+    expect(ordinalLegislature(1)).toBe('1ʳᵉ');
+  });
+});
+
+describe('periode', () => {
+  it('écrit « depuis le … » quand la fin manque, « du … au … » sinon', () => {
+    expect(periode('2024-07-19', null)).toBe('depuis le 19 juillet 2024');
+    expect(periode('2024-07-01', '2024-07-18')).toBe('du 1 juillet 2024 au 18 juillet 2024');
   });
 });

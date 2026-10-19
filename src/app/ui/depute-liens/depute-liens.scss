@@ -1,0 +1,25 @@
+@use '../shared/sr-only' as sr;
+
+.app-depute-liens {
+  display: block;
+}
+
+.app-depute-liens__liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cible de 44 px au moins, même pour un lien d'une ligne. */
+.app-depute-liens__liste a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--space-12);
+}
+
+.app-depute-liens__onglet {
+  @include sr.sr-only;
+}

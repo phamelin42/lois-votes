@@ -3,6 +3,7 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:f
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ErreurDonnees, chargerDonnees, decrireChargement, dossierDonnees } from './donnees';
+import type { DeputeFichier } from './donnees.types';
 import { GENERE_LE, produireDonneesDeTest, type DonneesDeTest } from './testing/donnees';
 
 describe('donnees.ts', () => {
@@ -188,6 +189,98 @@ describe('donnees.ts', () => {
       modifier('deputes.json', (c) => c.replace('"groupe":"PO845419"', '"groupe":"PO0"'));
 
       expect(() => chargerDonnees(copie)).toThrow(/deputes\.json : groupe de /);
+    });
+
+    describe('fiche des députés', () => {
+      /** Altère le premier député du fichier (celui de PA1008) avec `f`, puis charge. */
+      const altererDepute = (f: (d: DeputeFichier) => void) => {
+        modifier('deputes.json', (c) => {
+          const deputes = JSON.parse(c) as DeputeFichier[];
+          f(deputes[0]);
+          return JSON.stringify(deputes);
+        });
+        return () => chargerDonnees(copie);
+      };
+
+      it('accepte les données telles que produites', () => {
+        expect(() => chargerDonnees(copie)).not.toThrow();
+      });
+
+      it("refuse un lien qui n'est pas en https sur le site attendu", () => {
+        expect(
+          altererDepute((d) => (d.liens.hatvp = 'http://www.hatvp.fr/pages_nominatives/x')),
+        ).toThrow(/lien hatvp/);
+      });
+
+      it('refuse un lien Wikipédia hors de fr.wikipedia.org', () => {
+        expect(
+          altererDepute((d) => (d.liens.wikipedia = 'https://en.wikipedia.org/wiki/X')),
+        ).toThrow(/lien wikipedia/);
+      });
+
+      it('refuse un lien qui contient une espace', () => {
+        expect(altererDepute((d) => (d.liens.siteWeb = 'https://exemple.fr/a b'))).toThrow(
+          /lien siteWeb/,
+        );
+      });
+
+      it('refuse une fiche sans liens', () => {
+        expect(altererDepute((d) => Reflect.deleteProperty(d, 'liens'))).toThrow(
+          /deputes\.json : .* : liens/,
+        );
+      });
+
+      it('refuse une date de naissance impossible', () => {
+        expect(altererDepute((d) => (d.naissance = { date: '2025-02-30', lieu: null }))).toThrow(
+          /naissance/,
+        );
+      });
+
+      it('refuse une date de décès mal écrite', () => {
+        expect(altererDepute((d) => (d.deces = '13/04/1973'))).toThrow(/décès/);
+      });
+
+      it('refuse un mandat dont les législatures ne sont pas des nombres', () => {
+        expect(
+          altererDepute(
+            (d) => (d.mandat = { depuis: '2024-06-30', fin: null, legislatures: ['17'] as never }),
+          ),
+        ).toThrow(/ : mandat/);
+      });
+
+      it("refuse une période de groupe d'un groupe inconnu", () => {
+        expect(
+          altererDepute((d) => d.groupes.push({ id: 'PO0', debut: '2024-07-01', fin: null })),
+        ).toThrow(/période de groupe/);
+      });
+
+      it('accepte une période dans un groupe de meta.autresGroupes (AD)', () => {
+        expect(
+          altererDepute((d) => d.groupes.push({ id: 'PO845520', debut: '2024-07-01', fin: null })),
+        ).not.toThrow();
+      });
+
+      it('refuse une fonction incomplète', () => {
+        expect(
+          altererDepute((d) =>
+            d.fonctions.push({ organe: 'X', qualite: '', depuis: '2024-07-01' }),
+          ),
+        ).toThrow(/fonction/);
+      });
+
+      it('refuse une fiche sans historique de groupes', () => {
+        expect(altererDepute((d) => Reflect.deleteProperty(d, 'groupes'))).toThrow(/groupes/);
+      });
+
+      it('refuse un numéro de PA de plus de sept chiffres', () => {
+        expect(altererDepute((d) => (d.pa = 'PA12345678'))).toThrow(/numéro d'acteur/);
+      });
+
+      it('refuse un meta.json sans avertissements ni autres groupes', () => {
+        modifier('meta.json', (c) => c.replace('"avertissements":[]', '"avertissements":"non"'));
+
+        expect(() => chargerDonnees(copie)).toThrow(/meta\.json : autresGroupes et avertissements/);
+      });
     });
   });
 

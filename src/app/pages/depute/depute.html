@@ -33,12 +33,20 @@
           <app-group-pill [groupe]="groupe" />
         </p>
       }
-      @if (depute.circonscription; as circonscription) {
-        <p class="caption">Circonscription : {{ circonscription }}</p>
-      }
-      <a fdLink [href]="depute.urlFiche">Fiche officielle sur le site de l'Assemblée</a>
+      <app-depute-liens [liens]="depute.liens" />
     </div>
   </header>
+
+  <section class="app-depute__section" aria-labelledby="infos">
+    <h2 id="infos" class="title-2">Informations</h2>
+    <app-depute-profil [depute]="depute" />
+    <p class="caption">
+      Informations déclarées à l'Assemblée nationale ; l'âge est calculé par le site.
+      @if (depute.liens.wikipedia) {
+        Le lien Wikipédia vient de Wikidata, une source communautaire et non officielle.
+      }
+    </p>
+  </section>
 
   <section class="app-depute__section" aria-labelledby="chiffres">
     <h2 id="chiffres" class="title-2">Chiffres clés</h2>

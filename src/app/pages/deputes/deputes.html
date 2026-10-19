@@ -46,7 +46,7 @@
             [routerLink]="['/deputes', carte.depute.slug]"
             [appPrefetch]="'/api/deputes/' + carte.depute.slug"
           >
-            <app-deputy-photo [nom]="carte.depute.nom" />
+            <app-deputy-photo [src]="photoDe(carte.depute.pa)" [nom]="carte.depute.nom" />
             <span class="app-depute-carte__texte">
               <span class="app-depute-carte__nom">{{ carte.depute.nom }}</span>
               @if (carte.groupe; as groupe) {

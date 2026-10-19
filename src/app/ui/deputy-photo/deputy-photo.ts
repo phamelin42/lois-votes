@@ -19,6 +19,10 @@ import { FdAvatar } from 'fuda';
   templateUrl: './deputy-photo.html',
   styleUrl: './deputy-photo.scss',
   encapsulation: ViewEncapsulation.None,
+  host: {
+    class: 'app-deputy-photo-hote',
+    '[class.app-deputy-photo-hote--grande]': 'taille() === 160',
+  },
 })
 export class AppDeputyPhoto {
   readonly src = input<string | null>(null);

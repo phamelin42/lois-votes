@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -77,6 +77,22 @@ function ecarts(d: Donnees): string[] {
     'meta.statistiques : adoptés + rejetés',
   );
   verifie(Array.isArray(stat.nonVotantsCorriges), 'meta.statistiques.nonVotantsCorriges');
+  verifie(
+    Array.isArray(meta.avertissements) && meta.avertissements.every((a) => a === 'wikipedia'),
+    'meta.avertissements',
+  );
+  verifie(Array.isArray(meta.autresGroupes), 'meta.autresGroupes');
+  for (const quoi of ['actifs', 'tous'] as const) {
+    verifie(
+      Object.values(stat.couverture[quoi]).every(entier),
+      `meta.statistiques.couverture.${quoi}`,
+    );
+  }
+  verifie(
+    stat.couverture.tous.deputes === d.deputes.length &&
+      stat.couverture.actifs.deputes === d.deputes.filter((p) => p.actif).length,
+    'meta.statistiques.couverture : effectifs',
+  );
 
   d.groupes.forEach((g, i) => {
     verifie(
@@ -99,7 +115,61 @@ function ecarts(d: Donnees): string[] {
   verifie(d.groupes.length <= CARACTERES_GROUPE.length, 'groupes : au plus 36');
 
   const idsGroupes = new Set(d.groupes.map((g) => g.id));
+  const idsConnus = new Set([...idsGroupes, ...d.meta.autresGroupes.map((g) => g.id)]);
+  d.meta.autresGroupes.forEach((g, i) => {
+    verifie(!idsGroupes.has(g.id) && /^PO\d+$/.test(g.id), `meta.autresGroupes[${i}]`);
+  });
+  const dateValide = (x: unknown) =>
+    typeof x === 'string' && DATE.test(x) && new Date(`${x}T00:00:00Z`).toISOString().startsWith(x);
+  const PREFIXES: Record<string, string> = {
+    hatvp: 'https://www.hatvp.fr/pages_nominatives/',
+    wikipedia: 'https://fr.wikipedia.org/wiki/',
+    siteWeb: 'https://',
+    x: 'https://x.com/',
+    facebook: 'https://www.facebook.com/',
+  };
   d.deputes.forEach((p, i) => {
+    verifie(
+      p.naissance === null || (dateValide(p.naissance.date) && texteOuNull(p.naissance.lieu)),
+      `deputes[${i}].naissance`,
+    );
+    verifie(p.deces === null || dateValide(p.deces), `deputes[${i}].deces`);
+    verifie(texteOuNull(p.profession) && texteOuNull(p.parti), `deputes[${i}] : profession, parti`);
+    verifie(
+      p.mandat === null ||
+        (dateValide(p.mandat.depuis) &&
+          (p.mandat.fin === null || dateValide(p.mandat.fin)) &&
+          p.mandat.legislatures.length > 0 &&
+          p.mandat.legislatures.every(
+            (n, j, l) => Number.isInteger(n) && (j === 0 || l[j - 1] < n),
+          )),
+      `deputes[${i}].mandat`,
+    );
+    p.groupes.forEach((g, j) => {
+      verifie(
+        idsConnus.has(g.id) && dateValide(g.debut) && (g.fin === null || dateValide(g.fin)),
+        `deputes[${i}].groupes[${j}]`,
+      );
+      if (j > 0) verifie(p.groupes[j - 1].debut <= g.debut, `deputes[${i}].groupes : ordre`);
+    });
+    p.fonctions.forEach((f, j) => {
+      verifie(
+        f.organe !== '' && f.qualite !== '' && dateValide(f.depuis),
+        `deputes[${i}].fonctions[${j}]`,
+      );
+    });
+    verifie(
+      !p.actif ? p.fonctions.length === 0 && p.parti === null : true,
+      `deputes[${i}] : ancien député sans fonction ni parti`,
+    );
+    for (const [cle, prefixe] of Object.entries(PREFIXES)) {
+      const lien = p.liens[cle as keyof typeof p.liens];
+      verifie(
+        lien === null ||
+          (lien.startsWith(prefixe) && lien.length > prefixe.length && !/\s/.test(lien)),
+        `deputes[${i}].liens.${cle}`,
+      );
+    }
     verifie(/^PA\d+$/.test(p.pa), `deputes[${i}].pa`);
     verifie(/^[a-z0-9]+(-[a-z0-9]+)*$/.test(p.slug), `deputes[${i}].slug « ${p.slug} »`);
     verifie(p.nom.length > 0 && p.nomTri.length > 0, `deputes[${i}] : nom`);
@@ -322,6 +392,64 @@ describe('npm run donnees, en mode fixtures', () => {
       expect(donnees.meta.statistiques.nonVotantsCorriges).toEqual([1]);
     });
   });
+
+  describe('fiche des députés', () => {
+    const chenu = () => donnees.deputes.find((d) => d.slug === 'sebastien-chenu')!;
+
+    it('Sébastien Chenu : naissance, profession, mandats, groupes, fonctions, parti et liens réels', () => {
+      expect(chenu()).toMatchObject({
+        naissance: { date: '1973-04-13', lieu: 'Beauvais' },
+        profession: 'Conseiller en communication',
+        mandat: { depuis: '2024-06-30', fin: null, legislatures: [15, 16, 17] },
+        parti: 'Rassemblement national',
+        liens: {
+          hatvp: 'https://www.hatvp.fr/pages_nominatives/chenu-sebastien',
+          wikipedia: 'https://fr.wikipedia.org/wiki/S%C3%A9bastien_Chenu',
+        },
+      });
+      expect(chenu().fonctions).toEqual([
+        {
+          organe: "Bureau de l'Assemblée nationale",
+          qualite: "Vice-président de l'Assemblée nationale",
+          depuis: '2025-10-01',
+        },
+        { organe: 'Commission des affaires étrangères', qualite: 'Membre', depuis: '2024-07-20' },
+      ]);
+      expect(chenu().groupes).toEqual([
+        { id: 'PO840056', debut: '2024-07-01', fin: '2024-07-18' },
+        { id: 'PO845401', debut: '2024-07-19', fin: null },
+      ]);
+    });
+
+    it("garde l'historique d'un groupe que ne liste aucun scrutin (AD) dans meta.autresGroupes", () => {
+      expect(donnees.meta.autresGroupes.map((g) => g.abrege)).toEqual(['AD']);
+      expect(donnees.deputes.some((d) => d.groupes.some((g) => g.id === 'PO845520'))).toBe(true);
+    });
+
+    it('mesure la couverture des sources, pour les députés en mandat et pour tous', () => {
+      const { actifs, tous } = donnees.meta.statistiques.couverture;
+      expect(tous.deputes).toBe(donnees.deputes.length);
+      expect(actifs.deputes).toBe(donnees.deputes.filter((d) => d.actif).length);
+      expect(tous.wikipedia).toBe(donnees.deputes.length);
+      expect(actifs.hatvp).toBeLessThanOrEqual(actifs.deputes);
+      // Aucun ancien député n'a d'adresse HATVP dans l'archive.
+      expect(tous.hatvp).toBe(actifs.hatvp);
+      expect(tous.profession).toBe(tous.deputes);
+      expect(tous.naissance).toBe(tous.deputes);
+      expect(journal.filter((m) => m.includes('couverture'))).toHaveLength(2);
+    });
+
+    it('ne signale aucun avertissement avec les fixtures, qui ont leur extrait de Wikidata', () => {
+      expect(donnees.meta.avertissements).toEqual([]);
+    });
+
+    it('ne publie ni téléphone, ni e-mail, ni adresse postale', () => {
+      const texte = readFileSync(join(sortie, 'data', 'deputes.json'), 'utf8');
+      expect(texte).not.toMatch(
+        /@assemblee-nationale\.fr|\b0[1-9]([ .]?\d{2}){4}\b|Rue de l'Université/,
+      );
+    });
+  });
 });
 
 describe('npm run donnees, échecs', () => {
@@ -345,6 +473,43 @@ describe('npm run donnees, échecs', () => {
       expect(readdirSync(sortie)).toEqual([]);
     } finally {
       rmSync(sortie, { recursive: true, force: true });
+    }
+  });
+
+  it('construit sans les liens Wikipédia quand Wikidata manque : avertissement dans meta.json et dans le journal', async () => {
+    const racine = mkdtempSync(join(tmpdir(), 'donnees-sans-wikidata-'));
+    try {
+      const fixtures = join(racine, 'fixtures');
+      cpSync(join('src', 'server', 'fixtures', 'officiel'), fixtures, { recursive: true });
+      rmSync(join(fixtures, 'wikidata.json'));
+      const journal: string[] = [];
+
+      const resultat = await executer({
+        env: { DONNEES_DEPUIS: 'fixtures' },
+        fixtures,
+        destination: join(racine, 'data'),
+        journal: (m) => journal.push(m),
+        maintenant: new Date('2026-10-19T05:41:02Z'),
+      });
+
+      expect(resultat.meta.avertissements).toEqual(['wikipedia']);
+      expect(
+        JSON.parse(readFileSync(join(racine, 'data', 'meta.json'), 'utf8')).avertissements,
+      ).toEqual(['wikipedia']);
+      expect(
+        resultat.deputes.every(
+          (d: { liens: { wikipedia: string | null } }) => d.liens.wikipedia === null,
+        ),
+      ).toBe(true);
+      expect(resultat.deputes.some((d: { liens: { hatvp: string | null } }) => d.liens.hatvp)).toBe(
+        true,
+      );
+      expect(journal.some((m) => m.includes('AVERTISSEMENT : liens Wikipédia indisponibles'))).toBe(
+        true,
+      );
+      expect(journal.some((m) => m.includes('avertissements : wikipedia'))).toBe(true);
+    } finally {
+      rmSync(racine, { recursive: true, force: true });
     }
   });
 
@@ -373,6 +538,7 @@ describe('npm run donnees, échecs', () => {
           cache: join(racine, 'cache'),
           destination: join(racine, 'data'),
           fetch: requete as never,
+          pausesWikidata: [],
           journal: silence,
         }),
       ).rejects.toThrow(/garde-fou : 19 scrutins lus, au moins 8000 attendus/);

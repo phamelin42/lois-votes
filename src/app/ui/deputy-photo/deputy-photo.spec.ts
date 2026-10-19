@@ -41,6 +41,21 @@ describe('AppDeputyPhoto', () => {
     expect(image.getAttribute('loading')).toBe('lazy');
   });
 
+  it('décode l\'image hors du fil principal (decoding="async")', () => {
+    const image = monter().racine.querySelector('img')!;
+
+    expect(image.getAttribute('decoding')).toBe('async');
+  });
+
+  it("réserve la taille de la photo sur son hôte, que l'image charge, échoue ou soit remplacée", () => {
+    const petite = monter().racine;
+    const grande = monter({ taille: 160 }).racine;
+
+    expect(petite.classList).toContain('app-deputy-photo-hote');
+    expect(petite.classList).not.toContain('app-deputy-photo-hote--grande');
+    expect(grande.classList).toContain('app-deputy-photo-hote--grande');
+  });
+
   it('charge en priorité (LCP) quand on le demande', () => {
     const image = monter({ priority: true }).racine.querySelector('img')!;
 

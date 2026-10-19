@@ -38,6 +38,79 @@ const CODES_VOTE = new Set([...'PCANX-'].map((c) => c.charCodeAt(0)));
 const CODE_TIRET = '-'.charCodeAt(0);
 const VOTE_EXPRIME_OU_NON_VOTANT = new Set([...'PCAN'].map((c) => c.charCodeAt(0)));
 
+/** Date `AAAA-MM-JJ` qui existe au calendrier. */
+function dateValide(x: unknown): x is string {
+  if (typeof x !== 'string' || !DATE.test(x)) return false;
+  const date = new Date(`${x}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(x);
+}
+
+const texteOuNull = (x: unknown): x is string | null =>
+  x === null || (typeof x === 'string' && x.length > 0 && x.length <= 300);
+
+/** Préfixe attendu de chaque lien externe d'un député : le site du lien, en https. */
+const PREFIXES_LIENS: Record<keyof DeputeFichier['liens'], string> = {
+  hatvp: 'https://www.hatvp.fr/pages_nominatives/',
+  wikipedia: 'https://fr.wikipedia.org/wiki/',
+  siteWeb: 'https://',
+  x: 'https://x.com/',
+  facebook: 'https://www.facebook.com/',
+};
+
+/** Forme d'une entrée de `deputes.json` (hors groupe actuel) : on ne sert jamais une fiche mal formée. */
+function verifierDepute(d: DeputeFichier, i: number, groupesConnus: ReadonlySet<string>): void {
+  const ctx = `deputes.json : ${d.slug}`;
+  verifier(/^PA\d{1,7}$/.test(d.pa), `deputes.json : entrée ${i} : numéro d'acteur ${d.pa}`);
+  verifier(
+    d.naissance === null ||
+      (dateValide(d.naissance?.date) &&
+        (d.naissance.lieu === null || typeof d.naissance.lieu === 'string')),
+    `${ctx} : naissance`,
+  );
+  verifier(d.deces === null || dateValide(d.deces), `${ctx} : décès`);
+  verifier(texteOuNull(d.profession), `${ctx} : profession`);
+  verifier(
+    d.mandat === null ||
+      (dateValide(d.mandat?.depuis) &&
+        (d.mandat.fin === null || dateValide(d.mandat.fin)) &&
+        Array.isArray(d.mandat.legislatures) &&
+        d.mandat.legislatures.every((n) => Number.isInteger(n) && n >= 1 && n <= 99)),
+    `${ctx} : mandat`,
+  );
+  verifier(Array.isArray(d.groupes), `${ctx} : groupes`);
+  for (const g of d.groupes) {
+    verifier(
+      groupesConnus.has(g?.id) && dateValide(g.debut) && (g.fin === null || dateValide(g.fin)),
+      `${ctx} : période de groupe`,
+    );
+  }
+  verifier(Array.isArray(d.fonctions), `${ctx} : fonctions`);
+  for (const f of d.fonctions) {
+    verifier(
+      typeof f?.organe === 'string' &&
+        f.organe.length > 0 &&
+        typeof f.qualite === 'string' &&
+        f.qualite.length > 0 &&
+        dateValide(f.depuis),
+      `${ctx} : fonction`,
+    );
+  }
+  verifier(texteOuNull(d.parti), `${ctx} : parti`);
+  verifier(typeof d.liens === 'object' && d.liens !== null, `${ctx} : liens`);
+  for (const [cle, prefixe] of Object.entries(PREFIXES_LIENS)) {
+    const lien = d.liens[cle as keyof DeputeFichier['liens']];
+    verifier(
+      lien === null ||
+        (typeof lien === 'string' &&
+          lien.startsWith(prefixe) &&
+          lien.length > prefixe.length &&
+          lien.length <= 500 &&
+          !/\s/.test(lien)),
+      `${ctx} : lien ${cle}`,
+    );
+  }
+}
+
 /** Une entrée de groupe d'un scrutin, relue depuis les tableaux compacts. */
 export interface GroupeDuScrutin {
   /** Index dans `groupes.json`. */
@@ -102,6 +175,8 @@ function verifierCompte(compte: Compte, contexte: string): void {
 export class DonneesChargees {
   readonly meta: DonneesMeta;
   readonly groupes: readonly GroupeFichier[];
+  /** Groupes que ne liste aucun scrutin (historique des députés seulement). */
+  readonly groupesHorsScrutins: readonly GroupeFichier[];
   readonly deputes: readonly DeputeFichier[];
   readonly nbScrutins: number;
   readonly nbDeputes: number;
@@ -145,6 +220,13 @@ export class DonneesChargees {
     this.groupes = groupes.valeur;
     this.deputes = deputes.valeur;
     verifier(this.meta && typeof this.meta.genereLe === 'string', 'meta.json : genereLe manquant');
+    verifier(
+      Array.isArray(this.meta.autresGroupes) &&
+        Array.isArray(this.meta.avertissements) &&
+        this.meta.avertissements.every((a) => typeof a === 'string'),
+      'meta.json : autresGroupes et avertissements attendus',
+    );
+    this.groupesHorsScrutins = this.meta.autresGroupes;
     verifier(Array.isArray(this.groupes) && Array.isArray(this.deputes), 'tableaux attendus');
     verifier(Array.isArray(scrutins.valeur), 'scrutins.json : tableau attendu');
 
@@ -171,6 +253,14 @@ export class DonneesChargees {
       verifier(!idsGroupes.has(g.id), `groupes.json : ${g.id} en double`);
       idsGroupes.add(g.id);
     }
+    const groupesConnus = new Set(idsGroupes);
+    for (const g of this.groupesHorsScrutins) {
+      verifier(
+        typeof g?.id === 'string' && typeof g.abrege === 'string' && !groupesConnus.has(g.id),
+        'meta.json : autresGroupes',
+      );
+      groupesConnus.add(g.id);
+    }
     const parSlug = new Map<string, number>();
     this.deputes.forEach((d, i) => {
       verifier(
@@ -179,6 +269,7 @@ export class DonneesChargees {
       );
       verifier(!parSlug.has(d.slug), `deputes.json : slug ${d.slug} en double`);
       verifier(d.groupe === null || idsGroupes.has(d.groupe), `deputes.json : groupe de ${d.slug}`);
+      verifierDepute(d, i, groupesConnus);
       parSlug.set(d.slug, i);
     });
     this.parSlug = parSlug;

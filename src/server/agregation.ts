@@ -13,6 +13,7 @@ import type {
   VoteDepute,
   VoteGroupe,
 } from '@contrat';
+import { photoDe } from '../shared/photo';
 import { lecture, titreCourt } from './classify';
 import type { DonneesChargees } from './donnees';
 
@@ -33,9 +34,32 @@ const TAILLE_MEMO = { accueil: 50, loi: 150, scrutin: 150, depute: 700 };
 const URL_SCRUTIN = (numero: number) =>
   `https://www.assemblee-nationale.fr/dyn/17/scrutins/${numero}`;
 const URL_FICHE = (pa: string) => `https://www.assemblee-nationale.fr/dyn/deputes/${pa}`;
-/** Le fichier de la photo porte le numéro sans le préfixe « PA » (avec : 404). */
-const URL_PHOTO = (pa: string) =>
-  `https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/${pa.replace(/^PA/, '')}.jpg`;
+/** Numéro d'acteur sans le préfixe « PA » : ce que portent `DeputeIndex.pa` et le nom du fichier de la photo. */
+const numeroSansPrefixe = (pa: string) => pa.replace(/^PA/, '');
+
+const JOUR_A_PARIS = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Europe/Paris',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+/** Date du jour à Paris (`AAAA-MM-JJ`), pour l'âge : un anniversaire change à minuit à Paris, pas à minuit UTC. */
+export function jourAParis(maintenant: Date): string {
+  return JOUR_A_PARIS.format(maintenant);
+}
+
+/** Âge en années entières à une date (`AAAA-MM-JJ` pour les deux) ; jamais négatif. */
+export function ageAu(naissance: string, jour: string): number {
+  const annees = Number(jour.slice(0, 4)) - Number(naissance.slice(0, 4));
+  const anniversairePasse = jour.slice(5) >= naissance.slice(5);
+  return Math.max(0, anniversairePasse ? annees : annees - 1);
+}
+
+/** Options de l'agrégation : la date du jour est injectable pour tester l'âge. */
+export interface OptionsAgregation {
+  maintenant?: () => Date;
+}
 
 const POSITIONS: readonly Position[] = ['pour', 'contre', 'abstention', 'nonvotant'];
 const POSITION_DE_CASE: Record<string, Position | undefined> = {
@@ -69,13 +93,21 @@ function titreCourtDuTexte(titre: string): string {
   return titreCourt(texte ? `l'ensemble ${texte[0]}` : titre);
 }
 
-export function creerAgregation(donnees: DonneesChargees): Agregation {
+export function creerAgregation(
+  donnees: DonneesChargees,
+  { maintenant = () => new Date() }: OptionsAgregation = {},
+): Agregation {
   const groupes: Groupe[] = donnees.groupes.map((g) => ({
     id: g.id,
     abrege: g.abrege,
     libelle: g.libelle,
     couleur: g.couleur,
   }));
+  /** Tous les groupes de la 17ᵉ législature, y compris ceux que ne liste aucun scrutin, pour l'historique d'un député. */
+  const groupesParId = new Map<string, Groupe>(groupes.map((g) => [g.id, g]));
+  for (const g of donnees.groupesHorsScrutins) {
+    groupesParId.set(g.id, { id: g.id, abrege: g.abrege, libelle: g.libelle, couleur: g.couleur });
+  }
   const estFinal = (s: number) => donnees.type(s) === 'final';
 
   function resume(s: number): ScrutinResume {
@@ -242,6 +274,7 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
     const abregeDe = (id: string | null) => groupes.find((g) => g.id === id)?.abrege ?? null;
     const index: DeputeIndex[] = actifs.map((d) => ({
       slug: d.slug,
+      pa: numeroSansPrefixe(d.pa),
       nom: d.nom,
       nomTri: d.nomTri,
       groupe: abregeDe(d.groupe),
@@ -327,7 +360,12 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
     return votes;
   }
 
-  const depute = memoiser(TAILLE_MEMO.depute, (slug: string): DeputeDetail | null => {
+  /** Tout sauf l'âge, qui dépend du jour : cette partie se garde en mémoire, pas l'âge. */
+  type DeputeSansAge = Omit<DeputeDetail, 'naissance'> & {
+    naissance: { date: string; lieu: string | null } | null;
+  };
+
+  const deputeSansAge = memoiser(TAILLE_MEMO.depute, (slug: string): DeputeSansAge | null => {
     const d = donnees.parSlug.get(slug);
     if (d === undefined) return null;
     const fiche = donnees.deputes[d];
@@ -335,15 +373,44 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
     return {
       slug,
       nom: fiche.nom,
-      photo: URL_PHOTO(fiche.pa),
+      photo: photoDe(numeroSansPrefixe(fiche.pa)),
       groupe: groupes.find((g) => g.id === fiche.groupe) ?? null,
       circonscription: fiche.circonscription,
-      urlFiche: URL_FICHE(fiche.pa),
+      naissance: fiche.naissance,
+      deces: fiche.deces,
+      profession: fiche.profession,
+      mandat: fiche.mandat,
+      groupes: fiche.groupes.map(({ id, debut, fin }) => ({
+        groupe: groupesParId.get(id) as Groupe,
+        debut,
+        fin,
+      })),
+      fonctions: fiche.fonctions,
+      partiRattachement: fiche.parti,
+      liens: { assemblee: URL_FICHE(fiche.pa), ...fiche.liens },
       taux,
       scrutins,
       dernieresLois: derniersVotes(d),
     };
   });
+
+  /**
+   * La fiche d'un député, avec son âge calculé à la requête (jour courant à Paris, ou jour du décès).
+   * Une date de naissance dans le futur n'a pas de sens : pas de naissance affichée plutôt qu'un âge faux.
+   */
+  function depute(slug: string): DeputeDetail | null {
+    const base = deputeSansAge(slug);
+    if (!base) return null;
+    const { naissance } = base;
+    const jour = base.deces ?? jourAParis(maintenant());
+    return {
+      ...base,
+      naissance:
+        naissance && naissance.date <= jour
+          ? { ...naissance, age: ageAu(naissance.date, jour) }
+          : null,
+    };
+  }
 
   return {
     accueil,

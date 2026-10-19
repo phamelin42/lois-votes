@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, input, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { FdAlert, FdBadge, FdBreadcrumb, FdButton, FdEmptyState, FdLink } from 'fuda';
+import { FdAlert, FdBadge, FdBreadcrumb, FdButton, FdEmptyState } from 'fuda';
 import type { Compte, DeputeDetail, VoteDepute } from '@contrat';
 import { DeputeApi } from '../../data/depute-api';
 import { dateCourte, libelleAdoption, pourcent } from '../../data/format';
@@ -9,6 +9,8 @@ import { PageMeta } from '../../data/page-meta';
 import { AppPrefetch } from '../../data/prefetch';
 import { valeurDe } from '../../data/ressource';
 import { estIntrouvable, statutDePage } from '../../data/statut-de-page';
+import { AppDeputeLiens } from '../../ui/depute-liens/depute-liens';
+import { AppDeputeProfil } from '../../ui/depute-profil/depute-profil';
 import { AppDeputyPhoto } from '../../ui/deputy-photo/deputy-photo';
 import { AppGroupPill } from '../../ui/group-pill/group-pill';
 import { AppPosition } from '../../ui/position/position';
@@ -20,6 +22,8 @@ const nombreFr = new Intl.NumberFormat('fr-FR');
 @Component({
   selector: 'app-depute-page',
   imports: [
+    AppDeputeLiens,
+    AppDeputeProfil,
     AppDeputyPhoto,
     AppGroupPill,
     AppLienVisible,
@@ -31,7 +35,6 @@ const nombreFr = new Intl.NumberFormat('fr-FR');
     FdBreadcrumb,
     FdButton,
     FdEmptyState,
-    FdLink,
     RouterLink,
   ],
   templateUrl: './depute.html',

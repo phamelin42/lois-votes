@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { lireActeur, lireOrgane, lireScrutin } from './lire.mjs';
-import { reduireActeur, reduireOrgane, reduireScrutin } from './fixtures.mjs';
+import { organesCites, reduireActeur, reduireOrgane, reduireScrutin } from './fixtures.mjs';
 
 const votant = (pa: string, plus: Record<string, string> = {}) => ({
   acteurRef: pa,
@@ -272,9 +272,162 @@ describe('reduireActeur et reduireOrgane', () => {
       numDepartement: '59',
       numCirco: '19',
     });
-    expect(JSON.stringify(reduireActeur(acteur))).not.toMatch(
-      /adresses|profession|collaborateur|infoNaissance/,
-    );
+    expect(JSON.stringify(reduireActeur(acteur))).not.toMatch(/collaborateur|trigramme/);
+  });
+
+  describe('fiche enrichie', () => {
+    const riche = () => {
+      const brut = structuredClone(acteur);
+      Object.assign(brut.acteur, {
+        uri_hatvp: 'https://www.hatvp.fr/pages_nominatives/chenu-sebastien',
+        adresses: {
+          adresse: [
+            {
+              uid: 'AD1',
+              typeLibelle: 'Adresse officielle',
+              ville: 'Paris 07 SP',
+              codePostal: '75355',
+            },
+            { uid: 'AD2', typeLibelle: 'Téléphone', valElec: '01.40.63.01.03' },
+            { uid: 'AD3', typeLibelle: 'Mèl', valElec: 'depute@assemblee-nationale.fr' },
+            { uid: 'AD4', typeLibelle: 'Twitter', valElec: '@sebchenu', poids: null },
+            { uid: 'AD5', typeLibelle: 'Facebook', valElec: 'chenu.sebastien' },
+            { uid: 'AD6', typeLibelle: 'Site internet', valElec: 'www.exemple.fr' },
+            { uid: 'AD7', typeLibelle: 'Linkedin', valElec: '/in/sebchenu' },
+          ],
+        },
+      });
+      Object.assign(brut.acteur.etatCivil, { dateDeces: { '@xsi:nil': 'true' } });
+      const mandats = brut.acteur.mandats.mandat as Record<string, unknown>[];
+      mandats.push(
+        {
+          uid: 'PM10',
+          acteurRef: 'PA720468',
+          legislature: '15',
+          typeOrgane: 'ASSEMBLEE',
+          dateDebut: '2017-06-18',
+          dateFin: '2022-06-21',
+          organes: { organeRef: 'PO717460' },
+          election: { lieu: { departement: 'Nord', numDepartement: '59', numCirco: '19' } },
+        },
+        {
+          uid: 'PM11',
+          acteurRef: 'PA720468',
+          legislature: '17',
+          typeOrgane: 'BUREAU',
+          dateDebut: '2025-10-01',
+          dateFin: null,
+          organes: { organeRef: 'PO419604' },
+          infosQualite: {
+            codeQualite: 'Vice-Président',
+            libQualite: "Vice-président de l'Assemblée nationale",
+            libQualiteSex: "Vice-présidente de l'Assemblée nationale",
+            autre: 'x',
+          },
+        },
+        {
+          uid: 'PM12',
+          acteurRef: 'PA720468',
+          legislature: '17',
+          typeOrgane: 'COMPER',
+          dateDebut: '2024-07-20',
+          dateFin: null,
+          organes: { organeRef: 'PO419610' },
+          infosQualite: { codeQualite: 'Membre', libQualite: 'Membre' },
+        },
+        {
+          uid: 'PM13',
+          acteurRef: 'PA720468',
+          legislature: null,
+          typeOrgane: 'PARPOL',
+          dateDebut: '2025-12-03',
+          dateFin: null,
+          organes: { organeRef: 'PO761239' },
+        },
+        {
+          uid: 'PM14',
+          acteurRef: 'PA720468',
+          legislature: null,
+          typeOrgane: 'PARPOL',
+          dateDebut: '2017-12-01',
+          dateFin: '2018-11-30',
+          organes: { organeRef: 'PO684946' },
+        },
+        {
+          uid: 'PM15',
+          acteurRef: 'PA720468',
+          legislature: '16',
+          typeOrgane: 'COMPER',
+          dateDebut: '2022-06-30',
+          dateFin: '2024-06-09',
+          organes: { organeRef: 'PO800000' },
+        },
+        {
+          uid: 'PM16',
+          acteurRef: 'PA720468',
+          legislature: '17',
+          typeOrgane: 'CMP',
+          dateDebut: '2025-01-01',
+          dateFin: null,
+          organes: { organeRef: 'PO900000' },
+        },
+      );
+      return brut;
+    };
+
+    it('garde naissance, décès, profession et adresse HATVP, et les lit avec lireActeur', () => {
+      const lu = lireActeur(reduireActeur(riche()));
+
+      expect(lu).toMatchObject({
+        naissance: { date: '1973-04-13', lieu: null },
+        deces: null,
+        profession: 'Conseiller',
+        hatvp: 'https://www.hatvp.fr/pages_nominatives/chenu-sebastien',
+      });
+    });
+
+    it('ne garde des adresses que le site, X et Facebook : ni téléphone, ni e-mail, ni adresse postale', () => {
+      const reduit = reduireActeur(riche());
+      const texte = JSON.stringify(reduit);
+
+      expect(texte).not.toMatch(/01\.40|depute@|Paris|75355|Linkedin|Téléphone|Mèl/);
+      expect(lireActeur(reduit).liens).toEqual({
+        siteWeb: 'https://www.exemple.fr/',
+        x: 'https://x.com/sebchenu',
+        facebook: 'https://www.facebook.com/chenu.sebastien',
+      });
+    });
+
+    it('garde les mandats de député de toutes les législatures, de groupe, de bureau, de commission et le parti en cours', () => {
+      const lu = lireActeur(reduireActeur(riche()));
+
+      expect(lu.mandats.map((m) => [m.uid, m.type])).toEqual([
+        ['PM2', 'GP'],
+        ['PM4', 'ASSEMBLEE'],
+        ['PM10', 'ASSEMBLEE'],
+        ['PM11', 'BUREAU'],
+        ['PM12', 'COMPER'],
+        ['PM13', 'PARPOL'],
+      ]);
+      expect(lu.mandats.find((m) => m.uid === 'PM11')?.qualite).toBe(
+        "Vice-présidente de l'Assemblée nationale",
+      );
+      expect(lu.mandats.find((m) => m.uid === 'PM12')?.qualite).toBe('Membre');
+    });
+
+    it("garde l'adresse HATVP absente de l'archive (objet xsi:nil) telle quelle : elle se lit comme absente", () => {
+      const brut = riche();
+      Object.assign(brut.acteur, { uri_hatvp: { '@xsi:nil': 'true' } });
+
+      expect(reduireActeur(brut).acteur).toHaveProperty('uri_hatvp');
+      expect(lireActeur(reduireActeur(brut)).hatvp).toBeNull();
+    });
+
+    it('liste les organes cités par les mandats de bureau, de commission et de parti gardés', () => {
+      const reduit = reduireActeur(riche());
+
+      expect([...organesCites([reduit])].sort()).toEqual(['PO419604', 'PO419610', 'PO761239']);
+    });
   });
 
   it("écrit un mandat unique comme un objet, comme l'archive", () => {

@@ -26,6 +26,30 @@ describe('AProposPage', () => {
     expect(texte).not.toMatch(/data\.gouv|NosParlementaires|Datan/i);
   });
 
+  it('cite la HATVP pour les liens de déclarations, et Wikidata comme source communautaire non officielle pour Wikipédia', () => {
+    const texte = afficher();
+
+    expect(texte).toMatch(/Haute Autorité pour la transparence de la vie publique \(HATVP\)/);
+    expect(texte).toMatch(/Page Wikipédia/);
+    expect(texte).toMatch(/Wikidata/);
+    expect(texte).toMatch(/communautaire et non officielle/);
+    expect(texte).toMatch(/n'est pas dans les données officielles/);
+  });
+
+  it("dit que les photos viennent du site de l'Assemblée, et que le site ne publie ni téléphone ni e-mail", () => {
+    const texte = afficher();
+
+    expect(texte).toMatch(/photos et les fiches des députés sont celles du site de l'Assemblée/);
+    expect(texte).toMatch(/ne publie jamais de numéro de téléphone/);
+  });
+
+  it("ne prétend plus que l'Assemblée est l'unique source : la page Wikipédia est l'exception", () => {
+    const texte = afficher();
+
+    expect(texte).not.toMatch(/Toutes les données viennent de l'open data officiel/);
+    expect(texte).toMatch(/seule donnée qui n'est pas officielle/);
+  });
+
   it('annonce la mise à jour nocturne', () => {
     expect(afficher()).toMatch(/chaque nuit/i);
   });

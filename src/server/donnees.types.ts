@@ -19,6 +19,10 @@ export interface DonneesMeta {
   scrutins: number;
   deputes: number;
   groupes: number;
+  /** Groupes de la 17ᵉ législature qu'aucun scrutin ne liste (« AD ») : sans index dans les matrices, ils ne servent qu'à l'historique des députés. */
+  autresGroupes: GroupeFichier[];
+  /** Sources facultatives manquantes à la préparation : `wikipedia` quand Wikidata n'a pas répondu (le site vit sans ces liens). */
+  avertissements: string[];
   sources: { scrutins: SourceArchive; acteurs: SourceArchive };
   /** Mesures faites pendant la réduction, pour le journal de build et la page « à propos ». */
   statistiques: {
@@ -31,7 +35,20 @@ export interface DonneesMeta {
     groupesRattaches: number;
     /** Scrutins dont le nombre de non-votants officiel ne valait pas la somme des groupes (remplacé par la somme). */
     nonVotantsCorriges: number[];
+    /** Part des députés qui ont chaque information, pour les députés en mandat et pour tous. */
+    couverture: { actifs: Couverture; tous: Couverture };
   };
+}
+
+export interface Couverture {
+  deputes: number;
+  wikipedia: number;
+  hatvp: number;
+  profession: number;
+  naissance: number;
+  siteWeb: number;
+  x: number;
+  facebook: number;
 }
 
 /** Un élément de `groupes.json` : organe de type `GP` de la 17ᵉ législature présent dans au moins un scrutin. */
@@ -60,6 +77,28 @@ export interface DeputeFichier {
   departement: string | null;
   circonscription: string | null;
   actif: boolean;
+  /** Date `AAAA-MM-JJ` et lieu (« Beauvais », « Alger (Algérie) ») ; `null` sans date. L'âge n'est pas stocké : il se calcule à la requête. */
+  naissance: { date: string; lieu: string | null } | null;
+  /** Date du décès. */
+  deces: string | null;
+  /** Profession déclarée, sans le préfixe de code INSEE. */
+  profession: string | null;
+  /** Mandat de député de la 17ᵉ législature en cours, sinon le dernier ; `legislatures` : toutes celles où il ou elle a été député. `null` sans mandat. */
+  mandat: { depuis: string; fin: string | null; legislatures: number[] } | null;
+  /** Groupes de la 17ᵉ législature, du plus ancien au plus récent : `id` est dans `groupes.json` ou dans `meta.autresGroupes`. */
+  groupes: { id: string; debut: string; fin: string | null }[];
+  /** Fonctions en cours (bureau de l'Assemblée, commission permanente) d'un député en mandat. */
+  fonctions: { organe: string; qualite: string; depuis: string }[];
+  /** Parti de rattachement en cours (libellé de l'organe), pour un député en mandat. */
+  parti: string | null;
+  /** Adresses externes, seulement quand elles sont fiables : https, sur le site attendu. */
+  liens: {
+    hatvp: string | null;
+    wikipedia: string | null;
+    siteWeb: string | null;
+    x: string | null;
+    facebook: string | null;
+  };
 }
 
 export interface ScrutinGroupeFichier {

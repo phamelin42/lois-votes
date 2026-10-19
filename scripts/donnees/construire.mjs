@@ -66,12 +66,124 @@ function plusRecent(mandats) {
   )[0];
 }
 
+const JOUR = 24 * 60 * 60 * 1000;
+/** Jour suivant une date `AAAA-MM-JJ`. */
+function lendemain(date) {
+  return new Date(Date.parse(`${date}T00:00:00Z`) + JOUR).toISOString().slice(0, 10);
+}
+
+/**
+ * Périodes d'appartenance à un groupe d'après les mandats `GP`, de la plus ancienne à la plus récente. Les mandats
+ * en double (une même appartenance déclarée sous deux qualités) sont écartés, et les périodes qui se suivent sans
+ * trou dans un même groupe n'en font qu'une (un seul groupe, deux mandats).
+ *
+ * @param {import('./lire.mjs').MandatLu[]} mandats
+ * @returns {{ id: string, debut: string, fin: string | null }[]}
+ */
+export function periodesDeGroupe(mandats) {
+  const triees = mandats
+    .filter((m) => m.organe)
+    .map((m) => ({ id: /** @type {string} */ (m.organe), debut: m.debut, fin: m.fin }))
+    .sort(
+      (a, b) =>
+        (a.debut < b.debut ? -1 : a.debut > b.debut ? 1 : 0) ||
+        (a.fin ?? FIN_DES_TEMPS).localeCompare(b.fin ?? FIN_DES_TEMPS) ||
+        (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
+    );
+  /** @type {{ id: string, debut: string, fin: string | null }[]} */
+  const periodes = [];
+  for (const periode of triees) {
+    const derniere = periodes.at(-1);
+    if (
+      derniere &&
+      derniere.id === periode.id &&
+      (derniere.fin === null || lendemain(derniere.fin) >= periode.debut)
+    ) {
+      if (derniere.fin !== null && (periode.fin === null || periode.fin > derniere.fin))
+        derniere.fin = periode.fin;
+    } else {
+      periodes.push({ ...periode });
+    }
+  }
+  return periodes;
+}
+
+/**
+ * Fonctions en cours à l'Assemblée : le bureau (« Vice-président de l'Assemblée nationale ») puis la commission
+ * permanente (« Membre » de la « Commission des affaires étrangères »), dans la 17ᵉ législature.
+ *
+ * @param {import('./lire.mjs').MandatLu[]} mandats
+ * @param {Map<string, import('./lire.mjs').OrganeLu>} organes
+ * @returns {{ organe: string, qualite: string, depuis: string }[]}
+ */
+export function fonctionsEnCours(mandats, organes) {
+  const rang = { BUREAU: 0, COMPER: 1 };
+  const trouvees = mandats
+    .filter((m) => m.legislature === '17' && m.fin === null && m.type in rang && m.organe)
+    .flatMap((m) => {
+      const organe = organes.get(/** @type {string} */ (m.organe));
+      return organe?.libelle
+        ? [
+            {
+              rang: rang[m.type],
+              organe: organe.libelle,
+              qualite: m.qualite ?? 'Membre',
+              depuis: m.debut,
+            },
+          ]
+        : [];
+    })
+    .sort(
+      (a, b) =>
+        a.rang - b.rang ||
+        (a.depuis < b.depuis ? -1 : a.depuis > b.depuis ? 1 : 0) ||
+        a.organe.localeCompare(b.organe, 'fr') ||
+        a.qualite.localeCompare(b.qualite, 'fr'),
+    );
+  const vues = new Set();
+  return trouvees
+    .filter((f) => {
+      const cle = `${f.organe}|${f.qualite}|${f.depuis}`;
+      return vues.has(cle) ? false : (vues.add(cle), true);
+    })
+    .map(({ organe, qualite, depuis }) => ({ organe, qualite, depuis }));
+}
+
+/** Numéros de législature des mandats de député, sans doublon, du plus ancien au plus récent. */
+export function legislaturesDeDepute(mandats) {
+  const numeros = mandats
+    .filter((m) => m.type === 'ASSEMBLEE' && /^\d{1,2}$/.test(m.legislature))
+    .map((m) => Number(m.legislature));
+  return [...new Set(numeros)].sort((a, b) => a - b);
+}
+
+/**
+ * Parts de députés qui ont chaque information : pour juger de la couverture des sources, sur les députés en mandat
+ * puis sur tous.
+ * @param {Array<{ naissance: unknown, profession: unknown, liens: Record<string, string | null> }>} deputes
+ */
+export function couverture(deputes) {
+  const compter = (liste) => ({
+    deputes: liste.length,
+    wikipedia: liste.filter((d) => d.liens.wikipedia).length,
+    hatvp: liste.filter((d) => d.liens.hatvp).length,
+    profession: liste.filter((d) => d.profession).length,
+    naissance: liste.filter((d) => d.naissance).length,
+    siteWeb: liste.filter((d) => d.liens.siteWeb).length,
+    x: liste.filter((d) => d.liens.x).length,
+    facebook: liste.filter((d) => d.liens.facebook).length,
+  });
+  return { actifs: compter(deputes.filter((d) => d.actif)), tous: compter(deputes) };
+}
+
 /**
  * @param {object} entree
  * @param {import('./lire.mjs').ScrutinLu[]} entree.scrutins
  * @param {import('./lire.mjs').ActeurLu[]} entree.acteurs
  * @param {import('./lire.mjs').OrganeLu[]} entree.organes
  * @param {{ scrutins: object, acteurs: object }} entree.sources
+ * @param {Map<string, string> | null} [entree.wikipedia] Articles Wikipédia par numéro d'acteur sans « PA » ; `null` quand Wikidata est indisponible.
+ * @param {string[]} [entree.avertissements] Sources facultatives manquantes (`wikipedia`), recopiées dans `meta.json`.
  * @param {Date} [entree.maintenant]
  * @param {{ scrutins: number, deputes: number }} [entree.seuils]
  */
@@ -80,6 +192,8 @@ export function construire({
   acteurs,
   organes,
   sources,
+  wikipedia = null,
+  avertissements = [],
   maintenant = new Date(),
   seuils = SEUILS_OFFICIELS,
 }) {
@@ -93,6 +207,7 @@ export function construire({
   const organesGp = new Map(
     organes.filter((o) => o.codeType === 'GP' && o.legislature === '17').map((o) => [o.id, o]),
   );
+  const organesParId = new Map(organes.map((o) => [o.id, o]));
   const fiches = new Map();
   for (const acteur of acteurs) {
     if (fiches.has(acteur.pa))
@@ -222,6 +337,8 @@ export function construire({
   }
 
   const vus = new Map();
+  /** Groupes de l'historique des députés qu'aucun scrutin ne liste (« AD ») : ils n'ont pas d'index dans les matrices. */
+  const groupesHorsScrutins = new Set();
   const deputes = pas.map((pa) => {
     const fiche = fiches.get(pa);
     const nom = `${fiche.prenom} ${fiche.nom}`.trim();
@@ -237,6 +354,17 @@ export function construire({
       const connus = mandatsGp(pa).filter((m) => indexGroupe.has(m.organe));
       return connus.length ? plusRecent(connus).organe : null;
     })();
+    const actif = assemblee.some((m) => m.fin === null);
+    // Les groupes de l'historique : ceux dont l'organe est connu (même s'ils n'apparaissent dans aucun scrutin).
+    const periodes = periodesDeGroupe(mandatsGp(pa)).filter((p) => organesGp.has(p.id));
+    for (const p of periodes) if (!indexGroupe.has(p.id)) groupesHorsScrutins.add(p.id);
+    const parti = actif
+      ? fiche.mandats
+          .filter(
+            (m) => m.type === 'PARPOL' && m.fin === null && m.organe && organesParId.has(m.organe),
+          )
+          .sort((a, b) => (a.debut < b.debut ? 1 : a.debut > b.debut ? -1 : 0))[0]
+      : undefined;
     return {
       pa,
       slug,
@@ -246,9 +374,42 @@ export function construire({
       departement: lieu?.numDepartement ?? null,
       circonscription:
         lieu?.departement && lieu.numCirco ? `${lieu.departement} (${lieu.numCirco})` : null,
-      actif: assemblee.some((m) => m.fin === null),
+      actif,
+      naissance: fiche.naissance,
+      deces: fiche.deces,
+      profession: fiche.profession,
+      mandat: mandat
+        ? {
+            depuis: mandat.debut,
+            fin: mandat.fin,
+            legislatures: legislaturesDeDepute(fiche.mandats),
+          }
+        : null,
+      groupes: periodes,
+      fonctions: actif ? fonctionsEnCours(fiche.mandats, organesParId) : [],
+      parti: parti
+        ? (organesParId.get(/** @type {string} */ (parti.organe))?.libelle ?? null)
+        : null,
+      liens: {
+        hatvp: fiche.hatvp,
+        wikipedia: wikipedia?.get(pa.replace(/^PA/, '')) ?? null,
+        siteWeb: fiche.liens.siteWeb,
+        x: fiche.liens.x,
+        facebook: fiche.liens.facebook,
+      },
     };
   });
+  const autresGroupes = [...groupesHorsScrutins]
+    .map((id) => organesGp.get(id))
+    .sort((a, b) => (a.debut ?? '').localeCompare(b.debut ?? '') || a.id.localeCompare(b.id))
+    .map((o) => ({
+      id: o.id,
+      abrege: o.abrege,
+      libelle: o.libelle,
+      couleur: o.couleur,
+      debut: o.debut,
+      fin: o.fin,
+    }));
   const slugs = new Set(deputes.map((d) => d.slug));
   if (slugs.size !== deputes.length) throw new ErreurDonnees('deux députés avec le même slug');
   const colonne = new Map(pas.map((pa, i) => [pa, i]));
@@ -330,6 +491,8 @@ export function construire({
     scrutins: scrutinsFichier.length,
     deputes: deputes.length,
     groupes: groupes.length,
+    autresGroupes,
+    avertissements: [...avertissements],
     sources,
     statistiques: {
       adoptes: scrutinsFichier.filter((s) => s.adopte).length,
@@ -338,6 +501,7 @@ export function construire({
       misesAuPoint: ordonnes.filter((s) => s.lu.miseAuPoint).length,
       groupesRattaches,
       nonVotantsCorriges,
+      couverture: couverture(deputes),
     },
   };
 

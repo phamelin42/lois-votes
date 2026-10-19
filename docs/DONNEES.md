@@ -1,6 +1,6 @@
 # Format des données préparées (`data/`)
 
-`npm run donnees` (script `scripts/donnees/`) lit les deux archives officielles de l'Assemblée (voir PLAN.md) et écrit les fichiers ci-dessous dans `data/`. Le build les copie dans `dist/lois-votes/data/` ; le serveur les charge en mémoire au démarrage (`src/server/donnees.ts`). `DONNEES_DEPUIS=fixtures` lit à la place le mini-jeu `src/server/fixtures/officiel/` (régénéré par `node scripts/donnees/fixtures.mjs`).
+`npm run donnees` (script `scripts/donnees/`) lit les deux archives officielles de l'Assemblée (voir PLAN.md), interroge Wikidata pour les liens Wikipédia (seule source non officielle, facultative : voir « Liens Wikipédia ») et écrit les fichiers ci-dessous dans `data/`. Le build les copie dans `dist/lois-votes/data/` ; le serveur les charge en mémoire au démarrage (`src/server/donnees.ts`). `DONNEES_DEPUIS=fixtures` lit à la place le mini-jeu `src/server/fixtures/officiel/` (régénéré par `node scripts/donnees/fixtures.mjs`).
 
 **Ce document a été vérifié sur les vraies archives** (celles du 19/10/2026 : 8 877 scrutins, 3 175 acteurs, 10 819 organes). Chaque écart avec la première version de la spécification est listé en bas, dans « Écarts constatés ». Les types TypeScript des fichiers sont dans `src/server/donnees.types.ts`, partagé par le script et le serveur ; un test (`scripts/donnees/donnees.spec.ts`) vérifie que la sortie du mode `fixtures` y est conforme, y compris la cohérence entre `scrutins.json` et les matrices. `DONNEES_DIR=data npm test` applique le même contrôle à un `data/` produit à partir des vraies archives.
 
@@ -10,11 +10,18 @@ Tous les fichiers sont du JSON compact (sans indentation), sauf `votes.txt` et `
 
 ```json
 { "genereLe": "2026-10-19T05:41:02Z", "scrutins": 8877, "deputes": 652, "groupes": 13,
+  "autresGroupes": [{ "id": "PO845520", "abrege": "AD", "libelle": "À Droite", "couleur": "#3367A7", "debut": "2024-07-18", "fin": "2024-09-11" }],
+  "avertissements": [],
   "sources": { "scrutins": { "url": "…", "lastModified": "Mon, 19 Oct 2026 04:25:16 GMT", "etag": "\"…\"" }, "acteurs": { "url": "…", "lastModified": "…", "etag": "…" } },
-  "statistiques": { "adoptes": 3031, "rejetes": 5846, "sansDossier": 5826, "misesAuPoint": 1636, "groupesRattaches": 134, "nonVotantsCorriges": [1] } }
+  "statistiques": { "adoptes": 3031, "rejetes": 5846, "sansDossier": 5826, "misesAuPoint": 1636, "groupesRattaches": 134, "nonVotantsCorriges": [1],
+    "couverture": { "actifs": { "deputes": 574, "wikipedia": 574, "hatvp": 565, "profession": 574, "naissance": 574, "siteWeb": 209, "x": 354, "facebook": 242 },
+                    "tous": { "deputes": 652, "wikipedia": 652, "hatvp": 565, "profession": 652, "naissance": 652, "siteWeb": 232, "x": 394, "facebook": 275 } } } }
 ```
 
 - En mode `fixtures`, `sources.*.url` est le dossier des fixtures et `lastModified` et `etag` valent `null`.
+- `autresGroupes` : les organes `GP` de la 17ᵉ législature qu'aucun scrutin ne liste (aujourd'hui « AD », `PO845520`, 2024-07-18 → 2024-09-11, dont 16 députés ont fait partie). Même forme que `groupes.json`, mais sans index dans les matrices : ils ne servent qu'à nommer les groupes de l'historique d'un député (`deputes[].groupes`) et n'entrent ni dans `groupesSansVotant` ni dans les filtres.
+- `avertissements` : sources facultatives manquantes à la préparation. Vaut `["wikipedia"]` quand Wikidata n'a pas répondu (les `liens.wikipedia` sont alors tous `null`) ; vide sinon. Le build ne l'échoue jamais pour cela.
+- `statistiques.couverture` : pour les députés en mandat (`actifs`) et pour tous, le nombre de députés qui ont chaque information (Wikipédia, HATVP, profession, naissance, site, X, Facebook). Le script l'écrit aussi dans son journal.
 - `statistiques` : `sansDossier` (scrutins sans `dossier`), `misesAuPoint` (scrutins dont la section `miseAuPoint` n'est pas vide, voir plus bas), `groupesRattaches` (entrées de groupe dont l'identifiant d'organe était `PO0`, rattachées à leur vrai groupe), `nonVotantsCorriges` (numéros des scrutins dont le nombre de non-votants a été remplacé par la somme des groupes).
 
 ## `groupes.json`
@@ -35,14 +42,58 @@ Tout acteur qui a voté au moins une fois sous la 17ᵉ législature (652 observ
 
 ```json
 [{ "pa": "PA720468", "slug": "sebastien-chenu", "nom": "Sébastien Chenu", "nomTri": "Chenu",
-   "groupe": "PO845401", "departement": "59", "circonscription": "Nord (19)", "actif": true }]
+   "groupe": "PO845401", "departement": "59", "circonscription": "Nord (19)", "actif": true,
+   "naissance": { "date": "1973-04-13", "lieu": "Beauvais" }, "deces": null,
+   "profession": "Conseiller en communication",
+   "mandat": { "depuis": "2024-06-30", "fin": null, "legislatures": [15, 16, 17] },
+   "groupes": [{ "id": "PO840056", "debut": "2024-07-01", "fin": "2024-07-18" }, { "id": "PO845401", "debut": "2024-07-19", "fin": null }],
+   "fonctions": [{ "organe": "Bureau de l'Assemblée nationale", "qualite": "Vice-président de l'Assemblée nationale", "depuis": "2025-10-01" },
+                 { "organe": "Commission des affaires étrangères", "qualite": "Membre", "depuis": "2024-07-20" }],
+   "parti": "Rassemblement national",
+   "liens": { "hatvp": "https://www.hatvp.fr/pages_nominatives/chenu-sebastien", "wikipedia": "https://fr.wikipedia.org/wiki/S%C3%A9bastien_Chenu",
+              "siteWeb": null, "x": "https://x.com/sebchenu", "facebook": "https://www.facebook.com/chenu.sebastien" } }]
 ```
 
 - `nom` : `prénom nom` de la fiche. Quand deux députés portent le même nom, l'Assemblée les distingue dans le nom lui-même : « Alexandra Martin (Alpes-Maritimes) » et « Alexandra Martin (Gironde) ». On garde cette précision dans `nom` (elle sert à les distinguer dans la recherche) ; `nomTri` est le nom de famille sans elle (« Martin »).
 - `slug` : `nom` en minuscules, sans accents (`œ` → `oe`), tirets pour tout séparateur, soit `alexandra-martin-alpes-maritimes`. Suffixe `-2`, `-3`… (ordre des `PA`) si deux députés avaient exactement le même slug (cas non observé : testé sur des données de test). Stable d'un jour à l'autre tant que le jeu de PA et les noms ne changent pas : les liens partagés ne doivent pas casser.
 - `groupe` : `id` du groupe **actuel**, c'est-à-dire du mandat `GP` de la 17ᵉ sans `dateFin` (le plus récent s'il y en a deux : 11 députés), sinon du dernier mandat terminé ; `null` si aucun (aucun cas observé). Seuls les groupes présents dans `groupes.json` sont retenus.
 - `circonscription` : `election.lieu.departement` + `(numCirco)` du mandat `ASSEMBLEE` de la 17ᵉ (« Nord (19) », « Français établis hors de France (3) ») ; `departement` : `numDepartement` tel quel (`"59"`, `"2A"`, `"971"`, `"099"` pour les Français de l'étranger). Le mandat retenu est celui en cours, sinon le dernier : 29 députés ont plusieurs mandats `ASSEMBLEE` dans la législature (un membre du gouvernement perd son mandat à sa nomination et le retrouve ensuite). `actif` : au moins un de ces mandats est sans `dateFin` (574 observés).
+- **État civil** (`etatCivil` de l'archive des acteurs) : `naissance` = `{ date, lieu }` (`infoNaissance.dateNais` ; `lieu` = `villeNais`, suivie du pays entre parenthèses quand il n'est pas la France, « Alger (Algérie) »), `null` sans date valide ; `deces` = `dateDeces` (2 députés de la 17ᵉ sont décédés en cours de mandat). **L'âge n'est pas stocké** : le serveur le calcule à la requête. Un champ vide de l'archive n'est jamais `null` mais un objet `{ "@xsi:nil": "true" }` (`villeNais`, `paysNais`, `dateDeces`, `uri_hatvp`) : tout ce qui n'est pas du texte est ignoré (`chaine()` de `lire.mjs`).
+- **`profession`** : `profession.libelleCourant`, sans le préfixe de code INSEE que l'archive met parfois devant (« (33) - Cadre de la fonction publique » devient « Cadre de la fonction publique »).
+- **`mandat`** : mandat `ASSEMBLEE` de la 17ᵉ législature en cours, sinon le dernier (même règle que la circonscription) : `depuis` = `dateDebut`, `fin` = `dateFin` (`null` tant qu'il est en cours), `legislatures` = les législatures de **tous** ses mandats `ASSEMBLEE` (de la plus ancienne à la plus récente, de 1 à 6 observées). `null` sans mandat.
+- **`groupes`** : l'historique de ses mandats `GP` de la 17ᵉ législature, du plus ancien au plus récent, `{ id, debut, fin }`. `id` est dans `groupes.json` ou dans `meta.autresGroupes`. Les mandats en double (même groupe et mêmes dates : un second mandat sous une autre qualité) sont écartés, et deux périodes qui se suivent sans trou dans un même groupe sont fusionnées (« NI 2024-07-08 → 2024-07-18 » puis « NI 2024-07-19 → » donne « NI 2024-07-08 → »). Un organe inconnu est ignoré. Cet historique est celui des mandats, pas des scrutins : le groupe d'un député un jour de vote reste celui de `groupes-votes.txt`.
+- **`fonctions`** (députés en mandat seulement) : mandats `BUREAU` (« Vice-président de l'Assemblée nationale ») puis `COMPER` (commission permanente : « Membre » de la « Commission des affaires étrangères ») de la 17ᵉ législature sans `dateFin`, `{ organe, qualite, depuis }`. `organe` = libellé de l'organe référencé par `organeRef` ; `qualite` = `infosQualite.libQualiteSex` (accordée au genre : « Vice-présidente de l'Assemblée nationale »), sinon `libQualite`, sinon « Membre ». Doublons écartés.
+- **`parti`** (députés en mandat seulement) : libellé de l'organe du mandat `PARPOL` en cours (le plus récent) : le parti de rattachement (financement des partis), tel que déclaré. Ces mandats n'ont pas de législature (`legislature` vaut `null`).
+- **`liens`** : `hatvp`, `wikipedia`, `siteWeb`, `x`, `facebook`, chacun `null` quand il manque ou n'est pas fiable (voir « Liens externes »). La fiche officielle se déduit de `pa`.
 - **Photo et fiche** se déduisent de `pa` : pas de champ. Attention : le fichier de la photo porte le **numéro sans le préfixe `PA`** (`…/photos/carre/720468.jpg`, 200 ; avec `PA720468.jpg`, 404), alors que la fiche garde le préfixe (`https://www.assemblee-nationale.fr/dyn/deputes/PA720468`).
+
+## Liens externes
+
+Rien n'est jamais deviné : un lien absent est `null` et l'interface ne l'affiche pas. **Jamais publiés** : téléphone, e-mail, adresses postales, ni les autres réseaux (Instagram, LinkedIn…) : seules les rubriques `Site internet`, `Twitter` et `Facebook` de `adresses.adresse[]` sont lues (`lireLiensWeb`).
+
+- **`hatvp`** : `uri_hatvp` si c'est une chaîne de la forme que le site de la HATVP produit : `https://www.hatvp.fr/pages_nominatives/<mots en minuscules sans accent, séparés par des tirets>`. L'adresse redirige (302) vers `https://www.hatvp.fr/fiche-nominative/?declarant=<même nom>`, qui répond 200. Sur l'archive du 19/10/2026, 568 des 574 députés en mandat ont une adresse (aucun des 78 anciens) ; **3 de ces 568 sont écartées** parce que le site de la HATVP répond 404 : `martin-(alpes-maritimes)-alexandra`, `martin-(gironde)-alexandra-26044` (parenthèses) et `echaniz-iñaki-24343` (accent ; sans accent, `echaniz-inaki-24343` répond 200 : on ne le reconstruit pas). Reste 565.
+- **`x`** : un identifiant (`@sebchenu`, `sebchenu`, 15 caractères au plus : lettres, chiffres, `_`) ou une adresse de x.com / twitter.com, publié en `https://x.com/<compte>`. Du texte libre (« @X : x.com/BrigitteBareges ») est écarté.
+- **`facebook`** : un nom de page (`chenu.sebastien` : 5 à 80 caractères ASCII, lettres, chiffres, point, tiret) ou `people/<nom>/<numéro>`, nu ou dans une adresse facebook.com, publié en `https://www.facebook.com/<page>`. Un nom avec accent ou espace est écarté.
+- **`siteWeb`** : l'archive donne **toujours un nom de domaine nu** (233 sur 233 : `www.david-habib.fr`, parfois `/www.veroniquebesse.fr` ou `clementine-autain.fr/`, jamais `http://` ni `https://`). On retire les barres en trop et on ajoute `https://`, à condition que ce soit un nom de domaine valide (un point, un suffixe alphabétique) sans identifiant ni port ; sinon `null`. C'est la seule adresse dont le schéma est déduit : sur un échantillon de 25 sites, 19 répondent 200 en https depuis l'environnement de préparation, les autres échouent (un certificat qui ne correspond pas au domaine, des délais dépassés ou des connexions coupées).
+- **`wikipedia`** : voir ci-dessous.
+
+## Liens Wikipédia (Wikidata)
+
+Les pages Wikipédia ne sont **pas** dans les données officielles : c'est l'exception à la règle « sources officielles uniquement ». Source retenue : Wikidata (base communautaire de la fondation Wikimedia, CC0). La propriété `P4123` est l'identifiant « Assemblée nationale » d'une personne, soit le numéro du `PA` sans préfixe (`PA720468` donne `720468`) ; une requête SPARQL en donne l'article de Wikipédia en français :
+
+```sparql
+SELECT ?an ?article WHERE {
+  ?item wdt:P4123 ?an .
+  OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://fr.wikipedia.org/> }
+}
+```
+
+`GET https://query.wikidata.org/sparql?query=…`, `Accept: application/sparql-results+json` et un `User-Agent` qui identifie le site (obligatoire, en ASCII : c'est un en-tête HTTP). Mesuré le 19/10/2026 : 2 460 lignes, 2 439 articles, aucun doublon ; les 652 députés sont couverts.
+
+- **Robustesse** (`scripts/donnees/wikipedia.mjs`) : une tentative, puis jusqu'à trois nouveaux essais (pauses de 2, 4 et 8 s) sur une coupure réseau, un délai dépassé (60 s par requête), un 5xx, un 408 ou un 429 ; les autres statuts échouent tout de suite. Une réponse de moins de 1 000 lignes est tenue pour incomplète. **Wikidata ne fait jamais échouer le build** : en cas d'échec, tous les `liens.wikipedia` sont `null`, `meta.avertissements` vaut `["wikipedia"]` et le journal le dit (`AVERTISSEMENT : liens Wikipédia indisponibles…`).
+- **Filtre** : seules les adresses qui commencent par `https://fr.wikipedia.org/wiki/` sont retenues, sans espace. Une ligne sans article est ignorée ; deux articles différents pour un même numéro n'en donnent aucun (observé : jamais).
+- **Mode `fixtures`** : le script lit `src/server/fixtures/officiel/wikidata.json` (extrait réel de la réponse, réduit aux députés des fixtures, même format SPARQL) : aucun réseau en test.
+- Le serveur ne contacte jamais Wikidata : le lien est dans `deputes.json`. Le site le dit (`/a-propos`, fiche d'un député) : source communautaire et non officielle.
 
 ## `scrutins.json`
 
@@ -81,6 +132,8 @@ Dans 14 scrutins (146 entrées de groupe au total), l'archive ne renseigne pas l
 
 ## Garde-fous (le script échoue si…)
 
+(Wikidata n'en fait pas partie : une source facultative qui manque donne un avertissement, pas un échec.)
+
 - moins de 8 000 scrutins ou moins de 570 députés (seuils levés en mode `fixtures`) ;
 - le téléchargement n'a pas répondu 200, est incomplet, ou fait moins de 1 Mo ;
 - un votant (`acteurRef`) sans fiche dans l'archive des acteurs ;
@@ -100,6 +153,8 @@ Dans 14 scrutins (146 entrées de groupe au total), l'archive ne renseigne pas l
 - **Groupes sans votant** (`groupesSansVotant`, sur un scrutin et sur le vote final d'une loi) : les groupes de `groupes.json` dont `debut` ≤ date du scrutin ≤ `fin` (bornes incluses, `null` = sans borne) et qui n'ont aucune ligne dans les groupes affichés. L'interface les nomme sous le tableau par groupe au lieu de les masquer sans explication.
 - Un groupe dont le `compte` est nul (aucun député listé) est écarté des `VoteGroupe` renvoyés par l'API : une ligne « non-votant » à zéro laisserait croire que ses membres se sont tenus à l'écart. La somme des groupes affichés reste égale au décompte du scrutin.
 - L'accueil montre une carte par dossier : le vote final le plus récent de chaque dossier (un vote final sans dossier a sa propre carte). Les 10 derniers votes d'un député, eux, sont ses 10 derniers scrutins de type `final`, sans regrouper par dossier.
+- **Fiche d'un député** (`DeputeDetail`) : tout vient de `deputes.json`, rien n'est recalculé sauf **l'âge**, calculé à chaque requête d'après la date du jour à Paris (`Europe/Paris`) : un anniversaire change l'âge à minuit à Paris. Pour un député décédé, c'est l'âge au décès. Une date de naissance dans le futur n'a pas de sens : pas de naissance servie plutôt qu'un âge faux. La partie mémorisée de la fiche ne contient pas l'âge. L'historique de groupes remplace chaque `id` par le groupe complet (de `groupes.json` ou de `meta.autresGroupes`) ; `liens.assemblee` se déduit de `pa`. Le serveur contrôle la forme de chaque champ au chargement (dates réelles, liens en https sur le site attendu, identifiants de groupe connus, `pa` de 7 chiffres au plus) et refuse le dossier sinon (503).
+- `DeputeIndex.pa` : le numéro de `pa` sans préfixe (`720468`), pour que l'interface construise la photo (`photoDe`, `src/shared/photo.ts`) sans que l'index (que la recherche charge en entier) grossisse d'une URL par député.
 - 10 derniers votes d'un député : les 10 derniers scrutins de type `final` (ordre de `scrutins.json`) où sa case n'est pas `-`. Une case `X` donne `position: null` (absent).
 
 ## Écarts constatés
@@ -122,6 +177,33 @@ Vérification faite sur les archives du 19/10/2026 (`Scrutins.json.zip` : 27,6 M
 | Les listes de scrutins ont tous leurs groupes. | Chaque vrai groupe figure dans tous les scrutins de sa période d'existence (`UDR` ancien : 3 041 scrutins, nouveau : 5 824 ; `AD` : jamais). Les seuls trous sont les 14 scrutins `PO0` (RN absent de la liste sous son nom). Aucun scrutin n'a de groupe unique en objet. | Aucun traitement particulier. |
 | Types de scrutin. | `SPO` 8 780, `SPS` 74, `MOC` 23 : les 23 motions de censure (toutes `MOC`) ont un titre « la motion de censure… ». Des votes sur l'ensemble d'un texte sont écrits sans « l'ensemble » (« la proposition de loi… (première lecture). », 3 cas) ou avec une faute (« l'ensemble de de la… », 1 cas). | `classerTous`. |
 | Archive régénérée chaque nuit, avec ETag. | Vrai, mais le CDN sert parfois deux versions du fichier : le même jour, `Last-Modified` 04:25:16 GMT (27 563 304 octets, ETag `"1a49528-…"`) et 10:25:07 GMT (27 563 289 octets, ETag `"1a49519-…"`). Les deux sont valides et donnent les mêmes effectifs (8 877 scrutins, 3 031 adoptés) ; elles ne diffèrent que par le scrutin 8805, corrigé entre-temps : l'archive est donc republiée en cours de journée. | `If-None-Match` fonctionne ; un changement d'ETag télécharge à nouveau (27 Mo). |
+
+### Enrichissement des fiches (prompt 13) : ce que l'archive contient vraiment
+
+Vérifié sur l'archive du 19/10/2026 (654 acteurs ont un mandat `ASSEMBLEE` de la 17ᵉ législature, dont les 652 votants).
+
+| Affirmation ou attente | Réalité observée | Traitement |
+|---|---|---|
+| `uri_hatvp` est `null` quand elle manque. | Un objet `{ "@xsi:nil": "true" }` (86 acteurs sur 654). Même chose pour `villeNais`, `depNais`, `paysNais`, `dateDeces`. | `chaine()` : seul un texte non vide compte. |
+| Une adresse HATVP existe pour 568 députés en mandat. | Vrai (568 sur 574, 0 sur 78 anciens), mais 3 adresses répondent 404 sur le site de la HATVP (deux avec parenthèses, une avec un accent). | Forme stricte exigée ; 565 retenues. |
+| `profession.libelleCourant` est un libellé. | Souvent préfixé d'un code INSEE : « (33) - Cadre de la fonction publique » (30 fois), « (37) - … » (26 fois), la même profession existe aussi sans préfixe. | Préfixe retiré. |
+| Les adresses web sont des URL. | `Site internet` : 233 noms de domaine nus (jamais de schéma), parfois avec une barre devant ou derrière. `Twitter` : `@compte` ou du texte libre (« @X : x.com/… »). `Facebook` : un nom de page, parfois `people/<nom>/<numéro>`, parfois avec accents. | Extraction stricte (`lireSiteWeb`, `lireX`, `lireFacebook`) ; ce qui n'est pas fiable est écarté. |
+| Un mandat par groupe et par période. | Des mandats `GP` en double (même organe, mêmes dates) et des périodes contiguës dans le même groupe (49 cas). | `periodesDeGroupe` les écarte et les fusionne. |
+| Tous les groupes de l'historique sont dans les scrutins. | Le groupe `AD` (16 députés, 2024-07-18 → 2024-09-11) n'apparaît dans aucun scrutin donc pas dans `groupes.json`. | `meta.autresGroupes`. |
+| Les mandats `PARPOL` ont une législature. | `legislature` vaut `null`. Les `BUREAU` et `COMPER` ont leur législature. | Parti : le mandat sans `dateFin`. |
+| Les députés vivent. | Deux députés de la 17ᵉ législature sont décédés en cours de mandat (2025-07-07 et 2026-05-24). | `deces` ; l'âge est celui du décès. |
+| `etatCivil.infoNaissance` est complet. | Un député n'a pas de ville ni de pays de naissance, seulement la date. | Naissance sans lieu. |
+| Les photos existent pour tous. | Au moins une photo répond 404 (`PA841347`). | Repli sur les initiales (`app-deputy-photo`). |
+
+**Couverture mesurée** (journal du build, 19/10/2026) :
+
+| | Wikipédia | HATVP | Profession | Naissance | Site | X | Facebook |
+|---|---|---|---|---|---|---|---|
+| En mandat (574) | 574 (100 %) | 565 (98 %) | 574 (100 %) | 574 (100 %) | 209 (36 %) | 354 (62 %) | 242 (42 %) |
+| Anciens (78) | 78 (100 %) | 0 (0 %) | 78 (100 %) | 78 (100 %) | 23 (29 %) | 40 (51 %) | 33 (42 %) |
+| Tous (652) | 652 (100 %) | 565 (87 %) | 652 (100 %) | 652 (100 %) | 232 (36 %) | 394 (60 %) | 275 (42 %) |
+
+**Coût** : `data/` passe de 24,17 à 24,61 Mo (+0,45 Mo, +1,9 %) : `deputes.json` de 114 Ko à 562 Ko (21,6 Ko à 69,1 Ko compressé en gzip), `meta.json` +0,4 Ko ; les matrices et `scrutins.json` ne changent pas. En mémoire, les 652 fiches occupent 0,88 Mo de tas au lieu de 0,12 Mo (+0,76 Mo, mesuré après `JSON.parse` et ramasse-miettes) ; au démarrage, le serveur charge `data/` en 0,5 s pour un tas de 60 Mo (tampons 15 Mo, rss 175 Mo).
 
 ### Ce que la spec n'avait pas prévu
 

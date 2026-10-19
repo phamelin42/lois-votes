@@ -31,12 +31,20 @@
  * @property {string} debut
  * @property {string | null} fin
  * @property {string | null} organe `organes.organeRef`
+ * @property {string | null} qualite `infosQualite` (version accordée au genre quand elle existe) : « Membre », « Vice-présidente de l'Assemblée nationale ».
  * @property {{ departement: string | null, numDepartement: string | null, numCirco: string | null } | null} lieu Circonscription d'un mandat `ASSEMBLEE`.
+ *
+ * @typedef {{ siteWeb: string | null, x: string | null, facebook: string | null }} LiensWeb
  *
  * @typedef {object} ActeurLu
  * @property {string} pa
  * @property {string} prenom
  * @property {string} nom
+ * @property {{ date: string, lieu: string | null } | null} naissance `AAAA-MM-JJ` et lieu (« Beauvais », « Alger (Algérie) »).
+ * @property {string | null} deces `AAAA-MM-JJ`
+ * @property {string | null} profession Libellé courant, sans le préfixe de code INSEE.
+ * @property {string | null} hatvp Page nominative de la HATVP, seulement quand l'archive en donne une valide.
+ * @property {LiensWeb} liens Site, X et Facebook déclarés, seulement quand l'extraction est fiable.
  * @property {MandatLu[]} mandats
  *
  * @typedef {object} OrganeLu
@@ -184,7 +192,129 @@ function texte(valeur) {
 }
 
 /**
- * Un acteur brut (`{ acteur: … }`) en objet interne : identité et mandats.
+ * Texte d'un champ de l'archive : une chaîne non vide, ou `null`. Un champ vide n'est pas `null` dans l'archive mais
+ * un objet `{ "@xsi:nil": "true" }` (ou `null`) : tout ce qui n'est pas du texte est donc ignoré.
+ */
+export function chaine(valeur) {
+  const brut = typeof valeur === 'object' && valeur !== null ? valeur['#text'] : valeur;
+  if (typeof brut !== 'string') return null;
+  const texte = brut.trim();
+  return texte === '' ? null : texte;
+}
+
+/** Date `AAAA-MM-JJ` qui existe au calendrier, sinon `null`. */
+export function dateIso(valeur) {
+  const texte = chaine(valeur);
+  if (!texte || !/^\d{4}-\d{2}-\d{2}$/.test(texte)) return null;
+  const date = new Date(`${texte}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(texte) ? texte : null;
+}
+
+/**
+ * Naissance d'un acteur (`etatCivil.infoNaissance`) : la date, et le lieu quand la ville est connue (suivie du pays
+ * entre parenthèses s'il n'est pas la France). `null` sans date valide.
+ * @param {any} etatCivil
+ * @returns {{ date: string, lieu: string | null } | null}
+ */
+export function lireNaissance(etatCivil) {
+  const info = etatCivil?.infoNaissance;
+  const date = dateIso(info?.dateNais);
+  if (!date) return null;
+  const ville = chaine(info?.villeNais);
+  const pays = chaine(info?.paysNais);
+  return { date, lieu: ville ? (pays && pays !== 'France' ? `${ville} (${pays})` : ville) : null };
+}
+
+/** Profession courante, sans le code INSEE que l'archive met parfois devant (« (33) - Cadre de la fonction publique »). */
+export function lireProfession(profession) {
+  const libelle = chaine(profession?.libelleCourant)
+    ?.replace(/^\(\d+\)\s*-\s*/, '')
+    .trim();
+  return libelle || null;
+}
+
+/** Le nom d'une page de la HATVP : des mots en minuscules sans accent, séparés par des tirets (« chenu-sebastien », « martin-alexandra-26044 »). */
+const MOTIF_HATVP = /^https:\/\/www\.hatvp\.fr\/pages_nominatives\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/**
+ * Page nominative de la HATVP : uniquement une adresse de ce site, de la forme que le site lui-même produit, jamais
+ * une adresse reconstruite. Sur les 568 adresses de l'archive du 19/10/2026, 565 ont cette forme ; les trois autres
+ * (deux noms avec des parenthèses, « martin-(gironde)-alexandra-26044 », et un accent, « echaniz-iñaki-24343 »)
+ * répondent 404 sur le site de la HATVP : on ne publie pas un lien qu'on sait mort.
+ */
+export function lireHatvp(uri) {
+  const adresse = chaine(uri);
+  return adresse && MOTIF_HATVP.test(adresse) ? adresse : null;
+}
+
+/** Compte X : un identifiant (« @sebchenu », « sebchenu ») ou une adresse de x.com ou twitter.com. */
+export function lireX(valeur) {
+  const texte = chaine(valeur);
+  if (!texte) return null;
+  const adresse = /^https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/@?([^/?#]+)\/?$/i.exec(texte);
+  const compte = (adresse ? adresse[1] : texte).replace(/^@/, '');
+  return /^[A-Za-z0-9_]{1,15}$/.test(compte) ? `https://x.com/${compte}` : null;
+}
+
+/** Page Facebook : un nom de page (« nicolas.forissier ») ou `people/<nom>/<numéro>`, nu ou dans une adresse facebook.com. */
+export function lireFacebook(valeur) {
+  const texte = chaine(valeur);
+  if (!texte) return null;
+  const adresse = /^https?:\/\/(?:www\.|m\.|fr-fr\.)?facebook\.com\/([^?#]+?)\/?(?:[?#].*)?$/i.exec(
+    texte,
+  );
+  const chemin = (adresse ? adresse[1] : texte).replace(/^\/+/, '');
+  const nom = /^[A-Za-z0-9](?:[A-Za-z0-9.-]{3,78})[A-Za-z0-9]$/.test(chemin);
+  const personne = /^people\/[A-Za-z0-9%_-]+\/\d{6,20}$/.test(chemin);
+  return nom || personne ? `https://www.facebook.com/${chemin}` : null;
+}
+
+/**
+ * Site web déclaré : une adresse https valide, ou un nom de domaine nu (« www.darmanin.fr », « jerome-guedj.fr/ »,
+ * parfois précédé d'une barre oblique) auquel on ajoute `https://`. Rien d'autre : pas d'adresse avec identifiants,
+ * pas de port, pas de texte libre, pas de domaine sans point.
+ */
+export function lireSiteWeb(valeur) {
+  const texte = chaine(valeur);
+  if (!texte) return null;
+  const nu = texte.replace(/^\/+/, '');
+  const adresse = /^https:\/\//i.test(nu)
+    ? nu
+    : /^[a-z0-9]/i.test(nu) && !/^[a-z]+:/i.test(nu)
+      ? `https://${nu}`
+      : null;
+  if (!adresse || /\s/.test(adresse)) return null;
+  let url;
+  try {
+    url = new URL(adresse);
+  } catch {
+    return null;
+  }
+  const domaine = /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/;
+  if (url.protocol !== 'https:' || url.username || url.password || url.port) return null;
+  return domaine.test(url.hostname) ? url.href : null;
+}
+
+/**
+ * Les seules adresses publiées : site internet, X (Twitter) et Facebook. Téléphone, e-mail, adresse postale et
+ * autres réseaux ne sont jamais lus. Si une même rubrique apparaît plusieurs fois, la première valide est retenue.
+ * @param {any} adresses `acteur.adresses`
+ * @returns {LiensWeb}
+ */
+export function lireLiensWeb(adresses) {
+  /** @type {LiensWeb} */
+  const liens = { siteWeb: null, x: null, facebook: null };
+  for (const adresse of liste(adresses?.adresse)) {
+    const valeur = adresse.valElec;
+    if (adresse.typeLibelle === 'Site internet') liens.siteWeb ??= lireSiteWeb(valeur);
+    else if (adresse.typeLibelle === 'Twitter') liens.x ??= lireX(valeur);
+    else if (adresse.typeLibelle === 'Facebook') liens.facebook ??= lireFacebook(valeur);
+  }
+  return liens;
+}
+
+/**
+ * Un acteur brut (`{ acteur: … }`) en objet interne : identité, état civil, profession, liens et mandats.
  * @param {any} brut
  * @returns {ActeurLu}
  */
@@ -203,6 +333,8 @@ export function lireActeur(brut) {
       debut: mandat.dateDebut ?? '',
       fin: mandat.dateFin ?? null,
       organe: texte(mandat.organes?.organeRef),
+      qualite:
+        chaine(mandat.infosQualite?.libQualiteSex) ?? chaine(mandat.infosQualite?.libQualite),
       lieu: lieu
         ? {
             departement: lieu.departement ?? null,
@@ -216,6 +348,11 @@ export function lireActeur(brut) {
     pa,
     prenom: String(identite.prenom ?? '').trim(),
     nom: String(identite.nom ?? '').trim(),
+    naissance: lireNaissance(acteur.etatCivil),
+    deces: dateIso(acteur.etatCivil?.dateDeces),
+    profession: lireProfession(acteur.profession),
+    hatvp: lireHatvp(acteur.uri_hatvp),
+    liens: lireLiensWeb(acteur.adresses),
     mandats,
   };
 }

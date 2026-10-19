@@ -3,8 +3,11 @@
 //
 // Le jeu est un extrait RÉEL et RÉDUIT, au même format que les archives (fichiers JSON non zippés) :
 //   json/scrutins/VTANR5L17V<n>.json   scrutins retenus (titres, dates, dossiers, résultats officiels, groupes réels),
-//   json/acteur/PA<n>.json             députés retenus (identité et mandats GP et ASSEMBLEE de la 17ᵉ législature),
-//   json/organe/PO<n>.json             groupes politiques de la 17ᵉ législature.
+//   json/acteur/PA<n>.json             députés retenus (identité, naissance, profession, adresse HATVP, adresses web
+//                                      publiables, mandats de député de toutes les législatures, mandats de groupe, de bureau,
+//                                      de commission permanente et de parti de la 17ᵉ législature),
+//   json/organe/PO<n>.json             groupes politiques de la 17ᵉ législature, et organes cités par ces mandats,
+//   wikidata.json                      extrait de la réponse de Wikidata (articles Wikipédia) pour ces députés.
 // Les listes nominatives et les décomptes des scrutins sont réduits aux députés retenus : les effectifs du jeu sont
 // donc ceux de l'échantillon, pas les totaux officiels (le résultat « adopté » ou « rejeté » reste l'officiel).
 
@@ -14,6 +17,7 @@ import { pathToFileURL } from 'node:url';
 import { classerTous } from './classer.mjs';
 import { liste, lireActeur, lireOrgane, lireScrutin } from './lire.mjs';
 import { estOrgane, ouvrirArchives } from './telecharger.mjs';
+import { telechargerWikidata } from './wikipedia.mjs';
 
 const DESTINATION = join('src', 'server', 'fixtures', 'officiel');
 const POSITIONS = /** @type {const} */ ([
@@ -118,13 +122,22 @@ export function reduireScrutin(brut, retenus) {
   return { scrutin: s };
 }
 
-/** Un acteur brut réduit à l'identité et aux mandats GP et ASSEMBLEE de la 17ᵉ législature. */
+/** Types de mandat gardés pour la 17ᵉ législature (la fiche d'un député s'en sert), en plus des mandats de député. */
+const MANDATS_GARDES = new Set(['GP', 'BUREAU', 'COMPER']);
+
+/**
+ * Un acteur brut réduit à ce que lit le script : identité, naissance et décès, profession, adresse HATVP, adresses
+ * web (site, X, Facebook : jamais téléphone, e-mail ni adresse postale), mandats de député de toutes les législatures,
+ * mandats de groupe, de bureau et de commission permanente de la 17ᵉ, parti de rattachement en cours.
+ */
 export function reduireActeur(brut) {
   const a = brut.acteur;
+  const garder = (m) =>
+    m.typeOrgane === 'ASSEMBLEE' ||
+    (m.legislature === '17' && MANDATS_GARDES.has(m.typeOrgane)) ||
+    (m.typeOrgane === 'PARPOL' && (m.dateFin ?? null) === null);
   const mandats = liste(a.mandats?.mandat)
-    .filter(
-      (m) => m.legislature === '17' && (m.typeOrgane === 'GP' || m.typeOrgane === 'ASSEMBLEE'),
-    )
+    .filter(garder)
     .map((m) => {
       const reduit = {
         uid: m.uid,
@@ -135,6 +148,10 @@ export function reduireActeur(brut) {
         dateFin: m.dateFin ?? null,
         organes: { organeRef: m.organes?.organeRef },
       };
+      if (m.infosQualite) {
+        const { codeQualite, libQualite, libQualiteSex } = m.infosQualite;
+        reduit.infosQualite = { codeQualite, libQualite, libQualiteSex };
+      }
       if (m.typeOrgane === 'ASSEMBLEE' && m.election?.lieu) {
         const { departement, numDepartement, numCirco } = m.election.lieu;
         reduit.election = { lieu: { departement, numDepartement, numCirco } };
@@ -142,13 +159,34 @@ export function reduireActeur(brut) {
       return reduit;
     });
   const { civ, prenom, nom, alpha } = a.etatCivil.ident;
-  return {
-    acteur: {
-      uid: a.uid,
-      etatCivil: { ident: { civ, prenom, nom, alpha } },
-      mandats: { mandat: mandats.length === 1 ? mandats[0] : mandats },
-    },
+  /** @type {any} */
+  const reduit = {
+    uid: a.uid,
+    etatCivil: { ident: { civ, prenom, nom, alpha } },
   };
+  if (a.etatCivil.infoNaissance) reduit.etatCivil.infoNaissance = a.etatCivil.infoNaissance;
+  if (a.etatCivil.dateDeces) reduit.etatCivil.dateDeces = a.etatCivil.dateDeces;
+  if (a.profession) reduit.profession = { libelleCourant: a.profession.libelleCourant };
+  if (a.uri_hatvp !== undefined) reduit.uri_hatvp = a.uri_hatvp;
+  const web = liste(a.adresses?.adresse)
+    .filter((x) => ['Site internet', 'Twitter', 'Facebook'].includes(x.typeLibelle))
+    .map(({ uid, typeLibelle, valElec }) => ({ uid, typeLibelle, valElec }));
+  if (web.length) reduit.adresses = { adresse: web.length === 1 ? web[0] : web };
+  reduit.mandats = { mandat: mandats.length === 1 ? mandats[0] : mandats };
+  return { acteur: reduit };
+}
+
+/** Identifiants des organes cités par les mandats de bureau, de commission permanente et de parti d'acteurs réduits. */
+export function organesCites(acteursReduits) {
+  const ids = new Set();
+  for (const { acteur } of acteursReduits)
+    for (const m of liste(acteur.mandats?.mandat))
+      if (['BUREAU', 'COMPER', 'PARPOL'].includes(m.typeOrgane)) {
+        const ref = m.organes?.organeRef;
+        const id = typeof ref === 'string' ? ref : ref?.['#text'];
+        if (id) ids.add(id);
+      }
+  return ids;
 }
 
 /** Un organe brut réduit aux champs lus par le script. */
@@ -335,9 +373,7 @@ export async function genererFixtures({
   for (const [nom, octets] of archives.acteurs()) {
     if (estOrgane(nom)) {
       const brut = json(octets);
-      const organe = lireOrgane(brut);
-      if (organe.codeType === 'GP' && organe.legislature === '17')
-        organesBruts.set(organe.id, brut);
+      organesBruts.set(lireOrgane(brut).id, brut);
     } else {
       acteurs.push(lireActeur(json(octets)));
     }
@@ -345,9 +381,7 @@ export async function genererFixtures({
 
   const { numeros, deputes } = choisir(scrutins, acteurs);
   const retenus = new Set(deputes);
-  journal(
-    `[fixtures] ${numeros.length} scrutins, ${deputes.length} députés, ${organesBruts.size} groupes`,
-  );
+  journal(`[fixtures] ${numeros.length} scrutins, ${deputes.length} députés`);
 
   rmSync(destination, { recursive: true, force: true });
   const voulus = new Set(numeros);
@@ -360,15 +394,46 @@ export async function genererFixtures({
       reduireScrutin(brut, retenus),
     );
   }
+  const reduits = [];
   for (const [nom, octets] of archives.acteurs()) {
     if (estOrgane(nom)) continue;
     const brut = json(octets);
     const pa = typeof brut.acteur.uid === 'string' ? brut.acteur.uid : brut.acteur.uid['#text'];
-    if (retenus.has(pa)) ecrire(destination, `json/acteur/${pa}.json`, reduireActeur(brut));
+    if (!retenus.has(pa)) continue;
+    const reduit = reduireActeur(brut);
+    reduits.push(reduit);
+    ecrire(destination, `json/acteur/${pa}.json`, reduit);
   }
-  for (const [id, brut] of organesBruts)
-    ecrire(destination, `json/organe/${id}.json`, reduireOrgane(brut));
-  journal(`[fixtures] écrit dans ${destination}`);
+  // Les groupes de la 17ᵉ législature, et les organes (bureau, commissions, partis) cités par les mandats gardés.
+  const cites = organesCites(reduits);
+  let nbOrganes = 0;
+  for (const [id, brut] of organesBruts) {
+    const organe = lireOrgane(brut);
+    if ((organe.codeType === 'GP' && organe.legislature === '17') || cites.has(id)) {
+      ecrire(destination, `json/organe/${id}.json`, reduireOrgane(brut));
+      nbOrganes++;
+    }
+  }
+  await ecrireWikidata(destination, retenus, journal);
+  journal(`[fixtures] ${nbOrganes} organes, écrit dans ${destination}`);
+}
+
+/** `wikidata.json` : la vraie réponse de Wikidata, réduite aux députés retenus (même format SPARQL). */
+async function ecrireWikidata(destination, retenus, journal) {
+  const liens = await telechargerWikidata({ journal });
+  const numeros = new Set([...retenus].map((pa) => pa.replace(/^PA/, '')));
+  const bindings = [...liens]
+    .filter(([numero]) => numeros.has(numero))
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([numero, article]) => ({
+      article: { type: 'uri', value: article },
+      an: { type: 'literal', value: numero },
+    }));
+  ecrire(destination, 'wikidata.json', {
+    head: { vars: ['an', 'article'] },
+    results: { bindings },
+  });
+  journal(`[fixtures] wikidata.json : ${bindings.length} articles pour ${numeros.size} députés`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

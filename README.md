@@ -2,7 +2,7 @@
 
 Site qui montre quel parti a voté quoi pour chaque loi à l'Assemblée nationale (17ᵉ législature) : les dernières lois votées, une page par loi, par scrutin et par député, et une recherche.
 
-Application Angular 22 rendue côté serveur, construite avec [Fuda](https://github.com/phamelin42/design-system-fuda). Les données sont celles de l'open data officiel de l'Assemblée nationale ([data.assemblee-nationale.fr](https://data.assemblee-nationale.fr), Licence Ouverte 2.0). **Données officielles préparées au build** : `npm run build` télécharge les archives du jour, les réduit dans `data/` et les embarque dans le serveur, qui répond depuis la mémoire. Aucune base, aucune clé, aucune requête externe à l'exécution.
+Application Angular 22 rendue côté serveur, construite avec [Fuda](https://github.com/phamelin42/design-system-fuda). Les données sont celles de l'open data officiel de l'Assemblée nationale ([data.assemblee-nationale.fr](https://data.assemblee-nationale.fr), Licence Ouverte 2.0). **Données officielles préparées au build** : `npm run build` télécharge les archives du jour, les réduit dans `data/` et les embarque dans le serveur, qui répond depuis la mémoire. Aucune base, aucune clé, aucune requête externe à l'exécution. Seule donnée non officielle : le lien vers la page Wikipédia d'un député, lu dans Wikidata (communautaire) pendant la préparation des données ; si Wikidata ne répond pas, le site est construit sans ces liens.
 
 ## Démarrage
 
@@ -12,7 +12,7 @@ npm install
 npm start          # build sur le jeu de test (fixtures), puis serveur sur http://localhost:4000
 ```
 
-Pour travailler sur les vraies données : `npm run build` (télécharge ~41 Mo, ~10 s), puis `npm run serve:ssr`. Les archives sont gardées dans `.cache/officiel/` (ignoré par git) ; le format de `data/` est décrit dans [docs/DONNEES.md](docs/DONNEES.md).
+Pour travailler sur les vraies données : `npm run build` (télécharge ~41 Mo plus une requête à Wikidata, ~10 s), puis `npm run serve:ssr`. Les archives sont gardées dans `.cache/officiel/` (ignoré par git) ; le format de `data/` est décrit dans [docs/DONNEES.md](docs/DONNEES.md).
 
 Les commandes et conventions sont décrites dans [CLAUDE.md](CLAUDE.md). Le plan et le contrat entre le serveur et l'application sont dans [docs/PLAN.md](docs/PLAN.md) et [docs/CONTRAT.md](docs/CONTRAT.md).
 

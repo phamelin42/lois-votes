@@ -380,7 +380,7 @@ describe('agregation', () => {
         `https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/${pa.slice(2)}.jpg`,
       );
       expect(depute.photo).not.toContain('PA');
-      expect(depute.urlFiche).toBe(`https://www.assemblee-nationale.fr/dyn/deputes/${pa}`);
+      expect(depute.liens.assemblee).toBe(`https://www.assemblee-nationale.fr/dyn/deputes/${pa}`);
       expect(depute.groupe).toMatchObject({ id: 'PO845419', abrege: 'SOC' });
       expect(depute.circonscription).toBe('Essonne (6)');
     });

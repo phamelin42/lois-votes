@@ -106,3 +106,27 @@ export function libelleType(type: TypeScrutin): string {
 export function libelleAdoption(adopte: boolean): string {
   return adopte ? "Adopté par l'Assemblée" : "Rejeté par l'Assemblée";
 }
+
+/** Complément de lieu : « à Beauvais », « au Havre », « aux Lilas » (l'article défini se contracte). */
+export function aLieu(lieu: string): string {
+  const article = /^(Le|Les)\s+(.+)$/.exec(lieu);
+  if (article) return `${article[1] === 'Le' ? 'au' : 'aux'} ${article[2]}`;
+  return `à ${lieu}`;
+}
+
+/** Âge écrit avec son unité : « 52 ans », « 1 an ». */
+export function ans(age: number): string {
+  return `${age} ${age > 1 ? 'ans' : 'an'}`;
+}
+
+/** Numéro de législature en ordinal : « 17ᵉ », « 1ʳᵉ ». */
+export function ordinalLegislature(numero: number): string {
+  return `${numero}${numero === 1 ? 'ʳᵉ' : 'ᵉ'}`;
+}
+
+/** Période entre deux dates ISO, la fin pouvant manquer : « depuis le 19 juillet 2024 », « du 1 juillet 2024 au 18 juillet 2024 ». */
+export function periode(debut: string, fin: string | null): string {
+  return fin === null
+    ? `depuis le ${dateLongue(debut)}`
+    : `du ${dateLongue(debut)} au ${dateLongue(fin)}`;
+}

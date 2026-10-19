@@ -156,6 +156,7 @@ describe('routes /api/*', () => {
       expect(liste.deputes.length).toBeGreaterThan(50);
       for (const d of liste.deputes) {
         expect(d.slug).toMatch(/^[a-z0-9-]+$/);
+        expect(d.pa).toMatch(/^\d{1,7}$/);
         expect(d.nom).not.toBe('');
         expect(d.nomTri).not.toBe('');
       }
@@ -175,7 +176,20 @@ describe('routes /api/*', () => {
       );
       expect(depute.slug).toBe('jerome-guedj');
       expect(depute.photo).toMatch(/\/photos\/carre\/\d+\.jpg$/);
-      expect(depute.urlFiche).toMatch(/\/dyn\/deputes\/PA\d+$/);
+      expect(depute.liens.assemblee).toMatch(/\/dyn\/deputes\/PA\d+$/);
+      expect(depute.naissance).toEqual({
+        date: '1972-01-23',
+        age: expect.any(Number),
+        lieu: 'Pantin',
+      });
+      expect(depute.profession).toBe('Inspecteur général des affaires sociales');
+      expect(depute.mandat).toMatchObject({ depuis: '2024-07-07', fin: null });
+      expect(depute.groupes.map((g) => g.groupe.abrege)).toEqual(['NI', 'SOC']);
+      expect(depute.partiRattachement).toBe('Parti socialiste');
+      expect(depute.liens).toMatchObject({
+        hatvp: 'https://www.hatvp.fr/pages_nominatives/guedj-jerome',
+        wikipedia: 'https://fr.wikipedia.org/wiki/J%C3%A9r%C3%B4me_Guedj',
+      });
       for (const taux of Object.values(depute.taux)) {
         expect(taux === null || (taux >= 0 && taux <= 1)).toBe(true);
       }
