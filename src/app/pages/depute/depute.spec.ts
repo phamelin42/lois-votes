@@ -63,12 +63,24 @@ describe('DeputePage', () => {
     expect(sansEspaces(tuile(racine, 'Vote avec son groupe')!.textContent)).toContain('99 %');
   });
 
-  it('accompagne chaque chiffre de sa source', async () => {
+  it("présente chaque chiffre comme calculé d'après les scrutins publics, avec son calcul", async () => {
     const { racine } = await afficher();
 
+    for (const nom of ['Participation aux scrutins', "Taux d'abstention", 'Vote avec son groupe']) {
+      expect(sansEspaces(tuile(racine, nom)!.textContent)).toContain(
+        "Calculé d'après les scrutins publics",
+      );
+    }
     expect(sansEspaces(tuile(racine, 'Participation aux scrutins')!.textContent)).toContain(
-      'Datan',
+      'Part des scrutins publics où il ou elle a voté',
     );
+    expect(sansEspaces(racine.textContent)).toContain("Ce ne sont pas des chiffres de l'Assemblée");
+  });
+
+  it('ne cite aucun jeu de données tiers pour les chiffres', async () => {
+    const { racine } = await afficher();
+
+    expect(sansEspaces(racine.textContent)).not.toMatch(/Datan|NosParlementaires/);
   });
 
   it('écrit « — » quand un chiffre est inconnu', async () => {

@@ -9,7 +9,7 @@ import { serverRoutes } from './app.routes.server';
 const serverConfig: ApplicationConfig = {
   providers: [
     provideServerRendering(withRoutes(serverRoutes)),
-    // Pendant le rendu serveur, /api/* s'exécute en mémoire : BFF réel, ou fixtures avec MOCK_BFF=1.
+    // Pendant le rendu serveur, /api/* s'exécute en mémoire, depuis les données de data/ (src/server/bff.ts).
     { provide: APPELER_BFF, useValue: appelerBffActif },
     // L'intercepteur de /api est enregistré comme intercepteur racine, donc après le cache de
     // transfert : celui-ci doit voir la réponse pour la transmettre au navigateur (sinon le

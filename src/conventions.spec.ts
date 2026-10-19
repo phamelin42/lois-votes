@@ -140,10 +140,8 @@ describe('règles du produit', () => {
     expect(fautifs.map(nom)).toEqual([]);
   });
 
-  it('le navigateur ne parle jamais directement à data.gouv.fr (tout passe par /api)', () => {
-    expect(
-      textes.filter((f) => /tabular-api|fetch\(\s*['"`]https?:/.test(lire(f))).map(nom),
-    ).toEqual([]);
+  it("le navigateur n'appelle jamais directement un serveur externe (tout passe par /api)", () => {
+    expect(textes.filter((f) => /fetch\(\s*['"`]https?:/.test(lire(f))).map(nom)).toEqual([]);
   });
 
   it('ne contient aucune clé ni secret', () => {

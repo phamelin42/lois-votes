@@ -42,25 +42,33 @@
 
   <section class="app-depute__section" aria-labelledby="chiffres">
     <h2 id="chiffres" class="title-2">Chiffres clés</h2>
+    <p class="caption">
+      Ces trois chiffres sont calculés par le site, d'après les scrutins publics de la législature,
+      sur la période où ce député était en mandat. Ce ne sont pas des chiffres de l'Assemblée.
+    </p>
     <ul class="app-depute__tuiles">
       <li class="app-depute__tuile">
         <h3 class="title-3">Participation aux scrutins</h3>
         <p class="app-depute__chiffre title-1">{{ pourcent(depute.taux.participation) }}</p>
-        <p class="caption">Part des scrutins publics où il ou elle a voté, d'après Datan.</p>
+        <p class="caption">
+          Part des scrutins publics où il ou elle a voté (pour, contre ou abstention). Les scrutins
+          où il ou elle était absent comptent dans le total. Calculé d'après les scrutins publics.
+        </p>
       </li>
       <li class="app-depute__tuile">
         <h3 class="title-3">Taux d'abstention</h3>
         <p class="app-depute__chiffre title-1">{{ pourcent(depute.taux.abstention) }}</p>
         <p class="caption">
-          Ses abstentions parmi ses votes exprimés (pour, contre, abstention), sur la législature.
-          Calcul à partir des données de NosParlementaires.
+          Ses abstentions parmi ses votes exprimés (pour, contre, abstention). Calculé d'après les
+          scrutins publics.
         </p>
       </li>
       <li class="app-depute__tuile">
         <h3 class="title-3">Vote avec son groupe</h3>
         <p class="app-depute__chiffre title-1">{{ pourcent(depute.taux.loyaute) }}</p>
         <p class="caption">
-          Part des scrutins où il ou elle vote comme la majorité de son groupe, d'après Datan.
+          Part de ses votes exprimés identiques à la position majoritaire de son groupe le jour du
+          vote. Calculé d'après les scrutins publics.
         </p>
       </li>
     </ul>

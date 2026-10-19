@@ -2,11 +2,11 @@
 
 Chaque fichier est un prompt autonome à donner tel quel à un sous-agent (session Claude Code sur le dépôt `phamelin42/lois-votes`). Tous renvoient à [../PLAN.md](../PLAN.md) et [../CONTRAT.md](../CONTRAT.md), poussés avant eux sur la branche `claude/bold-fermi-zihw5t`.
 
-| # | Prompt | Dépend de | Réseau data.gouv.fr |
+| # | Prompt | Dépend de | Accès réseau |
 |---|---|---|---|
-| 00 | ~~Exploration de l'API tabulaire~~ (remplacé par 08, [rapport](00-exploration-api.md) conservé pour mémoire) | | |
+| 00 | ~~Exploration de l'API tabulaire~~ **remplacé par 08** ([rapport](00-exploration-api.md) conservé pour mémoire) | | |
 | 01 | [Squelette Angular SSR + Fuda](01-squelette.md) | rien | non |
-| 02 | ~~Serveur BFF sur l'API tabulaire~~ (remplacé par 09) | | |
+| 02 | ~~Serveur BFF sur l'API tabulaire~~ **remplacé par 09** ([prompt](02-serveur-bff.md) conservé pour mémoire) | | |
 | 03 | [Couche données et chargement intelligent](03-donnees-chargement.md) | 01 | non |
 | 04 | [Composants, shell et accueil](04-ui-shell-accueil.md) | 01 | non |
 | 05 | [Pages loi, scrutin, députés, recherche, à propos](05-pages.md) | 03, 04 | non |
@@ -35,7 +35,7 @@ Les agents d'une même vague travaillent en parallèle : chacun sur **sa propre 
 - Lire `docs/PLAN.md`, `docs/CONTRAT.md`, puis `CLAUDE.md` à la racine (créé par 01), qui reprend les conventions de Fuda.
 - Français pour les libellés, la documentation et les commits.
 - Node ≥ 22.22.3, exigé par Angular 22.
-- Aucune clé API : la source est l'API tabulaire publique de data.gouv.fr.
+- Aucune clé API : les données sont les archives officielles de l'Assemblée nationale, préparées au build (prompts 08 et 09).
 - Ne pas modifier Fuda, ni changer le contrat sans mettre à jour `docs/CONTRAT.md`.
 - Une tâche est terminée quand `npm run lint`, `npm run typecheck`, `npm test` et `npm run build` sont verts.
 

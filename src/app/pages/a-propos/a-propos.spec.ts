@@ -18,18 +18,36 @@ describe('AProposPage', () => {
     expect(TestBed.inject(Title).getTitle()).toContain('À propos');
   });
 
-  it('cite la source des données et sa licence', () => {
+  it("cite l'Assemblée nationale comme seule origine des données, et sa licence", () => {
     const texte = afficher();
 
-    expect(texte).toContain('data.gouv.fr');
-    expect(texte).toContain('NosParlementaires');
-    expect(texte).toContain('Datan');
+    expect(texte).toContain('data.assemblee-nationale.fr');
     expect(texte).toContain('Licence Ouverte 2.0');
-    expect(texte).toMatch(/quotidien/i);
+    expect(texte).not.toMatch(/data\.gouv|NosParlementaires|Datan/i);
   });
 
-  it('signale que la position est rattachée au groupe actuel du député', () => {
-    expect(afficher()).toMatch(/groupe actuel/i);
+  it('annonce la mise à jour nocturne', () => {
+    expect(afficher()).toMatch(/chaque nuit/i);
+  });
+
+  it("définit la participation, l'abstention et le vote avec son groupe", () => {
+    const texte = afficher();
+
+    expect(texte).toContain('Participation aux scrutins');
+    expect(texte).toContain("Taux d'abstention");
+    expect(texte).toContain('Vote avec son groupe');
+    expect(texte).toMatch(/calculés par le site, d'après les scrutins publics/);
+  });
+
+  it('signale la fiche au groupe actuel et les scrutins au groupe du jour du vote', () => {
+    const texte = afficher();
+
+    expect(texte).toMatch(/groupe actuel/i);
+    expect(texte).toMatch(/le jour du vote/i);
+  });
+
+  it('signale que les mises au point ne sont pas appliquées', () => {
+    expect(afficher()).toMatch(/n'applique pas les mises au point/i);
   });
 
   it('explique les notions : vote final, amendement, motion de censure', () => {

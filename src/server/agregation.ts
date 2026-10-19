@@ -1,365 +1,317 @@
 import type {
   Accueil,
   DeputeDetail,
+  DeputeIndex,
   DeputeListe,
   DeputeMini,
+  Groupe,
   LoiCarte,
   LoiDetail,
   Position,
   ScrutinDetail,
   ScrutinResume,
   VoteDepute,
+  VoteGroupe,
 } from '@contrat';
-import type { Cache } from './cache';
-import {
-  classer,
-  estAdopte,
-  lecture,
-  tauxAbstention,
-  titreCourt,
-  ventilerParGroupe,
-} from './classify';
-import { creerIndexDeputes, type DeputeActif, type IndexDeputes } from './index-deputes';
-import { GROUPE_NI } from './groupes';
-import {
-  COLONNES_SCRUTINS,
-  COLONNES_VOTES,
-  POSITION_SOURCE,
-  type ScrutinSource,
-  type VoteSource,
-  identifiantScrutin,
-  versScrutin,
-  versVote,
-} from './source/colonnes';
-import type { Rids } from './source/ressources';
-import type { Tabulaire } from './source/tabulaire';
+import { lecture, titreCourt } from './classify';
+import type { DonneesChargees } from './donnees';
 
-export interface Dependances {
-  tabulaire: Tabulaire;
-  cache: Cache;
-  rids: Rids;
-  maintenant: () => number;
-}
-
-/** Les données de chaque route, déjà agrégées. null quand l'objet demandé n'existe pas. */
+/** Les données de chaque route, déjà agrégées à partir de `data/`. `null` quand l'objet demandé n'existe pas. */
 export interface Agregation {
-  accueil(page: number): Promise<Accueil>;
-  loi(dossier: string): Promise<LoiDetail | null>;
-  scrutin(numero: number): Promise<ScrutinDetail | null>;
-  deputes(): Promise<DeputeListe>;
-  depute(slug: string): Promise<DeputeDetail | null>;
+  accueil(page: number): Accueil;
+  loi(dossier: string): LoiDetail | null;
+  scrutin(numero: number): ScrutinDetail | null;
+  deputes(): DeputeListe;
+  depute(slug: string): DeputeDetail | null;
 }
 
 const TAILLE_PAGE_ACCUEIL = 10;
 const NB_DERNIERS_VOTES = 10;
+/** Réponses gardées en mémoire (les plus récemment demandées) : la mémoire ne grandit pas avec les visites. */
+const TAILLE_MEMO = { accueil: 50, loi: 150, scrutin: 150, depute: 700 };
+
 const URL_SCRUTIN = (numero: number) =>
   `https://www.assemblee-nationale.fr/dyn/17/scrutins/${numero}`;
-
-// Durées du cache mémoire, en secondes. Les votes d'un scrutin ne changent pas : ils tiennent plus longtemps.
-const CACHE = {
-  finaux: { ttl: 1800, stale: 86400 },
-  accueil: { ttl: 1800, stale: 86400 },
-  loi: { ttl: 3600, stale: 86400 },
-  scrutin: { ttl: 3600, stale: 86400 },
-  depute: { ttl: 3600, stale: 86400 },
-  deputes: { ttl: 21600, stale: 86400 },
-  votes: { ttl: 86400, stale: 604800 },
-};
-
-const parDateDesc = (a: ScrutinSource, b: ScrutinSource) => Date.parse(b.date) - Date.parse(a.date);
-const estFinal = (scrutin: ScrutinSource) => classer(scrutin.titre) === 'final';
-const photoDe = (pa: string) =>
+const URL_FICHE = (pa: string) => `https://www.assemblee-nationale.fr/dyn/deputes/${pa}`;
+/** Le fichier de la photo porte le numéro sans le préfixe « PA » (avec : 404). */
+const URL_PHOTO = (pa: string) =>
   `https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/${pa.replace(/^PA/, '')}.jpg`;
 
-export function creerAgregation({ tabulaire, cache, rids, maintenant }: Dependances): Agregation {
-  const index = creerIndexDeputes({ tabulaire, cache, rids });
+const POSITIONS: readonly Position[] = ['pour', 'contre', 'abstention', 'nonvotant'];
+const POSITION_DE_CASE: Record<string, Position | undefined> = {
+  P: 'pour',
+  C: 'contre',
+  A: 'abstention',
+  N: 'nonvotant',
+};
+
+/** Mémoïsation bornée : la clé la moins récemment demandée sort la première. */
+function memoiser<K, V>(taille: number, calculer: (cle: K) => V): (cle: K) => V {
+  const valeurs = new Map<K, V>();
+  return (cle) => {
+    if (valeurs.has(cle)) {
+      const valeur = valeurs.get(cle) as V;
+      valeurs.delete(cle);
+      valeurs.set(cle, valeur);
+      return valeur;
+    }
+    const valeur = calculer(cle);
+    valeurs.set(cle, valeur);
+    if (valeurs.size > taille) valeurs.delete(valeurs.keys().next().value as K);
+    return valeur;
+  };
+}
+
+/** Nom du texte quand un dossier n'a pas (encore) de vote sur l'ensemble : « … du projet de loi X » donne « Projet de loi X ». */
+const TEXTE_DE_LOI = /\b(?:du|de la)\s+(?:projet|proposition) de loi\b.*$/i;
+function titreCourtDuTexte(titre: string): string {
+  const texte = TEXTE_DE_LOI.exec(titre);
+  return titreCourt(texte ? `l'ensemble ${texte[0]}` : titre);
+}
+
+export function creerAgregation(donnees: DonneesChargees): Agregation {
+  const groupes: Groupe[] = donnees.groupes.map((g) => ({
+    id: g.id,
+    abrege: g.abrege,
+    libelle: g.libelle,
+    couleur: g.couleur,
+  }));
+  const estFinal = (s: number) => donnees.type(s) === 'final';
+
+  function resume(s: number): ScrutinResume {
+    return {
+      numero: donnees.numero(s),
+      date: donnees.date(s),
+      titre: donnees.titre(s),
+      type: donnees.type(s),
+      adopte: donnees.adopte(s),
+      compte: donnees.compte(s),
+      urlOfficielle: URL_SCRUTIN(donnees.numero(s)),
+    };
+  }
 
   /**
-   * Tous les votes sur l'ensemble d'un texte, du plus récent au plus ancien, avec la date de leur chargement
-   * (c'est la date des données affichée : elle reste juste quand on sert une valeur périmée).
+   * Les groupes d'un scrutin, du plus nombreux au moins nombreux (puis dans l'ordre officiel des groupes).
+   * Un groupe dont aucun député n'est listé (ni pour, ni contre, ni abstention, ni non-votant) n'est pas affiché :
+   * une ligne à zéro « non-votant » laisserait croire que ses membres se sont tenus à l'écart du vote.
    */
-  const finaux = () =>
-    cache.memo('finaux', CACHE.finaux.ttl, CACHE.finaux.stale, async () => {
-      const lignes = await tabulaire.toutesLesLignes(rids.scrutins, {
-        filtres: [{ colonne: COLONNES_SCRUTINS.titre, op: 'contains', valeur: "l'ensemble" }],
-        tri: { colonne: COLONNES_SCRUTINS.date, ordre: 'desc' },
-      });
-      const scrutins = lignes.flatMap((ligne) => {
-        const scrutin = versScrutin(ligne);
-        return scrutin && estFinal(scrutin) ? [scrutin] : [];
-      });
-      return { scrutins, chargeLe: maintenant() };
-    });
+  function votesDesGroupes(s: number): VoteGroupe[] {
+    const taille = (c: VoteGroupe['compte']) => c.pour + c.contre + c.abstention + c.nonvotant;
+    return donnees
+      .groupesDuScrutin(s)
+      .filter(({ compte }) => taille(compte) > 0)
+      .sort((a, b) => taille(b.compte) - taille(a.compte) || a.g - b.g)
+      .map(({ g, position, compte }) => ({ groupe: groupes[g], position, compte }));
+  }
+
+  /** Les votes sur l'ensemble d'un texte, du plus récent au plus ancien (calcul unique). */
+  const finaux = donnees.ordreRecent.filter(estFinal);
 
   /** Une seule carte par texte : le vote final le plus récent de chaque dossier (sans dossier : chacun). */
-  async function finauxUniques(): Promise<{ scrutins: ScrutinSource[]; chargeLe: number }> {
-    const { scrutins: tous, chargeLe } = await finaux();
+  const finauxUniques = (() => {
     const vus = new Set<string>();
-    const uniques: ScrutinSource[] = [];
-    for (const scrutin of tous) {
-      if (scrutin.dossier !== null) {
-        if (vus.has(scrutin.dossier)) continue;
-        vus.add(scrutin.dossier);
-      }
-      uniques.push(scrutin);
-    }
-    return { scrutins: uniques, chargeLe };
-  }
+    return finaux.filter((s) => {
+      const dossier = donnees.dossier(s);
+      if (dossier === null) return true;
+      if (vus.has(dossier)) return false;
+      vus.add(dossier);
+      return true;
+    });
+  })();
 
-  /** Votes de plusieurs scrutins, demandés par paquets `scrutin_id__in`, groupés par scrutin. */
-  async function votesDes(ids: string[]): Promise<Map<string, VoteSource[]>> {
-    const parScrutin = new Map<string, VoteSource[]>();
-    if (ids.length === 0) return parScrutin;
-    const votes = await cache.memo(
-      `votes:${ids.join(',')}`,
-      CACHE.votes.ttl,
-      CACHE.votes.stale,
-      async () => {
-        const lignes = await tabulaire.toutesLesLignes(rids.votes, {
-          filtres: [{ colonne: COLONNES_VOTES.scrutin, op: 'in', valeur: ids }],
-        });
-        return lignes.flatMap((ligne) => {
-          const vote = versVote(ligne);
-          return vote ? [vote] : [];
-        });
-      },
-    );
-    for (const vote of votes) {
-      const liste = parScrutin.get(vote.scrutinId) ?? [];
-      liste.push(vote);
-      parScrutin.set(vote.scrutinId, liste);
-    }
-    return parScrutin;
-  }
+  /** Titre court d'un dossier : celui de son vote final le plus récent, sinon dérivé du texte cité par ses scrutins. */
+  const titreDuDossier = memoiser(1000, (dossier: string): string => {
+    const scrutins = donnees.parDossier.get(dossier) ?? [];
+    const dernier = scrutins.find(estFinal);
+    return dernier !== undefined
+      ? titreCourt(donnees.titre(dernier))
+      : titreCourtDuTexte(donnees.titre(scrutins[0]));
+  });
 
-  const groupeDe = (idx: IndexDeputes) => (slug: string) =>
-    idx.parSlug.get(slug)?.groupe ?? undefined;
-
-  const loiMemo = (dossier: string) =>
-    cache.memo(`loi:${dossier}`, CACHE.loi.ttl, CACHE.loi.stale, () => chargerLoi(dossier));
-
-  function resume(scrutin: ScrutinSource): ScrutinResume {
-    const type = classer(scrutin.titre);
+  function carte(s: number): LoiCarte {
     return {
-      numero: scrutin.numero,
-      date: scrutin.date,
-      titre: scrutin.titre,
-      type,
-      adopte: estAdopte(type, scrutin.compte),
-      compte: scrutin.compte,
-      urlOfficielle: URL_SCRUTIN(scrutin.numero),
-    };
-  }
-
-  function carte(scrutin: ScrutinSource, votes: VoteSource[], idx: IndexDeputes): LoiCarte {
-    return {
-      dossier: scrutin.dossier,
-      titreCourt: titreCourt(scrutin.titre),
-      titreOfficiel: scrutin.titre,
-      lecture: lecture(scrutin.titre),
+      dossier: donnees.dossier(s),
+      titreCourt: titreCourt(donnees.titre(s)),
+      titreOfficiel: donnees.titre(s),
+      lecture: lecture(donnees.titre(s)),
       statut: null,
-      voteFinal: resume(scrutin),
-      groupes: ventilerParGroupe(votes, groupeDe(idx)),
+      voteFinal: resume(s),
+      groupes: votesDesGroupes(s),
     };
   }
 
-  async function chargerLoi(dossier: string): Promise<LoiDetail | null> {
-    const lignes = await tabulaire.toutesLesLignes(rids.scrutins, {
-      filtres: [{ colonne: COLONNES_SCRUTINS.dossier, op: 'exact', valeur: dossier }],
-      tri: { colonne: COLONNES_SCRUTINS.date, ordre: 'desc' },
-    });
-    const scrutins = lignes.flatMap((ligne) => {
-      const scrutin = versScrutin(ligne);
-      return scrutin ? [scrutin] : [];
-    });
-    scrutins.sort(parDateDesc);
-    if (scrutins.length === 0) return null;
+  const accueil = memoiser(TAILLE_MEMO.accueil, (page: number): Accueil => {
+    const debut = (page - 1) * TAILLE_PAGE_ACCUEIL;
+    return {
+      lois: finauxUniques.slice(debut, debut + TAILLE_PAGE_ACCUEIL).map(carte),
+      page,
+      pageSuivante: debut + TAILLE_PAGE_ACCUEIL < finauxUniques.length,
+      miseAJour: donnees.meta.genereLe,
+    };
+  });
 
+  const loi = memoiser(TAILLE_MEMO.loi, (dossier: string): LoiDetail | null => {
+    const scrutins = donnees.parDossier.get(dossier);
+    if (!scrutins) return null;
     const votesFinaux = scrutins.filter(estFinal);
-    const dernier: ScrutinSource | undefined = votesFinaux[0];
-    const reference = dernier ?? scrutins[0];
-    let voteFinal: LoiDetail['voteFinal'] = null;
-    if (dernier) {
-      const [votes, idx] = await Promise.all([votesDes([dernier.id]), index()]);
-      voteFinal = {
-        ...resume(dernier),
-        groupes: ventilerParGroupe(votes.get(dernier.id) ?? [], groupeDe(idx)),
-      };
-    }
+    const dernier: number | undefined = votesFinaux[0];
     return {
       dossier,
-      titreCourt: titreCourt(reference.titre),
-      titreOfficiel: reference.titre,
-      lecture: dernier ? lecture(dernier.titre) : null,
+      titreCourt: titreDuDossier(dossier),
+      titreOfficiel: donnees.titre(dernier ?? scrutins[0]),
+      lecture: dernier !== undefined ? lecture(donnees.titre(dernier)) : null,
       statut: null,
       urlDossier: null,
-      voteFinal,
+      voteFinal:
+        dernier !== undefined ? { ...resume(dernier), groupes: votesDesGroupes(dernier) } : null,
       lectures: votesFinaux.slice(1).map(resume),
-      scrutins: scrutins.filter((scrutin) => !estFinal(scrutin)).map(resume),
+      scrutins: scrutins.filter((s) => !estFinal(s)).map(resume),
+    };
+  });
+
+  /** Députés par nom de famille, puis nom complet : l'ordre des listes nominatives et de l'annuaire. */
+  const collateur = new Intl.Collator('fr');
+  const ordreAlphabetique = donnees.deputes
+    .map((_, d) => d)
+    .sort(
+      (a, b) =>
+        collateur.compare(donnees.deputes[a].nomTri, donnees.deputes[b].nomTri) ||
+        collateur.compare(donnees.deputes[a].nom, donnees.deputes[b].nom),
+    );
+
+  const scrutin = memoiser(TAILLE_MEMO.scrutin, (numero: number): ScrutinDetail | null => {
+    const s = donnees.parNumero.get(numero);
+    if (s === undefined) return null;
+
+    // Qui a voté quoi : un bloc par groupe (celui du jour du vote) et par position, dans l'ordre des groupes.
+    const blocs = new Map<string, DeputeMini[]>();
+    for (const d of ordreAlphabetique) {
+      const position = POSITION_DE_CASE[donnees.caseVote(s, d)];
+      if (!position) continue; // absent (X) ou pas en mandat (-) : aucune liste ne le mentionne
+      const g = donnees.groupeAuVote(s, d);
+      const cle = `${g}|${position}`;
+      const liste = blocs.get(cle) ?? [];
+      liste.push({ slug: donnees.deputes[d].slug, nom: donnees.deputes[d].nom });
+      blocs.set(cle, liste);
+    }
+    const nominatif: ScrutinDetail['nominatif'] = [];
+    for (const { g } of donnees.groupesDuScrutin(s)) {
+      for (const position of POSITIONS) {
+        const deputes = blocs.get(`${g}|${position}`);
+        if (deputes) nominatif.push({ groupeId: groupes[g].id, position, deputes });
+      }
+    }
+
+    const dossier = donnees.dossier(s);
+    return {
+      ...resume(s),
+      loi: dossier ? { dossier, titreCourt: titreDuDossier(dossier) } : null,
+      groupes: votesDesGroupes(s),
+      nominatif,
+    };
+  });
+
+  function construireListeDeputes(): DeputeListe {
+    const actifs = donnees.deputes.filter((d) => d.actif);
+    const abregeDe = (id: string | null) => groupes.find((g) => g.id === id)?.abrege ?? null;
+    const index: DeputeIndex[] = actifs.map((d) => ({
+      slug: d.slug,
+      nom: d.nom,
+      nomTri: d.nomTri,
+      groupe: abregeDe(d.groupe),
+      departement: d.departement,
+      circonscription: d.circonscription,
+    }));
+    index.sort((a, b) => collateur.compare(a.nomTri, b.nomTri) || collateur.compare(a.nom, b.nom));
+    const idsActuels = new Set(actifs.map((d) => d.groupe));
+    return {
+      deputes: index,
+      groupes: groupes
+        .filter((g) => idsActuels.has(g.id))
+        .sort((a, b) => collateur.compare(a.abrege, b.abrege) || (a.id < b.id ? -1 : 1)),
+      loisRecentes: finauxUniques.flatMap((s) => {
+        const dossier = donnees.dossier(s);
+        return dossier
+          ? [{ dossier, titreCourt: titreCourt(donnees.titre(s)), date: donnees.date(s) }]
+          : [];
+      }),
     };
   }
+  let listeDeputes: DeputeListe | undefined;
 
-  async function chargerScrutin(numero: number): Promise<ScrutinDetail | null> {
-    const lignes = await tabulaire.toutesLesLignes(rids.scrutins, {
-      filtres: [{ colonne: COLONNES_SCRUTINS.id, op: 'exact', valeur: identifiantScrutin(numero) }],
-    });
-    const scrutin: ScrutinSource | undefined = lignes.flatMap((ligne) => {
-      const trouve = versScrutin(ligne);
-      return trouve ? [trouve] : [];
-    })[0];
-    if (!scrutin) return null;
-
-    const [votes, idx] = await Promise.all([
-      votesDes([scrutin.id]).then((m) => m.get(scrutin.id) ?? []),
-      index(),
-    ]);
-    const loiDuScrutin = scrutin.dossier ? await loiMemo(scrutin.dossier) : null;
-    const nominatif = new Map<
-      string,
-      { groupeId: string; position: Position; deputes: DeputeMini[] }
-    >();
-    for (const vote of votes) {
-      const groupeId = (groupeDe(idx)(vote.slug) ?? GROUPE_NI).id;
-      const cle = `${groupeId}|${vote.position}`;
-      const entree = nominatif.get(cle) ?? { groupeId, position: vote.position, deputes: [] };
-      entree.deputes.push({ slug: vote.slug, nom: idx.parSlug.get(vote.slug)?.nom ?? vote.slug });
-      nominatif.set(cle, entree);
+  /**
+   * Taux d'un député, calculés sur les scrutins où il était en mandat (case ≠ « - ») :
+   * participation = (P + C + A) / (P + C + A + N + X) ; abstention = A / (P + C + A) ;
+   * loyauté = votes égaux à la position de son groupe ce jour-là / votes exprimés (hors groupe « partagé »).
+   */
+  function taux(d: number): DeputeDetail['taux'] {
+    let enMandat = 0;
+    let exprimes = 0;
+    let abstentions = 0;
+    let comparables = 0;
+    let alignes = 0;
+    for (let s = 0; s < donnees.nbScrutins; s++) {
+      const caseVote = donnees.caseVote(s, d);
+      if (caseVote === '-') continue;
+      enMandat++;
+      if (caseVote !== 'P' && caseVote !== 'C' && caseVote !== 'A') continue;
+      exprimes++;
+      if (caseVote === 'A') abstentions++;
+      const g = donnees.groupeAuVote(s, d);
+      const positionGroupe = g >= 0 ? donnees.positionDuGroupe(s, g) : null;
+      if (positionGroupe === null || positionGroupe === 'partage' || positionGroupe === 'nonvotant')
+        continue;
+      comparables++;
+      if (positionGroupe === POSITION_DE_CASE[caseVote]) alignes++;
     }
     return {
-      ...resume(scrutin),
-      loi: scrutin.dossier
-        ? {
-            dossier: scrutin.dossier,
-            titreCourt: loiDuScrutin?.titreCourt ?? titreCourt(scrutin.titre),
-          }
-        : null,
-      groupes: ventilerParGroupe(votes, groupeDe(idx)),
-      nominatif: [...nominatif.values()],
+      participation: enMandat > 0 ? exprimes / enMandat : null,
+      abstention: exprimes > 0 ? abstentions / exprimes : null,
+      loyaute: comparables > 0 ? alignes / comparables : null,
     };
   }
 
-  async function chargerDepute(slug: string): Promise<DeputeDetail | null> {
-    const idx = await index();
-    const depute: DeputeActif | undefined = idx.parSlug.get(slug);
-    if (!depute) return null;
+  /** Ses votes sur les 10 derniers votes finaux où il était en mandat. */
+  function derniersVotes(d: number): VoteDepute[] {
+    const votes: VoteDepute[] = [];
+    for (const s of finaux) {
+      if (votes.length === NB_DERNIERS_VOTES) break;
+      const caseVote = donnees.caseVote(s, d);
+      if (caseVote === '-') continue;
+      const g = donnees.groupeAuVote(s, d);
+      votes.push({
+        loi: { dossier: donnees.dossier(s), titreCourt: titreCourt(donnees.titre(s)) },
+        numero: donnees.numero(s),
+        date: donnees.date(s),
+        position: POSITION_DE_CASE[caseVote] ?? null,
+        positionGroupe: g >= 0 ? donnees.positionDuGroupe(s, g) : null,
+        adopte: donnees.adopte(s),
+      });
+    }
+    return votes;
+  }
 
-    const derniers = (await finauxUniques()).scrutins.slice(0, NB_DERNIERS_VOTES);
-    const pourSlug = { colonne: COLONNES_VOTES.depute, op: 'exact' as const, valeur: slug };
-    const [votes, suffrages, abstentions] = await Promise.all([
-      votesDes(derniers.map((s) => s.id)),
-      tabulaire.compter(rids.votes, {
-        filtres: [
-          pourSlug,
-          {
-            colonne: COLONNES_VOTES.position,
-            op: 'in',
-            valeur: [POSITION_SOURCE.pour, POSITION_SOURCE.contre, POSITION_SOURCE.abstention],
-          },
-        ],
-      }),
-      tabulaire.compter(rids.votes, {
-        filtres: [
-          pourSlug,
-          { colonne: COLONNES_VOTES.position, op: 'exact', valeur: POSITION_SOURCE.abstention },
-        ],
-      }),
-    ]);
-
-    const groupeId = (depute.groupe ?? GROUPE_NI).id;
-    const dernieresLois: VoteDepute[] = derniers.map((scrutin) => {
-      const votesDuScrutin = votes.get(scrutin.id) ?? [];
-      const sonVote = votesDuScrutin.find((vote) => vote.slug === slug);
-      const positionGroupe =
-        ventilerParGroupe(votesDuScrutin, groupeDe(idx)).find((g) => g.groupe.id === groupeId)
-          ?.position ?? null;
-      return {
-        loi: { dossier: scrutin.dossier, titreCourt: titreCourt(scrutin.titre) },
-        numero: scrutin.numero,
-        date: scrutin.date,
-        position: sonVote?.position ?? null,
-        positionGroupe,
-        adopte: estAdopte(classer(scrutin.titre), scrutin.compte),
-      };
-    });
-
-    const photo = depute.datan ? photoDe(depute.datan.pa) : null;
+  const depute = memoiser(TAILLE_MEMO.depute, (slug: string): DeputeDetail | null => {
+    const d = donnees.parSlug.get(slug);
+    if (d === undefined) return null;
+    const fiche = donnees.deputes[d];
     return {
       slug,
-      nom: depute.nom,
-      photo,
-      groupe: depute.groupe ?? GROUPE_NI,
-      circonscription: depute.circonscription,
-      urlFiche: depute.datan
-        ? `https://www.assemblee-nationale.fr/dyn/17/deputes/${depute.datan.pa}`
-        : `https://nosparlementaires.fr/${slug}`,
-      taux: {
-        participation: depute.datan?.participation ?? null,
-        abstention: tauxAbstention(abstentions, suffrages),
-        loyaute: depute.datan?.loyaute ?? null,
-      },
-      dernieresLois,
+      nom: fiche.nom,
+      photo: URL_PHOTO(fiche.pa),
+      groupe: groupes.find((g) => g.id === fiche.groupe) ?? null,
+      circonscription: fiche.circonscription,
+      urlFiche: URL_FICHE(fiche.pa),
+      taux: taux(d),
+      dernieresLois: derniersVotes(d),
     };
-  }
+  });
 
   return {
-    accueil: (page) =>
-      cache.memo(`accueil:${page}`, CACHE.accueil.ttl, CACHE.accueil.stale, async () => {
-        const { scrutins: liste, chargeLe } = await finauxUniques();
-        const debut = (page - 1) * TAILLE_PAGE_ACCUEIL;
-        const tranche = liste.slice(debut, debut + TAILLE_PAGE_ACCUEIL);
-        const [votes, idx] = await Promise.all([votesDes(tranche.map((s) => s.id)), index()]);
-        return {
-          lois: tranche.map((scrutin) => carte(scrutin, votes.get(scrutin.id) ?? [], idx)),
-          page,
-          pageSuivante: debut + TAILLE_PAGE_ACCUEIL < liste.length,
-          miseAJour: new Date(chargeLe).toISOString(),
-        };
-      }),
-
-    loi: loiMemo,
-
-    scrutin: (numero) =>
-      cache.memo(`scrutin:${numero}`, CACHE.scrutin.ttl, CACHE.scrutin.stale, () =>
-        chargerScrutin(numero),
-      ),
-
-    deputes: () =>
-      cache.memo('deputes', CACHE.deputes.ttl, CACHE.deputes.stale, async () => {
-        const idx = await index();
-        const deputes = idx.deputes
-          .map((d) => ({
-            slug: d.slug,
-            nom: d.nom,
-            nomTri: d.nomTri,
-            groupe: d.groupe?.abrege ?? null,
-            departement: d.departement,
-            circonscription: d.circonscription,
-          }))
-          .sort(
-            (a, b) => a.nomTri.localeCompare(b.nomTri, 'fr') || a.nom.localeCompare(b.nom, 'fr'),
-          );
-        const groupes = new Map(
-          idx.deputes.map((d) => [d.groupe?.id ?? GROUPE_NI.id, d.groupe ?? GROUPE_NI]),
-        );
-        const loisRecentes = (await finauxUniques()).scrutins.flatMap((scrutin) =>
-          scrutin.dossier
-            ? [
-                {
-                  dossier: scrutin.dossier,
-                  titreCourt: titreCourt(scrutin.titre),
-                  date: scrutin.date,
-                },
-              ]
-            : [],
-        );
-        return {
-          deputes,
-          groupes: [...groupes.values()].sort((a, b) => a.abrege.localeCompare(b.abrege, 'fr')),
-          loisRecentes,
-        };
-      }),
-
-    depute: (slug) =>
-      cache.memo(`depute:${slug}`, CACHE.depute.ttl, CACHE.depute.stale, () => chargerDepute(slug)),
+    accueil,
+    loi,
+    scrutin,
+    deputes: () => (listeDeputes ??= construireListeDeputes()),
+    depute,
   };
 }

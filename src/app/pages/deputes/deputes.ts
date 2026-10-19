@@ -71,13 +71,22 @@ export class DeputesPage {
     computation: () => PAR_PAGE,
   });
 
+  /**
+   * Les groupes par abrégé : deux organes peuvent porter le même (UDR a été recréé en 2025), et le filtre
+   * `?groupe=` comme l'index des députés parlent en abrégés. Le serveur trie les groupes par abrégé puis par
+   * identifiant : le dernier organe d'un abrégé, le plus récent, donne son libellé.
+   */
+  private readonly groupesParAbrege = computed(
+    () => new Map((this.liste()?.groupes ?? []).map((g) => [g.abrege, g])),
+  );
+
   protected readonly cartes = computed<CarteDepute[]>(() => {
     const liste = this.liste();
     if (!liste) return [];
     const groupe = this.groupe() ?? '';
     const dept = this.dept() ?? '';
     const q = normaliser(this.q() ?? '');
-    const groupes = new Map(liste.groupes.map((g) => [g.id, g]));
+    const groupes = this.groupesParAbrege();
 
     return liste.deputes
       .filter(
@@ -97,7 +106,7 @@ export class DeputesPage {
 
   protected readonly optionsGroupes = computed<FdSelectOption[]>(() => [
     { value: '', label: 'Tous les groupes' },
-    ...(this.liste()?.groupes ?? []).map((g) => ({ value: g.id, label: g.libelle })),
+    ...[...this.groupesParAbrege().values()].map((g) => ({ value: g.abrege, label: g.libelle })),
   ]);
 
   protected readonly optionsDepartements = computed<FdSelectOption[]>(() => {

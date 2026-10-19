@@ -1,7 +1,7 @@
 import { By, Title } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { AppPrefetch } from '../../data/prefetch';
-import { deputeListe } from '../../testing/builders';
+import { UDR_2024, UDR_2025, deputeListe } from '../../testing/builders';
 import { configurerPage, monter, stabiliser } from '../../testing/page';
 import { DeputesPage } from './deputes';
 
@@ -33,6 +33,32 @@ describe('DeputesPage', () => {
     const { noms } = await afficher({ groupe: 'RN' });
 
     expect(noms()).toEqual(['Alice Durand', 'Bruno Martin']);
+  });
+
+  it('confond les deux organes « UDR » : le filtre et la liste parlent en abrégés', async () => {
+    const liste = deputeListe();
+    liste.deputes.push({
+      slug: 'eric-ciotti',
+      nom: 'Éric Ciotti',
+      nomTri: 'Ciotti',
+      groupe: 'UDR',
+      departement: '06',
+      circonscription: 'Alpes-Maritimes (1)',
+    });
+    liste.groupes.push(UDR_2024, UDR_2025);
+
+    const { noms, racine } = await afficher({ groupe: 'UDR' }, liste);
+
+    expect(noms()).toEqual(['Éric Ciotti']);
+    expect(
+      racine.querySelector('.app-depute-carte app-group-pill')!.textContent!.replace(/\s+/g, ' '),
+    ).toContain('UDR');
+    const select = racine.querySelector('fd-select')!;
+    const options = Array.from(select.querySelectorAll('option, [role="option"]'));
+    expect(
+      options.filter((o) => o.textContent!.trim() === 'Union des droites pour la République'),
+    ).toHaveLength(1);
+    expect(options.filter((o) => o.textContent!.trim() === 'UDR')).toHaveLength(0);
   });
 
   it("filtre par département depuis le paramètre d'URL", async () => {

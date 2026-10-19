@@ -13,24 +13,42 @@ import type {
 } from '@contrat';
 
 export const RN: Groupe = {
-  id: 'RN',
+  id: 'PO845401',
   abrege: 'RN',
   libelle: 'Rassemblement National',
   couleur: '#1b3a8a',
 };
 export const SOC: Groupe = {
-  id: 'SOC',
+  id: 'PO845419',
   abrege: 'SOC',
   libelle: 'Socialistes et apparentés',
   couleur: '#e4002b',
 };
 export const LFI: Groupe = {
-  id: 'LFI-NFP',
+  id: 'PO845413',
   abrege: 'LFI-NFP',
   libelle: 'La France insoumise - Nouveau Front Populaire',
   couleur: '#c4001d',
 };
-export const NI: Groupe = { id: 'NI', abrege: 'NI', libelle: 'Non inscrits', couleur: null };
+export const NI: Groupe = {
+  id: 'PO840056',
+  abrege: 'NI',
+  libelle: 'Non inscrits',
+  couleur: null,
+};
+/** Deux organes officiels portent l'abrégé « UDR » : le groupe d'origine (2024) et celui recréé en 2025. */
+export const UDR_2024: Groupe = {
+  id: 'PO847173',
+  abrege: 'UDR',
+  libelle: 'UDR',
+  couleur: '#3367a7',
+};
+export const UDR_2025: Groupe = {
+  id: 'PO872880',
+  abrege: 'UDR',
+  libelle: 'Union des droites pour la République',
+  couleur: '#3367a7',
+};
 
 export const compte = (pour = 312, contre = 201, abstention = 18, nonvotant = 46): Compte => ({
   pour,
@@ -120,12 +138,12 @@ export function scrutinDetail(surcharge: Partial<ScrutinDetail> = {}): ScrutinDe
     groupes: groupes(),
     nominatif: [
       {
-        groupeId: 'RN',
+        groupeId: 'PO845401',
         position: 'pour',
         deputes: [{ slug: 'alice-durand', nom: 'Alice Durand' }],
       },
       {
-        groupeId: 'SOC',
+        groupeId: 'PO845419',
         position: 'contre',
         deputes: [{ slug: 'emilie-laurent', nom: 'Émilie Laurent' }],
       },

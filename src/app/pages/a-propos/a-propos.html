@@ -12,24 +12,24 @@
 <section class="app-a-propos__section" aria-labelledby="sources">
   <h2 id="sources" class="title-2">D'où viennent les données</h2>
   <p class="body">
-    Les données sont lues dans l'API tabulaire de data.gouv.fr, qui publie deux jeux dérivés de
-    l'open data de l'Assemblée nationale :
+    Toutes les données viennent de l'open data officiel de l'Assemblée nationale (<a
+      fdLink
+      href="https://data.assemblee-nationale.fr"
+      >data.assemblee-nationale.fr</a
+    >), publié sous Licence Ouverte 2.0 : les scrutins publics de la 17ᵉ législature, avec le vote
+    de chaque député, puis la liste des députés, de leurs mandats et de leurs groupes. Les photos et
+    les fiches des députés sont celles du site de l'Assemblée. Le site n'utilise aucune autre
+    source.
   </p>
-  <ul class="app-a-propos__liste body">
-    <li>
-      <strong>NosParlementaires</strong> : les scrutins, le vote de chaque député et la liste des
-      députés. Jeu sur
-      <a fdLink href="https://www.data.gouv.fr/fr/search/?q=NosParlementaires">data.gouv.fr</a>.
-    </li>
-    <li>
-      <strong>Datan</strong> : les photos officielles, la participation aux scrutins et la loyauté
-      de chaque député. Jeu sur
-      <a fdLink href="https://www.data.gouv.fr/fr/search/?q=Datan">data.gouv.fr</a>.
-    </li>
-  </ul>
+</section>
+
+<section class="app-a-propos__section" aria-labelledby="miseajour">
+  <h2 id="miseajour" class="title-2">Mise à jour nocturne</h2>
   <p class="body">
-    Ces données sont publiées sous Licence Ouverte 2.0. Elles sont mises à jour chaque jour, de
-    façon quotidienne ; la date de mise à jour figure en bas de chaque page.
+    Les données sont préparées chaque nuit : le site télécharge les archives officielles du jour,
+    les réduit, puis se redéploie avec ces données. Si le téléchargement échoue, la version de la
+    veille reste en ligne. La date de la dernière mise à jour est indiquée en bas de la page
+    d'accueil.
   </p>
 </section>
 
@@ -51,15 +51,44 @@
     <dd>Un vote qui peut renverser le gouvernement. Ce n'est pas un vote sur une loi.</dd>
     <dt>Adopté ou rejeté</dt>
     <dd>
-      Le site calcule le résultat à partir des décomptes : un texte est adopté quand il réunit plus
-      de voix pour que de voix contre. Pour une motion de censure, il faut au moins 289 voix pour,
-      la majorité absolue des membres de l'Assemblée. Le résultat est ainsi « Adopté par l'Assemblée
-      » ou « Rejeté par l'Assemblée ».
+      C'est le résultat publié par l'Assemblée pour le scrutin : « Adopté par l'Assemblée » ou «
+      Rejeté par l'Assemblée ».
     </dd>
     <dt>Ce que ne dit pas « adopté »</dt>
     <dd>
       Une adoption à l'Assemblée n'est pas une loi promulguée. Un texte ne devient loi qu'après le
       vote conforme des deux assemblées, puis sa promulgation.
+    </dd>
+    <dt>Position d'un groupe</dt>
+    <dd>
+      La position qui a réuni le plus de voix dans le groupe parmi pour, contre et abstention. «
+      Partagé » signale une égalité en tête ; « non-votant » un groupe dont aucun membre n'a exprimé
+      de suffrage. Ce calcul est fait par le site sur les décomptes de chaque groupe.
+    </dd>
+  </dl>
+</section>
+
+<section class="app-a-propos__section" aria-labelledby="taux">
+  <h2 id="taux" class="title-2">Les chiffres d'un député</h2>
+  <p class="body">
+    Ces trois chiffres sont calculés par le site, d'après les scrutins publics de la législature, et
+    uniquement sur la période où le député était en mandat. Ce ne sont pas des chiffres publiés par
+    l'Assemblée.
+  </p>
+  <dl class="app-a-propos__notions body">
+    <dt>Participation aux scrutins</dt>
+    <dd>
+      Le nombre de scrutins où le député a voté (pour, contre ou abstention), divisé par le nombre
+      de scrutins publics tenus pendant son mandat : ceux où il a voté, ceux où il est resté
+      non-votant et ceux où il était absent.
+    </dd>
+    <dt>Taux d'abstention</dt>
+    <dd>Ses abstentions, divisées par ses votes exprimés (pour, contre ou abstention).</dd>
+    <dt>Vote avec son groupe</dt>
+    <dd>
+      Le nombre de fois où son vote est le même que la position majoritaire de son groupe le jour du
+      scrutin, divisé par ses votes exprimés. Les scrutins où le groupe est partagé à égalité n'y
+      entrent pas.
     </dd>
   </dl>
 </section>
@@ -68,14 +97,28 @@
   <h2 id="limites" class="title-2">Limites</h2>
   <ul class="app-a-propos__liste body">
     <li>
-      La position d'un député est rattachée à son groupe actuel. Les rares députés qui ont changé de
-      groupe apparaissent dans le groupe qu'ils ont aujourd'hui, pas dans celui qu'ils avaient au
-      moment du vote.
+      La fiche d'un député montre son groupe actuel. Les pages d'un scrutin et d'une loi montrent,
+      elles, le groupe qu'avait chaque député le jour du vote : un député qui a changé de groupe
+      apparaît dans les deux.
+    </li>
+    <li>
+      Le site n'applique pas les mises au point, ces corrections de vote que les députés peuvent
+      demander après un scrutin. Elles concernent environ un scrutin sur cinq : les décomptes
+      affichés sont ceux de la liste officielle avant correction.
     </li>
     <li>
       Le site parle de participation aux scrutins, et non de présence : l'Assemblée ne publie ni la
-      présence en séance ni la présence en commission. La participation compte les scrutins publics
-      où le député a voté.
+      présence en séance ni la présence en commission. Un député peut être présent dans l'hémicycle
+      sans avoir voté.
+    </li>
+    <li>
+      Beaucoup de scrutins, dont plus de la moitié des votes finaux, ne sont rattachés à aucun
+      dossier législatif dans les données de l'Assemblée : le site les ouvre sur la page du scrutin
+      plutôt que sur une page de loi.
+    </li>
+    <li>
+      La lecture d'un texte est indiquée telle que l'Assemblée la donne, par exemple « première
+      lecture » ou « texte de la commission mixte paritaire ».
     </li>
   </ul>
 </section>

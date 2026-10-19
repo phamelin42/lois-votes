@@ -1,11 +1,10 @@
 import { defineConfig } from '@playwright/test';
 
-// Trois instances du build SSR et deux faux serveurs de l'API tabulaire (voir e2e/aide.ts et les specs).
-//  - 4000 : site normal, faux serveur sain (4010), sans Umami ;
-//  - 4001 : site « panne », faux serveur qui répond 500 (4011) ;
-//  - 4002 : site avec Umami configuré, même faux serveur sain que 4000.
+// Trois instances du même build SSR (`npm run build:fixtures` : données du jeu de test, aucun réseau) :
+//  - 4000 : site normal, avec ses données, sans Umami ;
+//  - 4001 : site « panne », dont le dossier de données n'existe pas : toutes les routes /api répondent 503 ;
+//  - 4002 : site avec Umami configuré.
 const SSR = 'node dist/lois-votes/server/server.mjs';
-const SAIN = 'http://localhost:4010/api';
 
 export default defineConfig({
   testDir: 'e2e',
@@ -28,32 +27,20 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'node e2e/faux-tabulaire.mjs',
-      env: { FAUX_PORT: '4010' },
-      port: 4010,
-      reuseExistingServer: !process.env['CI'],
-    },
-    {
-      command: 'node e2e/faux-tabulaire.mjs',
-      env: { FAUX_PORT: '4011', FAUX_ERREUR: '500' },
-      port: 4011,
-      reuseExistingServer: !process.env['CI'],
-    },
-    {
       command: SSR,
-      env: { PORT: '4000', TABULAR_API_BASE: SAIN },
+      env: { PORT: '4000', DONNEES_DIR: '' },
       port: 4000,
       reuseExistingServer: !process.env['CI'],
     },
     {
       command: SSR,
-      env: { PORT: '4001', TABULAR_API_BASE: 'http://localhost:4011/api' },
+      env: { PORT: '4001', DONNEES_DIR: 'dossier-de-donnees-inexistant' },
       port: 4001,
       reuseExistingServer: !process.env['CI'],
     },
     {
       command: SSR,
-      env: { PORT: '4002', TABULAR_API_BASE: SAIN, UMAMI_WEBSITE_ID: 'site-de-test' },
+      env: { PORT: '4002', DONNEES_DIR: '', UMAMI_WEBSITE_ID: 'site-de-test' },
       port: 4002,
       reuseExistingServer: !process.env['CI'],
     },

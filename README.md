@@ -2,17 +2,17 @@
 
 Site qui montre quel parti a voté quoi pour chaque loi à l'Assemblée nationale (17ᵉ législature) : les dernières lois votées, une page par loi, par scrutin et par député, et une recherche.
 
-Application Angular 22 rendue côté serveur, construite avec [Fuda](https://github.com/phamelin42/design-system-fuda). Les données viennent de l'API tabulaire publique de data.gouv.fr, appelée à la demande : rien n'est stocké, aucune clé n'est nécessaire.
+Application Angular 22 rendue côté serveur, construite avec [Fuda](https://github.com/phamelin42/design-system-fuda). Les données sont celles de l'open data officiel de l'Assemblée nationale ([data.assemblee-nationale.fr](https://data.assemblee-nationale.fr), Licence Ouverte 2.0). **Données officielles préparées au build** : `npm run build` télécharge les archives du jour, les réduit dans `data/` et les embarque dans le serveur, qui répond depuis la mémoire. Aucune base, aucune clé, aucune requête externe à l'exécution.
 
 ## Démarrage
 
 ```bash
 nvm use            # Node 24 (.nvmrc), au moins 22.22.3
 npm install
-npm start          # build puis serveur sur http://localhost:4000 avec les données factices
+npm start          # build sur le jeu de test (fixtures), puis serveur sur http://localhost:4000
 ```
 
-Le BFF réel (sans `MOCK_BFF=1`) interroge l'API tabulaire. Ses identifiants de ressources (`RID_*`) et les colonnes de Datan sont à confirmer : voir la section « Identifiants de ressources à confirmer » de [CLAUDE.md](CLAUDE.md).
+Pour travailler sur les vraies données : `npm run build` (télécharge ~41 Mo, ~10 s), puis `npm run serve:ssr`. Les archives sont gardées dans `.cache/officiel/` (ignoré par git) ; le format de `data/` est décrit dans [docs/DONNEES.md](docs/DONNEES.md).
 
 Les commandes et conventions sont décrites dans [CLAUDE.md](CLAUDE.md). Le plan et le contrat entre le serveur et l'application sont dans [docs/PLAN.md](docs/PLAN.md) et [docs/CONTRAT.md](docs/CONTRAT.md).
 
@@ -20,34 +20,44 @@ Les commandes et conventions sont décrites dans [CLAUDE.md](CLAUDE.md). Le plan
 
 Toutes sont facultatives. Sans elles, le site fonctionne avec les valeurs par défaut.
 
-| Variable                                                                             | Rôle                                                                      | Défaut                                 |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | -------------------------------------- |
-| `UMAMI_WEBSITE_ID`                                                                   | Identifiant du site Umami. Sans lui, aucun script de mesure n'est ajouté. | aucun                                  |
-| `UMAMI_SRC`                                                                          | Adresse du script Umami (en https), pour une instance auto-hébergée.      | `https://cloud.umami.is/script.js`     |
-| `TABULAR_API_BASE`                                                                   | Base de l'API tabulaire (le faux serveur de test s'y branche).            | `https://tabular-api.data.gouv.fr/api` |
-| `RID_SCRUTINS`, `RID_VOTES`, `RID_DEPUTES`, `RID_DATAN_DEPUTES`, `RID_DATAN_GROUPES` | Identifiants (`rid`) des ressources data.gouv.fr.                         | valeurs provisoires, voir CLAUDE.md    |
+| Variable           | Rôle                                                                                                                    | Défaut                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `DONNEES_DEPUIS`   | À la préparation des données (`npm run donnees`, `npm run build`) : `fixtures` lit le jeu de test au lieu des archives. | archives officielles                      |
+| `DONNEES_DIR`      | Au démarrage du serveur : dossier des données préparées.                                                                | `data/` du build (`dist/lois-votes/data`) |
+| `UMAMI_WEBSITE_ID` | Identifiant du site Umami. Sans lui, aucun script de mesure n'est ajouté.                                               | aucun                                     |
+| `UMAMI_SRC`        | Adresse du script Umami (en https), pour une instance auto-hébergée.                                                    | `https://cloud.umami.is/script.js`        |
 
-**Avertissement** : tant que les `RID_*` réels n'ont pas été relevés sur data.gouv.fr (prompt 00, jamais exécuté faute d'accès au réseau), les valeurs par défaut ne correspondent à aucune ressource : le site répond **503** sur ses pages de données. Il faut renseigner les `RID_*` avant la mise en ligne.
+Si `data/` manque ou est invalide, le serveur démarre quand même : les routes `/api/*` et les pages de données répondent **503** (jamais un faux contenu) et `/a-propos` reste servie.
 
 ## Tests et mesures
 
-| Commande       | Rôle                                                                                                                                                                                                                   |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`     | Tests unitaires (Vitest, jsdom).                                                                                                                                                                                       |
-| `npm run e2e`  | Build, puis Playwright contre trois instances SSR et deux faux serveurs de l'API tabulaire (`e2e/faux-tabulaire.mjs`). Le navigateur est celui de Playwright, ou `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/chemin/chrome`. |
-| `npm run perf` | Build, puis Lighthouse (profil mobile) sur l'accueil, une loi et un député. Échoue sous 95 en performance ou en accessibilité.                                                                                         |
+| Commande                 | Rôle                                                                                                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm test`               | Tests unitaires (Vitest, jsdom), dont le pipeline des données et le serveur.                                                                                                         |
+| `npm run build:fixtures` | Comme `npm run build`, sur le jeu de test : aucun réseau.                                                                                                                            |
+| `npm run e2e`            | `build:fixtures`, puis Playwright contre trois instances SSR (normale, sans données, avec Umami). Navigateur de Playwright, ou `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/chemin/chrome`. |
+| `npm run perf`           | `build:fixtures`, puis Lighthouse (profil mobile) sur l'accueil, une loi et un député. Échoue sous 95 en performance ou en accessibilité.                                            |
 
 ## Mise en ligne (Vercel Hobby)
 
-Le site se déploie sur Vercel avec `vercel.json` (fonction `api/index.mjs` qui sert le serveur SSR, et le build de `npm run build`). Quatre étapes, à faire une fois :
+Le site se déploie sur Vercel avec `vercel.json` (fonction `api/index.mjs` qui sert le serveur SSR et embarque `dist/lois-votes/**`, donc les données ; build par `npm run build`). Quatre étapes, à faire une fois :
 
 1. **Créer le projet Vercel** relié au dépôt Git (aucune configuration de framework : `vercel.json` la fixe).
-2. **Ajouter les variables facultatives** dans les réglages du projet, si la mesure d'audience est voulue : `UMAMI_WEBSITE_ID` (et `UMAMI_SRC` si Umami n'est pas hébergé chez Umami Cloud). Ajouter les `RID_*` une fois confirmés.
+2. **Ajouter les variables facultatives** dans les réglages du projet, si la mesure d'audience est voulue : `UMAMI_WEBSITE_ID` (et `UMAMI_SRC` si Umami n'est pas hébergé chez Umami Cloud).
 3. **Ajouter le domaine** `quiavotequoi.phamelin.fr` au projet dans les réglages « Domains ».
 4. **Créer le CNAME** chez le registraire de `phamelin.fr` : `quiavotequoi` → `cname.vercel-dns.com`.
 
-Le préréglage « Angular » de Vercel n'a pas pu être vérifié dans sa documentation depuis l'environnement de développement : le projet passe donc par la fonction explicite de `api/index.mjs`.
+Le préréglage « Angular » de Vercel n'a pas été vérifié : le projet passe par la fonction explicite de `api/index.mjs`. Si le téléchargement des archives échoue pendant le build, le build échoue et l'ancien déploiement reste en ligne.
+
+## Mise à jour nocturne
+
+L'Assemblée régénère ses archives chaque nuit (~04:25 GMT). Le workflow [`.github/workflows/actualiser.yml`](.github/workflows/actualiser.yml) appelle chaque jour à 05:30 UTC (et à la demande, onglet « Actions » → « Actualiser les données » → « Run workflow ») un _Deploy Hook_ de Vercel, qui relance le build avec les archives du jour. Deux gestes, à faire une fois :
+
+1. **Créer le Deploy Hook dans Vercel** : projet → _Settings_ → _Git_ → _Deploy Hooks_, un nom (par exemple « actualisation nocturne »), la branche **`main`**, puis copier l'URL générée.
+2. **Ajouter le secret GitHub** `VERCEL_DEPLOY_HOOK_URL` avec cette URL : dépôt → _Settings_ → _Secrets and variables_ → _Actions_ → _New repository secret_.
+
+Sans ce secret, le workflow échoue avec un message clair et le site ne se met à jour qu'aux fusions sur `main`. Vercel autorise 60 déclenchements de Deploy Hook par heure et par projet : une exécution par nuit est largement en dessous.
 
 ## Licence
 
-Code sous licence MIT. Données : Licence Ouverte 2.0 (Etalab), issues de l'open data de l'Assemblée nationale via NosParlementaires et Datan.
+Code sous licence MIT. Données : Licence Ouverte 2.0 (Etalab), issues de l'open data de l'Assemblée nationale.

@@ -1,0 +1,25 @@
+name: Actualiser les données
+
+# Chaque nuit, redéploie le site : Vercel relance `npm run build`, qui télécharge les archives officielles
+# du jour et les réduit dans data/. Aucun checkout : le workflow se contente d'appeler le Deploy Hook.
+# Mise en place : voir « Mise à jour nocturne » dans README.md (Deploy Hook Vercel + secret GitHub).
+
+on:
+  schedule:
+    - cron: '30 5 * * *' # UTC : après la régénération des archives par l'Assemblée (~04:25 GMT)
+  workflow_dispatch:
+
+jobs:
+  redeployer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Appeler le Deploy Hook Vercel
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$VERCEL_DEPLOY_HOOK_URL" ]; then
+            echo "::error::Le secret VERCEL_DEPLOY_HOOK_URL est absent : créer un Deploy Hook dans Vercel puis l'ajouter aux secrets du dépôt (voir README.md)."
+            exit 1
+          fi
+          curl -fsS -X POST "$VERCEL_DEPLOY_HOOK_URL"

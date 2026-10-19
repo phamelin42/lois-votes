@@ -12,24 +12,23 @@ test.describe('chargement intelligent', () => {
     await attendreHydratation(page);
     expect(appels).toEqual([]);
 
-    await page.goto('/lois/DLR5L17N1110');
+    await page.goto('/lois/DLR5L17N54445');
     await attendreHydratation(page);
     expect(appels).toEqual([]); // seul le rendu serveur a interrogé le BFF
   });
 
-  test("« Voir plus » ne fait qu'une requête, pour la page suivante", async ({ page }) => {
+  test("sans page suivante, l'accueil ne propose pas « Voir plus » et ne fait aucune requête", async ({
+    page,
+  }) => {
+    const appels: string[] = [];
+    page.on('request', (r) => estApi(r.url()) && appels.push(new URL(r.url()).pathname));
+
     await page.goto('/');
     await attendreHydratation(page);
-    const appels: string[] = [];
-    page.on(
-      'request',
-      (r) => estApi(r.url()) && appels.push(new URL(r.url()).pathname + new URL(r.url()).search),
-    );
 
-    await page.getByRole('button', { name: 'Voir plus' }).click();
-    await expect(page.locator('app-loi-card')).toHaveCount(14);
-
-    expect(appels).toEqual(['/api/accueil?page=2']);
+    await expect(page.locator('app-loi-card')).toHaveCount(10);
+    await expect(page.getByRole('button', { name: 'Voir plus' })).toHaveCount(0);
+    expect(appels).toEqual([]);
   });
 
   test("le survol d'une carte précharge le code de la route et les données de la loi", async ({
@@ -42,7 +41,7 @@ test.describe('chargement intelligent', () => {
 
     await page.locator('app-loi-card').nth(1).hover();
 
-    await expect.poll(() => apres.some((p) => p.startsWith('/api/lois/DLR5L17N1110'))).toBe(true);
+    await expect.poll(() => apres.some((p) => p.startsWith('/api/lois/DLR5L17N54776'))).toBe(true);
     expect(page.url()).toMatch(/\/$/); // on n'a pas navigué : seulement préchargé
   });
 
@@ -69,11 +68,11 @@ test.describe('chargement intelligent', () => {
   test("les blocs différés sous la ligne de flottaison ne chargent rien avant d'être visibles", async ({
     page,
   }) => {
-    await page.goto('/lois/DLR5L17N1110');
+    await page.goto('/lois/DLR5L17N54445');
     await attendreHydratation(page);
 
     const scrutins = page
-      .waitForRequest((r) => new URL(r.url()).pathname === '/api/scrutins/110', { timeout: 1500 })
+      .waitForRequest((r) => new URL(r.url()).pathname === '/api/scrutins/8693', { timeout: 1500 })
       .then(
         () => true,
         () => false,
@@ -81,30 +80,30 @@ test.describe('chargement intelligent', () => {
     expect(await scrutins).toBe(false);
 
     await page.getByRole('button', { name: 'Voir comment chaque député a voté' }).click();
-    await expect(page.getByRole('link', { name: 'Alice Durand' }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Jérôme Guedj' }).first()).toBeVisible();
   });
 
   test('la photo du député est le LCP : chargée en priorité dès le HTML rendu par le serveur', async ({
     request,
   }) => {
-    const html = await (await request.get('/deputes/david-moreau')).text();
+    const html = await (await request.get('/deputes/jerome-guedj')).text();
 
     expect(html).toMatch(/<img[^>]*fetchpriority="high"/);
   });
 
-  test('le navigateur ne parle jamais à data.gouv.fr', async ({ page }) => {
+  test("le navigateur ne parle qu'à notre serveur, et au site de l'Assemblée pour les photos", async ({
+    page,
+  }) => {
     const hotes = new Set<string>();
     page.on('request', (r) => hotes.add(new URL(r.url()).hostname));
 
     await page.goto('/');
     await attendreHydratation(page);
-    await page.goto('/deputes/david-moreau');
+    await page.goto('/deputes/jerome-guedj');
     await attendreHydratation(page);
 
     expect(
-      [...hotes].filter(
-        (h) => h.includes('data.gouv.fr') || h.includes('nosparlementaires') || h.includes('datan'),
-      ),
+      [...hotes].filter((h) => h !== 'localhost' && h !== 'www.assemblee-nationale.fr'),
     ).toEqual([]);
   });
 
