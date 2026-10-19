@@ -20,14 +20,14 @@ Décisions :
 
 | Archive | URL (`https://data.assemblee-nationale.fr/static/openData/repository/17/…`) | Taille |
 |---|---|---|
-| Scrutins | `loi/scrutins/Scrutins.json.zip` | 27,5 Mo ; 8 806 fichiers, 189 Mo décompressés ; régénérée chaque nuit (~04:25 GMT), ETag |
+| Scrutins | `loi/scrutins/Scrutins.json.zip` | 27,6 Mo ; 8 877 fichiers, 181 Mo décompressés ; régénérée chaque nuit (~04:25 GMT), ETag (le CDN sert parfois deux versions le même jour) |
 | Acteurs, mandats, organes | `amo/tous_acteurs_mandats_organes_xi_legislature/AMO30_tous_acteurs_tous_mandats_tous_organes_historique.json.zip` | 14 Mo ; acteurs, mandats, organes (groupes) |
 
 Photos officielles : `https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/<numéro du PA>.jpg`. Lien d'un scrutin : `https://www.assemblee-nationale.fr/dyn/17/scrutins/<numero>`.
 
-Ce que contient un scrutin (`VTANR5L17V<numero>`) : `dateScrutin`, `titre`, `typeVote` (SPO, SPS, MOC), **`sort.code` (`adopté` / `rejeté`)**, `syntheseVote.decompte`, `objet.dossierLegislatif.dossierRef` (présent sur 2 980 scrutins sur 8 806), et `ventilationVotes.organe.groupes.groupe[]` : pour chaque groupe **au jour du vote**, `organeRef`, `positionMajoritaire`, `decompteVoix`, et la liste nominative (`decompteNominatif` : `pours`, `contres`, `abstentions`, `nonVotants`, avec `acteurRef`). Quand un groupe n'a qu'un votant, la liste est un objet et non un tableau.
+Ce que contient un scrutin (`VTANR5L17V<numero>`) : `dateScrutin`, `titre`, `typeVote` (SPO, SPS, MOC), **`sort.code` (`adopté` / `rejeté`)**, `syntheseVote.decompte`, `objet.dossierLegislatif.dossierRef` (présent sur 3 051 scrutins sur 8 877), et `ventilationVotes.organe.groupes.groupe[]` : pour chaque groupe **au jour du vote**, `organeRef` (parfois `PO0`, voir DONNEES.md), `positionMajoritaire` (non utilisée : elle ne suit pas les votes), `decompteVoix`, et la liste nominative (`decompteNominatif` : `pours`, `contres`, `abstentions`, `nonVotants`, avec `acteurRef`). Quand un groupe n'a qu'un votant, la liste est un objet et non un tableau.
 
-Constats (archive du 19/10/2026) : 3 018 scrutins adoptés et 5 788 rejetés ; 652 votants, tous présents dans l'archive des acteurs ; 348 d'entre eux apparaissent dans plusieurs groupes (changements de groupe) ; 1 317 652 positions. Une matrice d'un caractère par votant et par scrutin pèse 5,7 Mo bruts, 0,66 Mo compressés.
+Constats (archive du 19/10/2026, vérifiés dans DONNEES.md) : 3 031 scrutins adoptés et 5 846 rejetés ; 652 votants, tous présents dans l'archive des acteurs ; 348 d'entre eux apparaissent dans plusieurs groupes (changements de groupe) ; 1 323 978 positions. Les absents ne figurent dans aucune liste : l'appartenance au mandat vient de l'archive des acteurs. Une matrice d'un caractère par votant et par scrutin pèse 5,8 Mo bruts (0,73 Mo compressés pour les votes, 0,03 Mo pour les groupes).
 
 ## Architecture (option A)
 
@@ -46,8 +46,8 @@ Téléchargement échoué    le build échoue : l'ancien déploiement reste en l
 ### Pipeline : `scripts/donnees/`
 
 - Téléchargement (ETag, échec si statut ≠ 200), dézippage en mémoire avec `fflate` (dépendance de dev), parsing, réduction, écriture dans `data/`.
-- Garde-fous qui font échouer le build : au moins 8 000 scrutins, au moins 570 députés, aucun votant sans fiche, somme des groupes égale au décompte de chaque scrutin, `sort.code` toujours `adopté` ou `rejeté`.
-- Classement des scrutins (`classer`) : `final` (« l'ensemble du… », « l'article unique… » quand le texte n'a pas d'autre article, apostrophes droites et typographiques), `motion` (« la motion de censure… »), `article`, `amendement`, `autre`. Titre court et lecture dérivés du titre (« l'ensemble du projet de loi relatif à X (première lecture) » → « Projet de loi relatif à X », « première lecture »).
+- Garde-fous qui font échouer le build : au moins 8 000 scrutins, au moins 570 députés, aucun votant sans fiche, somme des groupes égale au décompte de chaque scrutin, `sort.code` toujours `adopté` ou `rejeté`, entrées de groupe `PO0` rattachables à un groupe (détail et autres contrôles dans DONNEES.md).
+- Classement des scrutins (`classer`, dans `src/shared/classer.ts`, partagé avec le serveur) : `final` (« l'ensemble du… », « l'article unique… » quand le texte n'a pas d'autre article, apostrophes droites et typographiques), `motion` (« la motion de censure… »), `article`, `amendement`, `autre`. Titre court et lecture dérivés du titre (« l'ensemble du projet de loi relatif à X (première lecture) » → « Projet de loi relatif à X », « première lecture »).
 
 ### Serveur : `src/server/`
 

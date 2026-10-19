@@ -21,6 +21,7 @@ Node ≥ 22.22.3 (`.nvmrc` : 24).
 | `npm run format` / `format:check` | Prettier                                                                                                     |
 | `npm run e2e`                     | Build, puis Playwright contre trois instances SSR et deux faux serveurs (voir « Tests e2e »)                 |
 | `npm run perf`                    | Build, puis Lighthouse mobile sur `/`, une loi et un député ; échoue sous 95 en performance ou accessibilité |
+| `npm run donnees`                 | Archives officielles vers `data/` (`DONNEES_DEPUIS=fixtures` : jeu de test), hors build pour l'instant       |
 
 Une tâche est terminée quand `lint`, `typecheck`, `test` et `build` sont verts, et que `MOCK_BFF=1 npm run serve:ssr` sert les 8 routes (`curl localhost:4000/api/accueil` renvoie la fixture). `e2e` s'exécute aussi quand une page, la navigation ou le serveur changent.
 
@@ -29,6 +30,7 @@ Une tâche est terminée quand `lint`, `typecheck`, `test` et `build` sont verts
 - `src/main.ts`, `src/main.server.ts`, `src/server.ts` : entrées navigateur, serveur de rendu et Express (routes `/api/*`, `/robots.txt`, `/sitemap.xml`, en-têtes, Umami).
 - `src/server/umami.ts`, `seo.ts`, `en-tetes.ts` : fonctions pures du serveur (script Umami, robots et sitemap, CSP et Cache-Control).
 - `api/index.mjs`, `vercel.json` : déploiement Vercel (une fonction qui sert le serveur SSR, tout passe par elle).
+- `scripts/donnees/` : pipeline des données officielles (`index.mjs` orchestre, `telecharger.mjs`, `lire.mjs`, `construire.mjs`, `ecrire.mjs`, `fixtures.mjs` pour regénérer le jeu de test) ; leurs specs tournent avec `npm test`. Format de `data/` : [docs/DONNEES.md](docs/DONNEES.md) ; types : `src/server/donnees.types.ts` ; classement des titres : `src/shared/classer.ts`.
 - `e2e/` : Playwright (`*.spec.ts`, `aide.ts`) et faux serveur HTTP de l'API tabulaire (`faux-tabulaire.mjs`). `scripts/perf.mjs` : Lighthouse. `.github/workflows/ci.yml` : CI.
 - `src/app/` : application. `app.routes.ts` (routes chargées par `loadComponent`), `app.routes.server.ts` (rendu : serveur partout, `/a-propos` pré-rendue), `pages/<page>/` (un dossier par page).
 - `src/server/` : BFF. `bff.ts` (`appelerBffActif`, choisit le mode), `routes.ts` (routes `/api/*`, `Cache-Control`, erreurs), `agregation.ts` (assemblage des réponses), `index-deputes.ts` (députés joints à Datan), `source/` (seul accès à data.gouv.fr : client tabulaire, limiteur, rid, colonnes), `cache.ts` (mémoire, périmé servi en cas de panne), `classify.ts` et `groupes.ts` (fonctions pures). `mock-bff.ts` (`appelerMock`) et `fixtures/bff/` servent le mode factice.
