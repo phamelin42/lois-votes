@@ -1,4 +1,4 @@
-# Qui a voté quoi ? (quiavotequi.phamelin.fr) : plan
+# Qui a voté quoi ? (quiavotequoi.phamelin.fr) : plan
 
 ## Contexte
 
@@ -15,7 +15,7 @@ Décisions :
 - **17ᵉ législature**. Les votes finaux (vote sur l'ensemble d'un texte) sont mis en avant ; articles et amendements restent consultables dans la page d'une loi.
 - **Pas de résumé inventé** : titre court dérivé du scrutin final en titre, titre officiel du scrutin en résumé (2 lignes sur l'accueil).
 - Formulation : « Adopté par l'Assemblée » / « Rejeté par l'Assemblée », jamais « loi adoptée ». « Participation aux scrutins », jamais « présence » : l'Assemblée ne publie pas la présence en séance ni en commission.
-- Domaine **`quiavotequi.phamelin.fr`**, nom affiché « Qui a voté quoi ? », dépôt `lois-votes`.
+- Domaine **`quiavotequoi.phamelin.fr`**, nom affiché « Qui a voté quoi ? », dépôt `lois-votes`.
 
 ## La source : API tabulaire de data.gouv.fr
 
@@ -127,11 +127,11 @@ e2e/                           Playwright + faux serveur tabulaire
 docs/                          PLAN.md, CONTRAT.md, API.md (prompt 00), prompts/
 ```
 
-Mise en ligne : intégration Git de Vercel. Variables facultatives `UMAMI_WEBSITE_ID` et `UMAMI_SRC`. Domaine : CNAME `quiavotequi` → `cname.vercel-dns.com` chez le registraire de `phamelin.fr`.
+Mise en ligne : intégration Git de Vercel. Variables facultatives `UMAMI_WEBSITE_ID` et `UMAMI_SRC`. Domaine : CNAME `quiavotequoi` → `cname.vercel-dns.com` chez le registraire de `phamelin.fr`.
 
 ## Prérequis côté utilisateur
 
 - Créer le projet Vercel relié au dépôt (variables Umami facultatives).
-- Ajouter le domaine `quiavotequi.phamelin.fr` au projet et créer le CNAME.
+- Ajouter le domaine `quiavotequoi.phamelin.fr` au projet et créer le CNAME.
 
 Les prompts des sous-agents sont dans [prompts/](prompts/README.md).
