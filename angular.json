@@ -33,7 +33,7 @@
               "entry": "src/server.ts"
             },
             "security": {
-              "allowedHosts": ["localhost", "127.0.0.1", "quiavotequi.phamelin.fr"]
+              "allowedHosts": ["localhost", "127.0.0.1", "quiavotequoi.phamelin.fr"]
             }
           },
           "configurations": {
