@@ -114,6 +114,30 @@ describe('agregation', () => {
       expect(avecGroupeVide).toBeGreaterThan(0); // le jeu de test contient bien le cas
     });
 
+    it("nomme les groupes en activité ce jour-là dont aucun député n'est listé", () => {
+      const d = jeu.donnees;
+      let avecGroupeSansVotant = 0;
+      for (let s = 0; s < d.nbScrutins; s++) {
+        const detail = agregation.scrutin(d.numero(s)) as ScrutinDetail;
+        const date = d.date(s);
+        const attendus = d.groupes
+          .filter((g) => (g.debut === null || g.debut <= date) && (g.fin === null || date <= g.fin))
+          .map((g) => g.id)
+          .filter((id) => !detail.groupes.some((v) => v.groupe.id === id));
+
+        expect(
+          detail.groupesSansVotant.map((g) => g.id),
+          `scrutin ${d.numero(s)}`,
+        ).toEqual(attendus);
+        // Un groupe est affiché ou nommé comme sans votant, jamais les deux.
+        for (const g of detail.groupesSansVotant)
+          expect(detail.groupes.some((v) => v.groupe.id === g.id)).toBe(false);
+        if (attendus.length > 0) avecGroupeSansVotant++;
+      }
+
+      expect(avecGroupeSansVotant).toBeGreaterThan(0);
+    });
+
     it('trie les groupes du plus nombreux au moins nombreux', () => {
       const tailles = (agregation.scrutin(8706) as ScrutinDetail).groupes.map(
         (g) => g.compte.pour + g.compte.contre + g.compte.abstention + g.compte.nonvotant,
@@ -174,6 +198,20 @@ describe('agregation', () => {
         titreCourt: expect.stringMatching(/^Projet de loi visant à offrir/),
       });
       expect((agregation.scrutin(5729) as ScrutinDetail).loi).toBeNull();
+    });
+
+    it('compte les députés en mandat (cases ≠ « - ») : au moins autant que les votants, pour chaque scrutin', () => {
+      fichiers.scrutins.forEach((s, i) => {
+        const detail = agregation.scrutin(s.n) as ScrutinDetail;
+        const attendu = fichiers.votes[i].replace(/-/g, '').length;
+        const votants = detail.compte.pour + detail.compte.contre + detail.compte.abstention;
+
+        expect(detail.enMandat, `scrutin ${s.n}`).toBe(attendu);
+        expect(detail.enMandat, `scrutin ${s.n}`).toBeGreaterThanOrEqual(votants);
+        expect(detail.enMandat - votants, `scrutin ${s.n}`).toBe(
+          fichiers.votes[i].replace(/[^NX]/g, '').length,
+        );
+      });
     });
 
     it("renseigne l'URL officielle du scrutin et son résultat officiel", () => {
@@ -372,6 +410,41 @@ describe('agregation', () => {
       });
       expect(comparables).toBeGreaterThan(0);
       expect(taux.loyaute).toBeCloseTo(alignes / comparables, 10);
+    });
+
+    it('répartit ses scrutins en mandat : pour + contre + abstention + nonVote = enMandat', () => {
+      for (const d of fichiers.deputes) {
+        const { scrutins, taux } = agregation.depute(d.slug)!;
+        const cases = fichiers.votes.map((ligne) => ligne[deputeIndex(d.slug)]).join('');
+        const nb = (re: RegExp) => cases.replace(re, '').length;
+
+        expect(scrutins, d.slug).toEqual({
+          enMandat: nb(/-/g),
+          pour: cases.replace(/[^P]/g, '').length,
+          contre: cases.replace(/[^C]/g, '').length,
+          abstention: cases.replace(/[^A]/g, '').length,
+          nonVote: cases.replace(/[^NX]/g, '').length,
+        });
+        expect(
+          scrutins.pour + scrutins.contre + scrutins.abstention + scrutins.nonVote,
+          d.slug,
+        ).toBe(scrutins.enMandat);
+        expect(taux.participation, d.slug).toBe(
+          scrutins.enMandat > 0
+            ? (scrutins.pour + scrutins.contre + scrutins.abstention) / scrutins.enMandat
+            : null,
+        );
+      }
+    });
+
+    it('donne les compteurs de Guedj : 7 pour, 3 contre, 0 abstention, 9 non-votes sur 19', () => {
+      expect(agregation.depute('jerome-guedj')!.scrutins).toEqual({
+        enMandat: 19,
+        pour: 7,
+        contre: 3,
+        abstention: 0,
+        nonVote: 9,
+      });
     });
 
     it("compte l'absence (X) dans le dénominateur de la participation", () => {

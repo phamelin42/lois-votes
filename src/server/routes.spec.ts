@@ -5,6 +5,7 @@ import type {
   DeputeListe,
   LoiDetail,
   ScrutinDetail,
+  ScrutinResume,
   VoteGroupe,
 } from '@contrat';
 import { creerAgregation } from './agregation';
@@ -23,6 +24,12 @@ function verifierGroupes(groupes: VoteGroupe[]) {
     expect(POSITIONS_GROUPE).toContain(position);
     for (const n of Object.values(compte)) expect(Number.isInteger(n)).toBe(true);
   }
+}
+
+function verifierEnMandat(scrutin: ScrutinResume) {
+  const { pour, contre, abstention } = scrutin.compte;
+  expect(Number.isInteger(scrutin.enMandat)).toBe(true);
+  expect(scrutin.enMandat).toBeGreaterThanOrEqual(pour + contre + abstention);
 }
 
 describe('routes /api/*', () => {
@@ -55,6 +62,7 @@ describe('routes /api/*', () => {
         expect(loi.titreCourt).not.toBe('');
         expect(loi.statut).toBeNull();
         expect(loi.voteFinal.type).toBe('final');
+        verifierEnMandat(loi.voteFinal);
         expect(loi.voteFinal.urlOfficielle).toBe(
           `https://www.assemblee-nationale.fr/dyn/17/scrutins/${loi.voteFinal.numero}`,
         );
@@ -87,6 +95,8 @@ describe('routes /api/*', () => {
       expect(loi.dossier).toBe('DLR5L17N53980');
       expect(loi.voteFinal?.numero).toBe(8433);
       verifierGroupes(loi.voteFinal!.groupes);
+      verifierEnMandat(loi.voteFinal!);
+      for (const s of [...loi.lectures, ...loi.scrutins]) verifierEnMandat(s);
       expect(Array.isArray(loi.lectures)).toBe(true);
       expect(Array.isArray(loi.scrutins)).toBe(true);
     });
@@ -119,6 +129,7 @@ describe('routes /api/*', () => {
       expect(scrutin.date).toBe('2026-10-13');
       expect(scrutin.type).toBe('final');
       verifierGroupes(scrutin.groupes);
+      verifierEnMandat(scrutin);
       expect(scrutin.nominatif.length).toBeGreaterThan(0);
       for (const bloc of scrutin.nominatif) {
         expect(bloc.groupeId).toMatch(/^PO\d+$/);
@@ -168,6 +179,9 @@ describe('routes /api/*', () => {
       for (const taux of Object.values(depute.taux)) {
         expect(taux === null || (taux >= 0 && taux <= 1)).toBe(true);
       }
+      const { enMandat, pour, contre, abstention, nonVote } = depute.scrutins;
+      expect(pour + contre + abstention + nonVote).toBe(enMandat);
+      expect(depute.taux.participation).toBeCloseTo((pour + contre + abstention) / enMandat, 10);
       expect(depute.dernieresLois).toHaveLength(10);
     });
 

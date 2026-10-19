@@ -86,6 +86,7 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
       type: donnees.type(s),
       adopte: donnees.adopte(s),
       compte: donnees.compte(s),
+      enMandat: donnees.enMandat(s),
       urlOfficielle: URL_SCRUTIN(donnees.numero(s)),
     };
   }
@@ -102,6 +103,24 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
       .filter(({ compte }) => taille(compte) > 0)
       .sort((a, b) => taille(b.compte) - taille(a.compte) || a.g - b.g)
       .map(({ g, position, compte }) => ({ groupe: groupes[g], position, compte }));
+  }
+
+  /**
+   * Les groupes qui existaient le jour du scrutin (`debut` et `fin` inclus) et dont aucun député n'est listé :
+   * ils n'ont pas de ligne dans `votesDesGroupes`, on les nomme à part pour ne pas les masquer sans explication.
+   */
+  function groupesSansVotant(s: number): Groupe[] {
+    const date = donnees.date(s);
+    const affiches = new Set(votesDesGroupes(s).map(({ groupe }) => groupe.id));
+    return donnees.groupes
+      .map((g, i) => ({ g, i }))
+      .filter(
+        ({ g }) =>
+          (g.debut === null || g.debut <= date) &&
+          (g.fin === null || date <= g.fin) &&
+          !affiches.has(g.id),
+      )
+      .map(({ i }) => groupes[i]);
   }
 
   /** Les votes sur l'ensemble d'un texte, du plus récent au plus ancien (calcul unique). */
@@ -163,7 +182,13 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
       statut: null,
       urlDossier: null,
       voteFinal:
-        dernier !== undefined ? { ...resume(dernier), groupes: votesDesGroupes(dernier) } : null,
+        dernier !== undefined
+          ? {
+              ...resume(dernier),
+              groupes: votesDesGroupes(dernier),
+              groupesSansVotant: groupesSansVotant(dernier),
+            }
+          : null,
       lectures: votesFinaux.slice(1).map(resume),
       scrutins: scrutins.filter((s) => !estFinal(s)).map(resume),
     };
@@ -207,6 +232,7 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
       ...resume(s),
       loi: dossier ? { dossier, titreCourt: titreDuDossier(dossier) } : null,
       groupes: votesDesGroupes(s),
+      groupesSansVotant: groupesSansVotant(s),
       nominatif,
     };
   });
@@ -240,23 +266,29 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
   let listeDeputes: DeputeListe | undefined;
 
   /**
-   * Taux d'un député, calculés sur les scrutins où il était en mandat (case ≠ « - ») :
+   * Taux d'un député et répartition de ses scrutins, calculés sur ceux où il était en mandat (case ≠ « - ») :
    * participation = (P + C + A) / (P + C + A + N + X) ; abstention = A / (P + C + A) ;
    * loyauté = votes égaux à la position de son groupe ce jour-là / votes exprimés (hors groupe « partagé »).
    */
-  function taux(d: number): DeputeDetail['taux'] {
+  function tauxEtScrutins(d: number): Pick<DeputeDetail, 'taux' | 'scrutins'> {
     let enMandat = 0;
-    let exprimes = 0;
+    let pour = 0;
+    let contre = 0;
     let abstentions = 0;
+    let nonVote = 0;
     let comparables = 0;
     let alignes = 0;
     for (let s = 0; s < donnees.nbScrutins; s++) {
       const caseVote = donnees.caseVote(s, d);
       if (caseVote === '-') continue;
       enMandat++;
-      if (caseVote !== 'P' && caseVote !== 'C' && caseVote !== 'A') continue;
-      exprimes++;
-      if (caseVote === 'A') abstentions++;
+      if (caseVote !== 'P' && caseVote !== 'C' && caseVote !== 'A') {
+        nonVote++; // N (non-votant) ou X (absent)
+        continue;
+      }
+      if (caseVote === 'P') pour++;
+      else if (caseVote === 'C') contre++;
+      else abstentions++;
       const g = donnees.groupeAuVote(s, d);
       const positionGroupe = g >= 0 ? donnees.positionDuGroupe(s, g) : null;
       if (positionGroupe === null || positionGroupe === 'partage' || positionGroupe === 'nonvotant')
@@ -264,10 +296,14 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
       comparables++;
       if (positionGroupe === POSITION_DE_CASE[caseVote]) alignes++;
     }
+    const exprimes = pour + contre + abstentions;
     return {
-      participation: enMandat > 0 ? exprimes / enMandat : null,
-      abstention: exprimes > 0 ? abstentions / exprimes : null,
-      loyaute: comparables > 0 ? alignes / comparables : null,
+      taux: {
+        participation: enMandat > 0 ? exprimes / enMandat : null,
+        abstention: exprimes > 0 ? abstentions / exprimes : null,
+        loyaute: comparables > 0 ? alignes / comparables : null,
+      },
+      scrutins: { enMandat, pour, contre, abstention: abstentions, nonVote },
     };
   }
 
@@ -295,6 +331,7 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
     const d = donnees.parSlug.get(slug);
     if (d === undefined) return null;
     const fiche = donnees.deputes[d];
+    const { taux, scrutins } = tauxEtScrutins(d);
     return {
       slug,
       nom: fiche.nom,
@@ -302,7 +339,8 @@ export function creerAgregation(donnees: DonneesChargees): Agregation {
       groupe: groupes.find((g) => g.id === fiche.groupe) ?? null,
       circonscription: fiche.circonscription,
       urlFiche: URL_FICHE(fiche.pa),
-      taux: taux(d),
+      taux,
+      scrutins,
       dernieresLois: derniersVotes(d),
     };
   });
