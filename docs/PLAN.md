@@ -47,7 +47,7 @@ Téléchargement échoué    le build échoue : l'ancien déploiement reste en l
 
 - **Position d'un groupe calculée par nous** : la plus votée parmi pour, contre, abstention ; `partage` à égalité ; `nonvotant` si aucun suffrage exprimé. La `positionMajoritaire` de l'archive est inutilisable (fausse dans 5,3 % des entrées, jamais `partage`, « pour » dans 9 547 entrées sans aucun votant) ; elle n'est jamais appliquée.
 - **Absents** : les listes nominatives n'en contiennent pas (en médiane, 132 des 577 députés sont listés par scrutin). `votes.txt` code `X` un député en mandat ce jour-là mais absent de toutes les listes. Participation = (P+C+A) / (P+C+A+N+X) sur les scrutins où sa case n'est pas `-` ; `X` donne `position: null` dans `VoteDepute`.
-- **Limites à dire dans `/a-propos`** : les mises au point (corrections de vote après coup) ne sont pas appliquées (18 % des scrutins) ; 66 % des scrutins n'ont pas de dossier législatif, dont 154 des 235 votes finaux (ils s'ouvrent sur `/scrutins/:numero`, pas sur une page de loi) ; une « lecture » peut être « texte de la commission mixte paritaire » ; la fiche d'un député montre son groupe actuel, les scrutins le groupe du jour du vote ; la participation n'est pas la présence en séance.
+- **Limites à dire dans `/a-propos`** : les mises au point (corrections de vote après coup) ne sont pas appliquées (18 % des scrutins) ; 66 % des scrutins n'ont pas de dossier législatif, dont 154 des 235 votes finaux (ils s'ouvrent sur `/scrutins/:numero`, pas sur une page de loi) ; une « lecture » peut être « texte de la commission mixte paritaire » ; la fiche d'un député montre son groupe actuel, les scrutins le groupe du jour du vote ; la participation n'est pas la présence en séance ; « ont voté » (pour + contre + abstention) et « n'ont pas voté » (en mandat sans avoir voté : non-votants officiels et absents) remplacent « présents » et « absents », puisque l'Assemblée ne publie pas la présence (un député peut être en séance sans voter, ou voter par délégation).
 
 ### Pipeline : `scripts/donnees/`
 
@@ -59,6 +59,7 @@ Téléchargement échoué    le build échoue : l'ancien déploiement reste en l
 
 - `donnees.ts` : charge `data/` au démarrage et expose des accès en mémoire (aucun appel réseau).
 - `agregation.ts` : calcule les réponses du contrat : accueil (10 derniers votes finaux, tri par date puis numéro décroissants, donc déterministe), loi (regroupement par dossier, lectures), scrutin (listes nominatives par groupe), député (10 derniers votes finaux, taux).
+- **Participation affichée** : sous la barre d'un vote (accueil, loi, scrutin), pourcentages de pour, contre et abstention sur les votants, puis « N n'ont pas voté sur M en mandat (x %) » (`ScrutinResume.enMandat`). Le tableau par groupe ajoute les pourcentages sur les votants du groupe et nomme les groupes sans aucun votant. La fiche d'un député donne sa participation en nombres (« a voté à n scrutins sur m en mandat, n'a pas voté à k ») et la répartition de ses votes (tuile « Ses votes »).
 - **Taux calculés par nous** à partir des scrutins publics, et présentés comme tels : *participation* = votes exprimés (pour, contre, abstention) / scrutins où le député était membre ; *abstention* = abstentions / votes exprimés ; *loyauté* = votes alignés sur la position majoritaire de son groupe / votes exprimés.
 - `routes.ts` : routes `/api/*`, `Cache-Control`, erreurs ; `cache.ts` ; `bff.ts` ; `classify.ts` (fonctions pures).
 
@@ -80,7 +81,7 @@ Angular 22 : standalone, zoneless, signaux, `@if/@for/@defer`, `host: {}`, `inje
 | `/lois/:dossier` | Titre, titre officiel, lecture, lien officiel. Vote final : résultat, barre, **tableau par groupe**. Puis autres lectures, « Voir comment chaque député a voté », et autres scrutins du texte (articles, amendements). | SSR, bas de page en `@defer` |
 | `/scrutins/:numero` | Un scrutin : décompte, tableau par groupe, liste nominative | SSR |
 | `/deputes` | Liste avec filtres groupe et département | SSR |
-| `/deputes/:slug` | **Photo**, nom, **parti**, circonscription ; **participation aux scrutins**, **taux d'abstention**, vote avec son groupe ; **ses votes sur les 10 dernières lois** (sa position, celle de son groupe, résultat) | SSR |
+| `/deputes/:slug` | **Photo**, nom, **parti**, circonscription ; **participation aux scrutins** (pourcentage et nombres), **ses votes** (pour, contre, abstention en %), **taux d'abstention**, vote avec son groupe ; **ses votes sur les 10 dernières lois** (sa position, celle de son groupe, résultat) | SSR |
 | `/recherche?q=` | Résultats Lois / Députés ; un seul député trouvé → son profil | SSR |
 | `/a-propos` | Source officielle, licence, méthode de calcul des taux, limites, mise à jour nocturne, Umami | pré-rendu |
 

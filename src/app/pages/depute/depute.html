@@ -43,16 +43,26 @@
   <section class="app-depute__section" aria-labelledby="chiffres">
     <h2 id="chiffres" class="title-2">Chiffres clés</h2>
     <p class="caption">
-      Ces trois chiffres sont calculés par le site, d'après les scrutins publics de la législature,
-      sur la période où ce député était en mandat. Ce ne sont pas des chiffres de l'Assemblée.
+      Ces chiffres sont calculés par le site, d'après les scrutins publics de la législature, sur la
+      période où ce député était en mandat. Ce ne sont pas des chiffres de l'Assemblée.
     </p>
     <ul class="app-depute__tuiles">
       <li class="app-depute__tuile">
         <h3 class="title-3">Participation aux scrutins</h3>
         <p class="app-depute__chiffre title-1">{{ pourcent(depute.taux.participation) }}</p>
+        <p class="app-depute__detail body">{{ detailParticipation() }}</p>
         <p class="caption">
           Part des scrutins publics où il ou elle a voté (pour, contre ou abstention). Les scrutins
-          où il ou elle était absent comptent dans le total. Calculé d'après les scrutins publics.
+          où il ou elle n'a pas voté, qu'il ou elle ait été non-votant ou absent, comptent dans le
+          total. Calculé d'après les scrutins publics.
+        </p>
+      </li>
+      <li class="app-depute__tuile">
+        <h3 class="title-3">Ses votes</h3>
+        <app-vote-bar [compte]="compteVotes()" />
+        <p class="caption">
+          Répartition de ses votes exprimés entre pour, contre et abstention, en pourcentage de ses
+          votes. Calculé d'après les scrutins publics.
         </p>
       </li>
       <li class="app-depute__tuile">

@@ -122,6 +122,8 @@ export class DonneesChargees {
   private readonly adoptes: Uint8Array;
   private readonly dossiers: (string | null)[];
   private readonly comptes: Uint16Array;
+  /** Députés en mandat à chaque scrutin (cases ≠ « - » de la matrice), calculés une fois au chargement. */
+  private readonly enMandats: Uint16Array;
   private readonly debutGroupes: Uint32Array;
   private readonly entrees: Uint16Array;
   private readonly votes: Uint8Array;
@@ -201,6 +203,7 @@ export class DonneesChargees {
     this.votes = votes;
     this.groupesVotes = groupesVotes;
     this.verifierMatrices();
+    this.enMandats = this.compterEnMandat();
 
     // Scrutins.
     const numeros = new Int32Array(nbScrutins);
@@ -347,6 +350,19 @@ export class DonneesChargees {
     }
   }
 
+  /** Compte, par scrutin, les cases ≠ « - » : les députés en mandat ce jour-là (au plus 0xffff : une ligne tient dans `Uint16Array` car il y a moins de 65 536 députés). */
+  private compterEnMandat(): Uint16Array {
+    verifier(this.nbDeputes <= 0xffff, `deputes.json : ${this.nbDeputes} députés (65 535 au plus)`);
+    const enMandats = new Uint16Array(this.nbScrutins);
+    for (let s = 0; s < this.nbScrutins; s++) {
+      const debut = s * this.pas;
+      let n = 0;
+      for (let d = 0; d < this.nbDeputes; d++) if (this.votes[debut + d] !== CODE_TIRET) n++;
+      enMandats[s] = n;
+    }
+    return enMandats;
+  }
+
   numero(s: number): number {
     return this.numeros[s];
   }
@@ -364,6 +380,10 @@ export class DonneesChargees {
   }
   dossier(s: number): string | null {
     return this.dossiers[s];
+  }
+  /** Nombre de députés en mandat au scrutin `s` (voir `ScrutinResume.enMandat`). */
+  enMandat(s: number): number {
+    return this.enMandats[s];
   }
   compte(s: number): Compte {
     const c = this.comptes;

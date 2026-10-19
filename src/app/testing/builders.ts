@@ -80,6 +80,7 @@ export function scrutin(numero = 8317, surcharge: Partial<ScrutinResume> = {}): 
     type: 'final',
     adopte: true,
     compte: compte(),
+    enMandat: 577,
     urlOfficielle: `https://www.assemblee-nationale.fr/dyn/17/scrutins/${numero}`,
     ...surcharge,
   };
@@ -124,7 +125,7 @@ export function loiDetail(surcharge: Partial<LoiDetail> = {}): LoiDetail {
     lecture: 'première lecture',
     statut: null,
     urlDossier: null,
-    voteFinal: { ...scrutin(8317), groupes: groupes() },
+    voteFinal: { ...scrutin(8317), groupes: groupes(), groupesSansVotant: [] },
     lectures: [],
     scrutins: [],
     ...surcharge,
@@ -136,6 +137,7 @@ export function scrutinDetail(surcharge: Partial<ScrutinDetail> = {}): ScrutinDe
     ...scrutin(8317),
     loi: { dossier: 'DLR5L17N54372', titreCourt: 'Projet de loi relatif à la sobriété foncière' },
     groupes: groupes(),
+    groupesSansVotant: [],
     nominatif: [
       {
         groupeId: 'PO845401',
@@ -201,6 +203,7 @@ export function deputeDetail(surcharge: Partial<DeputeDetail> = {}): DeputeDetai
     circonscription: 'Rhône (7)',
     urlFiche: 'https://www.assemblee-nationale.fr/dyn/deputes/PA1001',
     taux: { participation: 0.91, abstention: 0.12, loyaute: 0.99 },
+    scrutins: { enMandat: 200, pour: 120, contre: 40, abstention: 22, nonVote: 18 },
     dernieresLois: [
       {
         loi: {

@@ -85,6 +85,15 @@ describe('AppLoiCard', () => {
     expect(racine.querySelector('app-group-pills')).not.toBeNull();
   });
 
+  it("donne à la barre les députés en mandat : écrit combien n'ont pas voté", () => {
+    const { racine } = monter();
+    const texte = racine.textContent!.replace(/\s+/g, ' ');
+
+    // 577 en mandat, 531 votants (312 + 201 + 18) : 46 n'ont pas voté.
+    expect(texte).toContain("46 n'ont pas voté sur 577 en mandat (8");
+    expect(texte).toMatch(/59\s%\spour \(312\)/);
+  });
+
   it('a un nom accessible de lien qui ne se réduit pas à « Voir »', () => {
     const { lien } = monter();
 

@@ -39,6 +39,11 @@ export interface ScrutinResume {
   type: TypeScrutin;
   adopte: boolean;       // résultat officiel : sort.code === 'adopté'
   compte: Compte;
+  /**
+   * Députés en mandat le jour du scrutin (cases ≠ « - » de la matrice des votes). Ont voté = pour + contre + abstention ;
+   * n'ont pas voté = enMandat − (pour + contre + abstention) : les non-votants officiels et les absents.
+   */
+  enMandat: number;
   urlOfficielle: string; // https://www.assemblee-nationale.fr/dyn/17/scrutins/<numero>
 }
 
@@ -68,7 +73,7 @@ export interface LoiDetail {
   lecture: string | null;
   statut: null;              // voir LoiCarte
   urlDossier: null;          // idem
-  voteFinal: (ScrutinResume & { groupes: VoteGroupe[] }) | null; // vote sur l'ensemble le plus récent ; null s'il n'y en a pas encore
+  voteFinal: (ScrutinResume & { groupes: VoteGroupe[]; groupesSansVotant: Groupe[] }) | null; // vote sur l'ensemble le plus récent ; null s'il n'y en a pas encore
   lectures: ScrutinResume[]; // autres votes sur l'ensemble du texte (lectures précédentes), du plus récent au plus ancien
   scrutins: ScrutinResume[]; // articles, amendements, motions et autres scrutins du texte, du plus récent au plus ancien
 }
@@ -82,6 +87,8 @@ export interface DeputeMini {
 export interface ScrutinDetail extends ScrutinResume {
   loi: { dossier: string | null; titreCourt: string } | null;
   groupes: VoteGroupe[];
+  /** Groupes existant le jour du scrutin dont aucun député n'est listé (ni pour, ni contre, ni abstention, ni non-votant) : absents de `groupes`, signalés pour ne pas les masquer sans explication. */
+  groupesSansVotant: Groupe[];
   nominatif: { groupeId: string; position: Position; deputes: DeputeMini[] }[];
 }
 
@@ -123,6 +130,8 @@ export interface DeputeDetail {
     abstention: number | null;    // 0..1, calculé : abstentions / votes exprimés
     loyaute: number | null;       // 0..1, calculé : votes alignés sur la position majoritaire de son groupe / votes exprimés
   };
+  /** Ses scrutins en mandat, répartis : pour + contre + abstention + nonVote = enMandat ; nonVote = cases N (non-votant) + X (absent). */
+  scrutins: { enMandat: number; pour: number; contre: number; abstention: number; nonVote: number };
   dernieresLois: VoteDepute[];    // ses votes sur les 10 derniers votes finaux
 }
 ```
@@ -133,5 +142,6 @@ export interface DeputeDetail {
 - Les montants sont des entiers et les taux des nombres entre 0 et 1 (l'application les formate en %, en `fr-FR`).
 - Pour un même scrutin, la somme des `compte` de tous les groupes égale le `compte` du scrutin. Un test le vérifie.
 - Le groupe d'un député sur un scrutin est son groupe **au jour du vote** (ventilation officielle). `DeputeDetail.groupe` et `DeputeIndex.groupe` sont son groupe **actuel**.
+- `enMandat ≥ pour + contre + abstention` pour chaque scrutin, et pour chaque député `scrutins.pour + scrutins.contre + scrutins.abstention + scrutins.nonVote = scrutins.enMandat`. L'interface dit « ont voté » et « n'ont pas voté », jamais « présents » ni « absents » (l'Assemblée ne publie pas la présence en séance). Un test le vérifie.
 - Les taux sont calculés par nous à partir des scrutins publics : l'interface le dit (« calculé d'après les scrutins publics »). Ce ne sont pas des chiffres de l'Assemblée.
 - Les textes affichés sont en français. Aucun champ ne contient de HTML.

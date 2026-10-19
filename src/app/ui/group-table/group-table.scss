@@ -44,6 +44,16 @@
   text-align: right;
 }
 
+/* Le pourcentage des votants du groupe accompagne le nombre, en plus discret. */
+.app-group-table__part {
+  color: var(--ink-muted);
+}
+
+.app-group-table__note {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-muted);
+}
+
 /* Mini-barre : largeur minimale pour que les segments restent lisibles dans la cellule. */
 .app-group-table .app-vote-bar {
   min-width: calc(var(--space-16) * 2);

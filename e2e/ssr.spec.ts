@@ -11,7 +11,10 @@ test.describe('rendu serveur (JavaScript désactivé)', () => {
     await expect(page).toHaveTitle(/Qui a voté quoi \?/);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(page.locator('app-loi-card')).toHaveCount(10);
-    await expect(page.locator('app-loi-card').first()).toContainText(/\d+ pour/);
+    await expect(page.locator('app-loi-card').first()).toContainText(/\d+\s%\spour \(\d+\)/);
+    await expect(page.locator('app-loi-card').first()).toContainText(
+      /\d+ n'(?:ont|a) pas voté sur \d+ en mandat/,
+    );
   });
 
   test('loi : titre, vote final et tableau par groupe', async ({ page }) => {
@@ -20,6 +23,9 @@ test.describe('rendu serveur (JavaScript désactivé)', () => {
     expect(reponse!.status()).toBe(200);
     await expect(page).toHaveTitle(/titre-restaurant/);
     await expect(page.getByRole('table', { name: 'Vote par groupe' })).toBeVisible();
+    await expect(page.locator('app-vote-bar').first()).toContainText(
+      /\d+ n'(?:ont|a) pas voté sur \d+ en mandat/,
+    );
   });
 
   test('député : nom, chiffres clés et votes', async ({ page }) => {
@@ -28,6 +34,15 @@ test.describe('rendu serveur (JavaScript désactivé)', () => {
     expect(reponse!.status()).toBe(200);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Jérôme Guedj');
     await expect(page.getByText('Participation aux scrutins')).toBeVisible();
+    // Jérôme Guedj : 19 scrutins en mandat, 10 votes (7 pour, 3 contre), 9 sans vote.
+    await expect(
+      page.getByText("A voté à 10 scrutins sur 19 en mandat, n'a pas voté à 9."),
+    ).toBeVisible();
+    const votes = page.locator('.app-depute__tuile', {
+      has: page.getByRole('heading', { name: 'Ses votes', exact: true }),
+    });
+    await expect(votes).toContainText(/70\s%\spour \(7\)/);
+    await expect(votes).toContainText(/30\s%\scontre \(3\)/);
     await expect(page.locator('tbody tr')).toHaveCount(10);
   });
 

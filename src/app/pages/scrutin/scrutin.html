@@ -26,7 +26,7 @@
     <fd-badge [tone]="scrutin.adopte ? 'tokiwa' : 'enji'">{{
       libelleAdoption(scrutin.adopte)
     }}</fd-badge>
-    <app-vote-bar [compte]="scrutin.compte" taille="md" />
+    <app-vote-bar [compte]="scrutin.compte" [enMandat]="scrutin.enMandat" taille="md" />
     <p class="app-scrutin__liens">
       @if (scrutin.loi; as loi) {
         @if (loi.dossier; as dossier) {
@@ -41,7 +41,7 @@
 
   <section class="app-scrutin__section" aria-labelledby="decompte">
     <h2 id="decompte" class="title-2">Vote par groupe</h2>
-    <app-group-table [groupes]="scrutin.groupes" />
+    <app-group-table [groupes]="scrutin.groupes" [sansVotant]="scrutin.groupesSansVotant" />
   </section>
 
   <section class="app-scrutin__section" aria-labelledby="nominatif">

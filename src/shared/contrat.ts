@@ -32,6 +32,11 @@ export interface ScrutinResume {
   type: TypeScrutin;
   adopte: boolean; // résultat officiel : sort.code === 'adopté'
   compte: Compte;
+  /**
+   * Députés en mandat le jour du scrutin (cases ≠ « - » de la matrice des votes). Ont voté = pour + contre + abstention ;
+   * n'ont pas voté = enMandat − (pour + contre + abstention) : les non-votants officiels et les absents.
+   */
+  enMandat: number;
   urlOfficielle: string; // https://www.assemblee-nationale.fr/dyn/17/scrutins/<numero>
 }
 
@@ -61,7 +66,7 @@ export interface LoiDetail {
   lecture: string | null;
   statut: null; // voir LoiCarte
   urlDossier: null; // idem
-  voteFinal: (ScrutinResume & { groupes: VoteGroupe[] }) | null; // vote sur l'ensemble le plus récent ; null s'il n'y en a pas encore
+  voteFinal: (ScrutinResume & { groupes: VoteGroupe[]; groupesSansVotant: Groupe[] }) | null; // vote sur l'ensemble le plus récent ; null s'il n'y en a pas encore
   lectures: ScrutinResume[]; // autres votes sur l'ensemble du texte (lectures précédentes), du plus récent au plus ancien
   scrutins: ScrutinResume[]; // articles, amendements, motions et autres scrutins du texte, du plus récent au plus ancien
 }
@@ -75,6 +80,8 @@ export interface DeputeMini {
 export interface ScrutinDetail extends ScrutinResume {
   loi: { dossier: string | null; titreCourt: string } | null;
   groupes: VoteGroupe[];
+  /** Groupes existant le jour du scrutin dont aucun député n'est listé (ni pour, ni contre, ni abstention, ni non-votant) : absents de `groupes`, signalés pour ne pas les masquer sans explication. */
+  groupesSansVotant: Groupe[];
   nominatif: { groupeId: string; position: Position; deputes: DeputeMini[] }[];
 }
 
@@ -116,5 +123,7 @@ export interface DeputeDetail {
     abstention: number | null; // 0..1, calculé : abstentions / votes exprimés
     loyaute: number | null; // 0..1, calculé : votes alignés sur la position majoritaire de son groupe / votes exprimés
   };
+  /** Ses scrutins en mandat, répartis : pour + contre + abstention + nonVote = enMandat ; nonVote = cases N (non-votant) + X (absent). */
+  scrutins: { enMandat: number; pour: number; contre: number; abstention: number; nonVote: number };
   dernieresLois: VoteDepute[]; // ses votes sur les 10 derniers votes finaux
 }

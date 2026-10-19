@@ -72,6 +72,16 @@ describe('AProposPage', () => {
     expect(texte).toMatch(/présence/i);
   });
 
+  it("définit « ont voté » et « n'ont pas voté » et explique ces mots plutôt que « présents » et « absents »", () => {
+    const texte = afficher();
+
+    expect(texte).toContain('Ont voté');
+    expect(texte).toContain("N'ont pas voté");
+    expect(texte).toMatch(/ne veut donc pas dire/);
+    expect(texte).toMatch(/voter par délégation/);
+    expect(texte).toMatch(/Groupes sans aucun votant/);
+  });
+
   it("mentionne la mesure d'audience Umami sans cookie", () => {
     const texte = afficher();
 
