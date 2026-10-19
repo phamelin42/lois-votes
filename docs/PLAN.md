@@ -4,84 +4,65 @@
 
 Site public pour voir **quel parti a voté quoi pour une loi**. On y trouve les dernières lois votées à l'Assemblée avec les pour, contre et abstentions, une page par loi, une page par député, et une recherche. Contraintes :
 - utiliser **Fuda** (`phamelin42/design-system-fuda`), sans la modifier ;
-- **ne rien stocker chez nous** : les données viennent d'une API publique appelée à la demande ;
-- **aucune clé API** ;
+- **sources officielles uniquement** (Assemblée nationale), **aucune clé API**, aucune base de données ;
 - **fluide et rapide** : SSR, `@defer`, pré-chargement intelligent des pages suivantes ;
 - très simple à utiliser.
 
 Décisions :
-- **Source : l'API tabulaire de data.gouv.fr** (`https://tabular-api.data.gouv.fr/api`) : officielle, publique, sans clé, en lecture seule. Elle filtre et trie les fichiers CSV publiés sur data.gouv.fr (NosParlementaires et Datan, dérivés chaque jour de l'open data de l'Assemblée, Licence Ouverte 2.0). L'Assemblée elle-même ne publie que des archives zip, pas d'API. *L'API REST de NosParlementaires, envisagée un temps, est abandonnée parce qu'elle demande une clé.*
+- **Source : l'open data officiel de l'Assemblée nationale** (`data.assemblee-nationale.fr`, Licence Ouverte 2.0), préparé **chaque nuit** (option A) : un script télécharge les archives officielles et les réduit en fichiers compacts, que le serveur charge en mémoire. Aucune requête externe à l'exécution. L'Assemblée ne propose pas d'API qu'on peut interroger, seulement ces archives quotidiennes. *Les pistes précédentes (API de NosParlementaires, API tabulaire de data.gouv.fr avec les jeux NosParlementaires et Datan) sont abandonnées : elles ne sont pas officielles, l'une demande une clé, l'autre ne sert pas les votes individuels.*
 - **Angular 22 SSR sur Vercel Hobby** (non commercial). Mesure d'audience **Umami** (sans cookie).
 - **17ᵉ législature**. Les votes finaux (vote sur l'ensemble d'un texte) sont mis en avant ; articles et amendements restent consultables dans la page d'une loi.
 - **Pas de résumé inventé** : titre court dérivé du scrutin final en titre, titre officiel du scrutin en résumé (2 lignes sur l'accueil).
 - Formulation : « Adopté par l'Assemblée » / « Rejeté par l'Assemblée », jamais « loi adoptée ». « Participation aux scrutins », jamais « présence » : l'Assemblée ne publie pas la présence en séance ni en commission.
 - Domaine **`quiavotequoi.phamelin.fr`**, nom affiché « Qui a voté quoi ? », dépôt `lois-votes`.
 
-## La source : API tabulaire de data.gouv.fr
+## La source : archives officielles de l'Assemblée
 
-D'après la documentation de data.gouv.fr et le README de `datagouv/api-tabular` :
-- `GET /api/resources/{rid}/data/?<colonne>__exact=…&<colonne>__sort=desc&page=1&page_size=…`
-- Opérateurs : `__exact`, `__differs`, `__isnull` / `__isnotnull`, `__contains`, `__notcontains`, `__in` / `__notin`, `__less` / `__greater`, `__sort=asc|desc`.
-- Réponse : `{ data: [...], links: { next, prev }, meta: { page, page_size, total } }`. `meta.total` permet de **compter sans tout télécharger**.
-- `page_size` vaut 20 par défaut ; le maximum (200 ?) est à confirmer. Fichiers jusqu'à 100 Mo (csv et csv.gz). Spec par ressource : `/api/resources/{rid}/swagger/`. Le `rid` est dans l'onglet « Métadonnées » de la ressource.
-- **À établir par le prompt 00** : la limite de débit ; si les ressources visées sont traitées par l'API (en particulier les 1,3 M lignes de votes) ; le délai de rafraîchissement ; les noms et types exacts des colonnes.
-
-### Ressources visées (à confirmer par le prompt 00)
-
-| Besoin | Ressource candidate sur data.gouv.fr | Colonnes utiles |
+| Archive | URL (`https://data.assemblee-nationale.fr/static/openData/repository/17/…`) | Taille |
 |---|---|---|
-| Scrutins | NosParlementaires `scrutins_an.csv` | `id` (`VTANR5L17V<n>`), `date`, `title`, `dossier_ref`, `pour`, `contre`, `abstention`, `nonvotant` |
-| Votes individuels | NosParlementaires `votes_an.csv.gz` | `scrutin_id`, `deputy_slug`, `position` (`POUR`, `CONTRE`, `ABSTENTION`, `NONVOTANT`) |
-| Députés | NosParlementaires `deputes.csv` | `slug`, `first_name`, `last_name`, `full_name`, `group_short`, `group_label`, `constituency_label`, `department_code`, `active` |
-| Photo, participation, loyauté | Datan « Députés actifs de l'Assemblée nationale », quotidien | identifiant `PA…`, score de participation, score de loyauté |
-| Couleurs des groupes | Datan « Groupes politiques actifs » s'il existe | sinon une table des 12 couleurs officielles dans le code (de la configuration, pas de la donnée) |
+| Scrutins | `loi/scrutins/Scrutins.json.zip` | 27,5 Mo ; 8 806 fichiers, 189 Mo décompressés ; régénérée chaque nuit (~04:25 GMT), ETag |
+| Acteurs, mandats, organes | `amo/tous_acteurs_mandats_organes_xi_legislature/AMO30_tous_acteurs_tous_mandats_tous_organes_historique.json.zip` | 14 Mo ; acteurs, mandats, organes (groupes) |
 
-- **Photo** : `https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/<numéro du PA>.jpg` (format vérifié : 200).
-- **Jointure NosParlementaires ↔ Datan** : par nom, prénom et département ; le prompt 00 mesure le taux de correspondance.
-- **Point de décision** : si l'API tabulaire ne sert pas les votes individuels, le prompt 00 s'arrête et le signale sans rien changer seul. **Repli** proposé à l'utilisateur : lire en mémoire les exports publics de NosParlementaires (`https://nosparlementaires.fr/opendata/`, sans clé, ~10 Mo, testés), avec la même couche `source/` et sans toucher aux pages.
+Photos officielles : `https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/<numéro du PA>.jpg`. Lien d'un scrutin : `https://www.assemblee-nationale.fr/dyn/17/scrutins/<numero>`.
 
-### Constats tirés des exports publics (16/10/2026)
+Ce que contient un scrutin (`VTANR5L17V<numero>`) : `dateScrutin`, `titre`, `typeVote` (SPO, SPS, MOC), **`sort.code` (`adopté` / `rejeté`)**, `syntheseVote.decompte`, `objet.dossierLegislatif.dossierRef` (présent sur 2 980 scrutins sur 8 806), et `ventilationVotes.organe.groupes.groupe[]` : pour chaque groupe **au jour du vote**, `organeRef`, `positionMajoritaire`, `decompteVoix`, et la liste nominative (`decompteNominatif` : `pours`, `contres`, `abstentions`, `nonVotants`, avec `acteurRef`). Quand un groupe n'a qu'un votant, la liste est un objet et non un tableau.
 
-- `scrutins_an` : 8 806 lignes, `{ id, date: "2024-10-07T22:00:00+00:00", title, dossier_ref | null, pour, contre, abstention, nonvotant }`. **Aucun champ « adopté / rejeté ».**
-- `votes_an` : 1 317 652 lignes, `{ scrutin_id, deputy_slug, position }`. **Aucun groupe sur la ligne** : il faut joindre avec l'index des députés (groupe actuel).
-- `deputes` : 2 128 lignes, dont 574 actifs, en 12 groupes (RN 121, EPR 90, LFI-NFP 70, SOC 68, DR 47, ECOS 38, DEM 37, HOR 35, LIOT 23, UDDPLR 17, GDR 17, NI 11).
+Constats (archive du 19/10/2026) : 3 018 scrutins adoptés et 5 788 rejetés ; 652 votants, tous présents dans l'archive des acteurs ; 348 d'entre eux apparaissent dans plusieurs groupes (changements de groupe) ; 1 317 652 positions. Une matrice d'un caractère par votant et par scrutin pèse 5,7 Mo bruts, 0,66 Mo compressés.
 
-Conséquences :
-1. **Adopté ou rejeté se calcule** (`estAdopte`). Cas général : majorité des suffrages exprimés, soit `pour > contre`. **Motion de censure** : adoptée seulement si `pour >= 289` (majorité absolue des membres). Le prompt 00 vérifie la règle sur au moins 200 scrutins par rapport au champ `sort.code` des données officielles (archive `Scrutins.json.zip`, utilisée pour ce test seulement).
-2. **Ventilation par groupe** : votes du scrutin joints au groupe **actuel** du député. C'est faux pour les rares députés qui ont changé de groupe ; à signaler dans `/a-propos`, et à corriger si une ressource donne le groupe à la date du vote.
-3. Identifiant de scrutin `VTANR5L17V<numero>` ; les URL du site utilisent le numéro (`/scrutins/8317`). Lien officiel : `https://www.assemblee-nationale.fr/dyn/17/scrutins/<numero>`.
-4. **Identifiant de loi = `dossier_ref`** (`/lois/DLR5L17N54372`). Un texte peut avoir plusieurs votes sur l'ensemble (lectures successives) : le plus récent est le vote final affiché, les autres sont listés.
-
-## Architecture
+## Architecture (option A)
 
 ```
-Navigateur ──► Vercel CDN (cache HTTP) ──► fonction SSR Angular (server.ts, Express)
-                                             ├─ rend les pages (SSR + hydratation incrémentale)
-                                             └─ /api/*  : BFF qui interroge l'API tabulaire,
-                                                          agrège, renvoie un JSON compact et l'en-tête Cache-Control
+Build (Vercel ou local)  npm run donnees : télécharge les 2 archives, écrit data/ (fichiers compacts)
+                         ng build : data/ est copié dans dist/lois-votes/data/
+Exécution                serveur SSR : lit data/ au démarrage, tout en mémoire, aucune requête externe
+Chaque nuit              GitHub Actions appelle le Deploy Hook Vercel (secret VERCEL_DEPLOY_HOOK_URL) vers 05:30 UTC
+Téléchargement échoué    le build échoue : l'ancien déploiement reste en ligne
 ```
 
-- **Rien en base, rien sur disque.** Seulement le cache HTTP du CDN et un cache mémoire de durée limitée dans la fonction : moins d'appels à data.gouv.fr, des pages rapides.
-- **Une seule couche d'accès à la source** (`src/server/source/`) : changer de source ne touche ni le BFF ni les pages.
-- Le navigateur ne parle qu'à `/api/*` (même origine, cache CDN), jamais directement à data.gouv.fr.
+- **Rien en base.** `data/` est un produit de build, régénéré chaque nuit et jamais modifié à l'exécution ; il n'est pas versionné (`.gitignore`).
+- **Mode `fixtures`** : `DONNEES_DEPUIS=fixtures npm run donnees` construit `data/` à partir d'un mini-jeu d'archives réelles réduites (`src/server/fixtures/officiel/`). C'est le mode des tests, des e2e et de la CI, qui ne dépendent donc pas du réseau.
+- Le format des fichiers est dans [DONNEES.md](DONNEES.md), les formats de l'API interne dans [CONTRAT.md](CONTRAT.md).
+
+### Pipeline : `scripts/donnees/`
+
+- Téléchargement (ETag, échec si statut ≠ 200), dézippage en mémoire avec `fflate` (dépendance de dev), parsing, réduction, écriture dans `data/`.
+- Garde-fous qui font échouer le build : au moins 8 000 scrutins, au moins 570 députés, aucun votant sans fiche, somme des groupes égale au décompte de chaque scrutin, `sort.code` toujours `adopté` ou `rejeté`.
+- Classement des scrutins (`classer`) : `final` (« l'ensemble du… », « l'article unique… » quand le texte n'a pas d'autre article, apostrophes droites et typographiques), `motion` (« la motion de censure… »), `article`, `amendement`, `autre`. Titre court et lecture dérivés du titre (« l'ensemble du projet de loi relatif à X (première lecture) » → « Projet de loi relatif à X », « première lecture »).
 
 ### Serveur : `src/server/`
 
-- `source/tabulaire.ts` : client `fetch` typé ; base `TABULAR_API_BASE` (remplaçable par un faux serveur en test) ; `rid` de chaque ressource dans `source/ressources.ts` ; pagination ; comptage par `meta.total`. Aucune clé.
-- `source/limiter.ts` : au plus 4 requêtes simultanées et 10 par seconde (à ajuster selon la limite mesurée en 00) ; fusion des requêtes identiques en vol ; nouvel essai sur 429 ou 503 (`Retry-After`).
-- `cache.ts` : LRU mémoire avec TTL et `stale-while-revalidate`. La valeur périmée est servie pendant le rafraîchissement, et aussi quand la source est en erreur.
-- `classify.ts` (fonctions pures, testées) : `classer(titre)` → `final | motion | article | amendement | autre` ; `estAdopte(type, compte)` ; `ventilerParGroupe(votes, groupeDe)` ; `titreCourt(titre)` et `lecture(titre)` (« l'ensemble du projet de loi relatif à X (première lecture) » → « Projet de loi relatif à X », « première lecture ») ; `tauxAbstention`.
-- `routes.ts` (monté dans `server.ts`) :
+- `donnees.ts` : charge `data/` au démarrage et expose des accès en mémoire (aucun appel réseau).
+- `agregation.ts` : calcule les réponses du contrat : accueil (10 derniers votes finaux, tri par date puis numéro décroissants, donc déterministe), loi (regroupement par dossier, lectures), scrutin (listes nominatives par groupe), député (10 derniers votes finaux, taux).
+- **Taux calculés par nous** à partir des scrutins publics, et présentés comme tels : *participation* = votes exprimés (pour, contre, abstention) / scrutins où le député était membre ; *abstention* = abstentions / votes exprimés ; *loyauté* = votes alignés sur la position majoritaire de son groupe / votes exprimés.
+- `routes.ts` : routes `/api/*`, `Cache-Control`, erreurs ; `cache.ts` ; `bff.ts` ; `classify.ts` (fonctions pures).
 
-| Route BFF | Requêtes à froid | `s-maxage` / `stale-while-revalidate` |
+| Route BFF | Calcul | `s-maxage` / `stale-while-revalidate` |
 |---|---|---|
-| `GET /api/accueil?page=n` | scrutins `title__contains=l'ensemble&date__sort=desc&page_size=10` (1) + votes `scrutin_id__in=<10 ids>` (~29 pages de 200) + index des députés (en cache) | 30 min / 1 jour |
-| `GET /api/lois/:dossier` | scrutins `dossier_ref__exact` (1-2) + votes du vote final (3) | 1 h / 1 jour |
-| `GET /api/scrutins/:numero` | scrutin (1) + votes (3) | 1 jour / 1 semaine |
-| `GET /api/deputes` | députés `active__exact=true` (3) + Datan (3) | 6 h / 1 jour |
-| `GET /api/deputes/:slug` | député (1) + Datan (1) + votes `deputy_slug__exact&scrutin_id__in=<10 derniers finaux>` (1) + 2 comptages `meta.total` | 1 h / 1 jour |
-
-Les formats échangés sont dans [CONTRAT.md](CONTRAT.md).
+| `GET /api/accueil?page=n` | tranche de la liste des votes finaux | 30 min / 1 jour |
+| `GET /api/lois/:dossier` | scrutins du dossier | 1 h / 1 jour |
+| `GET /api/scrutins/:numero` | un scrutin et ses listes nominatives | 1 jour / 1 semaine |
+| `GET /api/deputes` | index des députés actifs | 6 h / 1 jour |
+| `GET /api/deputes/:slug` | fiche, taux, 10 derniers votes finaux | 1 h / 1 jour |
 
 ### Application : `src/app/` (mêmes conventions que Fuda)
 
@@ -95,7 +76,7 @@ Angular 22 : standalone, zoneless, signaux, `@if/@for/@defer`, `host: {}`, `inje
 | `/deputes` | Liste avec filtres groupe et département | SSR |
 | `/deputes/:slug` | **Photo**, nom, **parti**, circonscription ; **participation aux scrutins**, **taux d'abstention**, vote avec son groupe ; **ses votes sur les 10 dernières lois** (sa position, celle de son groupe, résultat) | SSR |
 | `/recherche?q=` | Résultats Lois / Députés ; un seul député trouvé → son profil | SSR |
-| `/a-propos` | Source, licence, méthode, limites, Umami | pré-rendu |
+| `/a-propos` | Source officielle, licence, méthode de calcul des taux, limites, mise à jour nocturne, Umami | pré-rendu |
 
 Composants de l'app : `app-vote-bar`, `app-position`, `app-group-pill(s)`, `app-group-table`, `app-loi-card`, `app-deputy-photo`, `app-search` (combobox ; choisir un député ouvre son profil).
 Fuda : `a[fdCard]`, `fd-badge`, `fd-text-field`, `fd-select`, `fd-chip`, `fd-tabs`, `fd-accordion`, `fd-breadcrumb`, `fd-avatar`, `fd-empty-state`, `fd-spinner`, `fd-alert`, `button[fdButton]`, `button[fdIconButton]`, `a[fdLink]`, `FdThemeService`.
@@ -104,34 +85,36 @@ Fuda : `a[fdCard]`, `fd-badge`, `fd-text-field`, `fd-select`, `fd-chip`, `fd-tab
 
 1. SSR + `withIncrementalHydration()` + cache de transfert HTTP : pas de double requête à l'hydratation.
 2. Services `httpResource('/api/...')`. Côté serveur, un intercepteur exécute `/api/*` en mémoire (`appelerBff`), sans aller-retour réseau.
-3. `@defer (on viewport; hydrate on viewport)` sous la ligne de flottaison, `@defer (on interaction; hydrate on interaction)` pour la liste nominative ; placeholders de hauteur fixe.
+3. `@defer (on viewport; hydrate on viewport)` sous la ligne de flottaison, `@defer (on interaction)` pour la liste nominative ; placeholders de hauteur fixe.
 4. Pré-chargement : code des routes quand un lien devient visible (stratégie maison à la manière de quicklink, rien en `saveData`) ; données au survol ou au focus (`appPrefetch`, `fetch` de priorité basse).
 5. `loadComponent` partout, `withViewTransitions()` (coupé en mouvement réduit).
-6. `NgOptimizedImage` (photo du profil en `priority`), `preconnect` vers l'hôte des photos.
-7. Polices latines de Fuda seulement ; barres en CSS ; budgets bloquants (initial ≤ 150 Ko brut) ; Lighthouse mobile ≥ 95.
+6. `NgOptimizedImage` (photo du profil en `priority`), `preconnect` vers `www.assemblee-nationale.fr` pour les photos.
+7. Polices latines de Fuda seulement ; barres en CSS ; budgets bloquants ; Lighthouse mobile ≥ 95.
 8. Script de thème en ligne dans `index.html` (pas de flash pour qui a choisi Nuit).
 
 ### Robustesse
 
-Cache CDN et mémoire, fusion des requêtes, limiteur. Sur erreur : valeur périmée si elle existe, sinon `fd-alert` et statut 503 + `Retry-After` (non mis en cache).
+Données entièrement en mémoire : aucune dépendance externe à l'exécution. Un build dont les données sont invalides ou incomplètes échoue, et l'ancien déploiement reste servi. Cache CDN sur les réponses.
 
 ## Structure du dépôt
 
 ```
 CLAUDE.md, README.md, angular.json, package.json, tsconfig*.json, eslint.config.js, vercel.json
+scripts/donnees/               téléchargement et réduction des archives officielles
 src/server.ts                  Express de @angular/ssr/node + routes BFF
-src/server/                    source/ (tabulaire, ressources, limiter), cache.ts, classify.ts, routes.ts, fixtures/
+src/server/                    donnees.ts, agregation.ts, routes.ts, bff.ts, cache.ts, classify.ts, fixtures/
 src/shared/contrat.ts          types du contrat
 src/app/                       config, routes, shell/, pages/, ui/, data/
-e2e/                           Playwright + faux serveur tabulaire
-docs/                          PLAN.md, CONTRAT.md, API.md (prompt 00), prompts/
+e2e/                           Playwright (sur le jeu fixtures)
+.github/workflows/             ci.yml, actualiser.yml (déclenche le redéploiement nocturne)
+docs/                          PLAN.md, CONTRAT.md, DONNEES.md, prompts/
 ```
 
 Mise en ligne : intégration Git de Vercel. Variables facultatives `UMAMI_WEBSITE_ID` et `UMAMI_SRC`. Domaine : CNAME `quiavotequoi` → `cname.vercel-dns.com` chez le registraire de `phamelin.fr`.
 
 ## Prérequis côté utilisateur
 
-- Créer le projet Vercel relié au dépôt (variables Umami facultatives).
-- Ajouter le domaine `quiavotequoi.phamelin.fr` au projet et créer le CNAME.
+- Projet Vercel relié au dépôt, domaine `quiavotequoi.phamelin.fr` et CNAME (déjà faits d'après l'utilisateur).
+- **Mise à jour nocturne** : créer un *Deploy Hook* dans le projet Vercel (branche `main`) et l'enregistrer comme secret GitHub `VERCEL_DEPLOY_HOOK_URL`. Sans lui, le site ne se met à jour qu'aux fusions sur `main`.
 
-Les prompts des sous-agents sont dans [prompts/](prompts/README.md).
+Les prompts des sous-agents sont dans [prompts/](prompts/README.md). Les prompts 00 (exploration de l'API tabulaire) et 02 (serveur BFF sur l'API tabulaire) sont remplacés par 08 et 09.

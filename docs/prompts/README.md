@@ -4,9 +4,9 @@ Chaque fichier est un prompt autonome à donner tel quel à un sous-agent (sessi
 
 | # | Prompt | Dépend de | Réseau data.gouv.fr |
 |---|---|---|---|
-| 00 | [Exploration de l'API tabulaire et fixtures](00-exploration-api.md) | rien | **obligatoire** |
+| 00 | ~~Exploration de l'API tabulaire~~ (remplacé par 08, [rapport](00-exploration-api.md) conservé pour mémoire) | | |
 | 01 | [Squelette Angular SSR + Fuda](01-squelette.md) | rien | non |
-| 02 | [Serveur BFF](02-serveur-bff.md) | 00, 01 | utile pour la vérification finale |
+| 02 | ~~Serveur BFF sur l'API tabulaire~~ (remplacé par 09) | | |
 | 03 | [Couche données et chargement intelligent](03-donnees-chargement.md) | 01 | non |
 | 04 | [Composants, shell et accueil](04-ui-shell-accueil.md) | 01 | non |
 | 05 | [Pages loi, scrutin, députés, recherche, à propos](05-pages.md) | 03, 04 | non |
@@ -38,3 +38,13 @@ Les agents d'une même vague travaillent en parallèle : chacun sur **sa propre 
 - Aucune clé API : la source est l'API tabulaire publique de data.gouv.fr.
 - Ne pas modifier Fuda, ni changer le contrat sans mettre à jour `docs/CONTRAT.md`.
 - Une tâche est terminée quand `npm run lint`, `npm run typecheck`, `npm test` et `npm run build` sont verts.
+
+## Passage aux sources officielles (option A)
+
+Les prompts 01 à 06 ont été exécutés (branche `main`). Le prompt 00 a montré que l'API tabulaire ne sert pas les votes, et le projet a basculé sur les archives officielles de l'Assemblée, préparées au build :
+
+| # | Prompt | Dépend de |
+|---|---|---|
+| 08 | [Pipeline des données officielles](08-donnees-officielles.md) | rien (part de `claude/bold-fermi-zihw5t`, qui contient `main`) |
+| 09 | [Serveur sur les données officielles, déploiement, mise à jour nocturne](09-serveur-officiel.md) | 08 |
+| 07 | [Relecture finale](07-relecture-finale.md) | 09 |

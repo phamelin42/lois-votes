@@ -1,8 +1,8 @@
 # Contrat BFF ↔ application
 
-Ce fichier est la **source unique** des formats échangés entre le serveur (`/api/*`) et l'application Angular. Il est recopié tel quel dans `src/shared/contrat.ts` par le prompt 01. Les deux côtés importent ces types, et aucun ne les modifie sans mettre à jour ce fichier.
+Ce fichier est la **source unique** des formats échangés entre le serveur (`/api/*`) et l'application Angular. Il est recopié tel quel dans `src/shared/contrat.ts`. Les deux côtés importent ces types, et aucun ne les modifie sans mettre à jour ce fichier.
 
-Toutes les routes répondent en JSON, en `GET`, avec un `Cache-Control` (voir PLAN.md). En erreur, la réponse est `{ "erreur": string }` avec le code 404 (inconnu) ou 503 (source indisponible, plus `Retry-After`).
+Toutes les routes répondent en JSON, en `GET`, avec un `Cache-Control` (voir PLAN.md). En erreur, la réponse est `{ "erreur": string }` avec le code 404 (inconnu) ou 503 (données non chargées, plus `Retry-After`).
 
 ```ts
 // src/shared/contrat.ts
@@ -20,10 +20,10 @@ export interface Compte {
 }
 
 export interface Groupe {
-  id: string;          // abrégé du groupe (« RN ») : les ressources n'ont pas d'autre identifiant commun
-  abrege: string;      // « RN », « LFI-NFP »…
+  id: string;          // identifiant officiel de l'organe (« PO845401 ») ; deux organes peuvent porter le même abrégé (UDR a été recréé en 2025)
+  abrege: string;      // abrégé officiel : « RN », « LFI-NFP », « EcoS »…
   libelle: string;     // « Rassemblement National »
-  couleur: string | null; // couleur officielle, pour une pastille seulement (jamais pour du texte)
+  couleur: string | null; // couleurAssociee officielle, pour une pastille seulement (jamais pour du texte)
 }
 
 export interface VoteGroupe {
@@ -37,7 +37,7 @@ export interface ScrutinResume {
   date: string;          // ISO 8601, jour du scrutin
   titre: string;         // titre officiel du scrutin
   type: TypeScrutin;
-  adopte: boolean;       // calculé, voir PLAN.md « Constats » §1
+  adopte: boolean;       // résultat officiel : sort.code === 'adopté'
   compte: Compte;
   urlOfficielle: string; // https://www.assemblee-nationale.fr/dyn/17/scrutins/<numero>
 }
@@ -47,7 +47,7 @@ export interface LoiCarte {
   titreCourt: string;     // dérivé du titre du scrutin final (« Projet de loi relatif à … »)
   titreOfficiel: string;  // titre du scrutin final (sert de résumé, tronqué à 2 lignes sur l'accueil)
   lecture: string | null; // « première lecture », « lecture définitive »… si le titre l'indique
-  statut: null;           // aucune source sans clé ne le fournit ; gardé pour plus tard
+  statut: null;           // l'archive des scrutins ne le fournit pas ; gardé pour plus tard
   voteFinal: ScrutinResume;
   groupes: VoteGroupe[]; // triés par nombre de sièges décroissant
 }
@@ -57,7 +57,7 @@ export interface Accueil {
   lois: LoiCarte[];      // 10 par page, du plus récent au plus ancien
   page: number;
   pageSuivante: boolean;
-  miseAJour: string;     // ISO : date de génération des données de la source si elle est connue, sinon de la réponse
+  miseAJour: string;     // ISO : date de génération de data/ (meta.json)
 }
 
 /** GET /api/lois/:dossier */
@@ -114,14 +114,14 @@ export interface VoteDepute {
 export interface DeputeDetail {
   slug: string;
   nom: string;
-  photo: string | null; // photo officielle de l'Assemblée (identifiant PA de Datan) ; null si la jointure échoue
+  photo: string | null; // photo officielle : https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/<numéro du PA>.jpg
   groupe: Groupe | null;
   circonscription: string | null;
-  urlFiche: string;   // fiche officielle sur assemblee-nationale.fr si l'identifiant PA est connu, sinon fiche NosParlementaires
+  urlFiche: string;   // fiche officielle : https://www.assemblee-nationale.fr/dyn/deputes/<PA>
   taux: {
-    participation: number | null; // 0..1, score de participation de Datan : « participation aux scrutins publics »
-    abstention: number | null;    // 0..1, abstentions / (pour + contre + abstention) sur la législature, calculé par comptage (meta.total)
-    loyaute: number | null;       // 0..1, score de loyauté de Datan
+    participation: number | null; // 0..1, calculé : votes exprimés / scrutins où le député était membre (« participation aux scrutins publics »)
+    abstention: number | null;    // 0..1, calculé : abstentions / votes exprimés
+    loyaute: number | null;       // 0..1, calculé : votes alignés sur la position majoritaire de son groupe / votes exprimés
   };
   dernieresLois: VoteDepute[];    // ses votes sur les 10 derniers votes finaux
 }
@@ -131,6 +131,7 @@ export interface DeputeDetail {
 
 - Une loi est identifiée par son `dossier_ref` ; le site l'utilise dans l'URL (`/lois/DLR5L17N54372`).
 - Les montants sont des entiers et les taux des nombres entre 0 et 1 (l'application les formate en %, en `fr-FR`).
-- Pour un même scrutin, la somme des `compte` de tous les groupes égale le `compte` du scrutin, à l'unité près. Un député sans groupe connu va dans `{ id: 'NI', abrege: 'NI', libelle: 'Non inscrits' }`. Un test le vérifie.
-- Le groupe d'un député sur un scrutin est son groupe **actuel** (les votes ne portent pas le groupe à la date du vote ; voir PLAN.md).
+- Pour un même scrutin, la somme des `compte` de tous les groupes égale le `compte` du scrutin. Un test le vérifie.
+- Le groupe d'un député sur un scrutin est son groupe **au jour du vote** (ventilation officielle). `DeputeDetail.groupe` et `DeputeIndex.groupe` sont son groupe **actuel**.
+- Les taux sont calculés par nous à partir des scrutins publics : l'interface le dit (« calculé d'après les scrutins publics »). Ce ne sont pas des chiffres de l'Assemblée.
 - Les textes affichés sont en français. Aucun champ ne contient de HTML.
