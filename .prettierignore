@@ -7,3 +7,4 @@ tdd
 *.css
 docs
 .superpowers
+src/server/fixtures/source
