@@ -1,0 +1,2037 @@
+{
+  "lois": [
+    {
+      "dossier": "DLR5L17N54096",
+      "titreCourt": "Proposition de loi relative à l'expérimentation d'une gouvernance territoriale unifiée pour le centre de ressources, d'expertise et de performance sportive (CREPS) de Vichy",
+      "titreOfficiel": "l'ensemble de la proposition de loi relative à l'expérimentation d'une gouvernance territoriale unifiée pour le centre de ressources, d'expertise et de performance sportive (CREPS) de Vichy (première lecture).",
+      "lecture": "première lecture",
+      "statut": null,
+      "voteFinal": {
+        "numero": 8695,
+        "date": "2026-10-11T22:00:00+00:00",
+        "titre": "l'ensemble de la proposition de loi relative à l'expérimentation d'une gouvernance territoriale unifiée pour le centre de ressources, d'expertise et de performance sportive (CREPS) de Vichy (première lecture).",
+        "type": "final",
+        "adopte": true,
+        "compte": {
+          "pour": 44,
+          "contre": 0,
+          "abstention": 6,
+          "nonvotant": 1
+        },
+        "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8695"
+      },
+      "groupes": [
+        {
+          "groupe": {
+            "id": "RN",
+            "abrege": "RN",
+            "libelle": "Rassemblement National",
+            "couleur": "#313567"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 11,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "EPR",
+            "abrege": "EPR",
+            "libelle": "Ensemble pour la République",
+            "couleur": "#7B4591"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 2,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LFI-NFP",
+            "abrege": "LFI-NFP",
+            "libelle": "La France insoumise - Nouveau Front Populaire",
+            "couleur": "#C00D0D"
+          },
+          "position": "abstention",
+          "compte": {
+            "pour": 1,
+            "contre": 0,
+            "abstention": 4,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "SOC",
+            "abrege": "SOC",
+            "libelle": "Socialistes et apparentés",
+            "couleur": "#F5B4CE"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 7,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DR",
+            "abrege": "DR",
+            "libelle": "Droite Républicaine",
+            "couleur": "#8CB0DC"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 4,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "ECOS",
+            "abrege": "ECOS",
+            "libelle": "Écologiste et Social",
+            "couleur": "#77AA79"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 3,
+            "contre": 0,
+            "abstention": 2,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DEM",
+            "abrege": "DEM",
+            "libelle": "Les Démocrates",
+            "couleur": "#F07E26"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 4,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "HOR",
+            "abrege": "HOR",
+            "libelle": "Horizons & Indépendants",
+            "couleur": "#B5E2F9"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 4,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "LIOT",
+            "abrege": "LIOT",
+            "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+            "couleur": "#FFD96F"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 1,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "UDDPLR",
+            "abrege": "UDDPLR",
+            "libelle": "Union des droites pour la République",
+            "couleur": "#3367A7"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 5,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "GDR",
+            "abrege": "GDR",
+            "libelle": "Gauche Démocrate et Républicaine",
+            "couleur": "#830E21"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 2,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "NI",
+            "abrege": "NI",
+            "libelle": "Non inscrits",
+            "couleur": "#8D949A"
+          },
+          "position": "nonvotant",
+          "compte": {
+            "pour": 0,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        }
+      ]
+    },
+    {
+      "dossier": "DLR5L17N53886",
+      "titreCourt": "Proposition de loi visant à assouplir la procédure d'autorisation des établissements et services sociaux et médico-sociaux à caractère expérimental",
+      "titreOfficiel": "l'ensemble de la proposition de loi visant à assouplir la procédure d'autorisation des établissements et services sociaux et médico-sociaux à caractère expérimental (première lecture).",
+      "lecture": "première lecture",
+      "statut": null,
+      "voteFinal": {
+        "numero": 8694,
+        "date": "2026-10-11T22:00:00+00:00",
+        "titre": "l'ensemble de la proposition de loi visant à assouplir la procédure d'autorisation des établissements et services sociaux et médico-sociaux à caractère expérimental (première lecture).",
+        "type": "final",
+        "adopte": true,
+        "compte": {
+          "pour": 53,
+          "contre": 0,
+          "abstention": 0,
+          "nonvotant": 1
+        },
+        "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8694"
+      },
+      "groupes": [
+        {
+          "groupe": {
+            "id": "RN",
+            "abrege": "RN",
+            "libelle": "Rassemblement National",
+            "couleur": "#313567"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 20,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "EPR",
+            "abrege": "EPR",
+            "libelle": "Ensemble pour la République",
+            "couleur": "#7B4591"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 10,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LFI-NFP",
+            "abrege": "LFI-NFP",
+            "libelle": "La France insoumise - Nouveau Front Populaire",
+            "couleur": "#C00D0D"
+          },
+          "position": "nonvotant",
+          "compte": {
+            "pour": 0,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "SOC",
+            "abrege": "SOC",
+            "libelle": "Socialistes et apparentés",
+            "couleur": "#F5B4CE"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 8,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DR",
+            "abrege": "DR",
+            "libelle": "Droite Républicaine",
+            "couleur": "#8CB0DC"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 2,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "ECOS",
+            "abrege": "ECOS",
+            "libelle": "Écologiste et Social",
+            "couleur": "#77AA79"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 3,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DEM",
+            "abrege": "DEM",
+            "libelle": "Les Démocrates",
+            "couleur": "#F07E26"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 2,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "HOR",
+            "abrege": "HOR",
+            "libelle": "Horizons & Indépendants",
+            "couleur": "#B5E2F9"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 2,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "LIOT",
+            "abrege": "LIOT",
+            "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+            "couleur": "#FFD96F"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 2,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "UDDPLR",
+            "abrege": "UDDPLR",
+            "libelle": "Union des droites pour la République",
+            "couleur": "#3367A7"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 4,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "GDR",
+            "abrege": "GDR",
+            "libelle": "Gauche Démocrate et Républicaine",
+            "couleur": "#830E21"
+          },
+          "position": "nonvotant",
+          "compte": {
+            "pour": 0,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "NI",
+            "abrege": "NI",
+            "libelle": "Non inscrits",
+            "couleur": "#8D949A"
+          },
+          "position": "nonvotant",
+          "compte": {
+            "pour": 0,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        }
+      ]
+    },
+    {
+      "dossier": "DLR5L17N54445",
+      "titreCourt": "Proposition de loi visant à moderniser et rééquilibrer le fonctionnement du titre-restaurant",
+      "titreOfficiel": "l'ensemble de la proposition de loi visant à moderniser et rééquilibrer le fonctionnement du titre-restaurant (première lecture).",
+      "lecture": "première lecture",
+      "statut": null,
+      "voteFinal": {
+        "numero": 8693,
+        "date": "2026-10-11T22:00:00+00:00",
+        "titre": "l'ensemble de la proposition de loi visant à moderniser et rééquilibrer le fonctionnement du titre-restaurant (première lecture).",
+        "type": "final",
+        "adopte": true,
+        "compte": {
+          "pour": 87,
+          "contre": 0,
+          "abstention": 15,
+          "nonvotant": 1
+        },
+        "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8693"
+      },
+      "groupes": [
+        {
+          "groupe": {
+            "id": "RN",
+            "abrege": "RN",
+            "libelle": "Rassemblement National",
+            "couleur": "#313567"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 28,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "EPR",
+            "abrege": "EPR",
+            "libelle": "Ensemble pour la République",
+            "couleur": "#7B4591"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 18,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LFI-NFP",
+            "abrege": "LFI-NFP",
+            "libelle": "La France insoumise - Nouveau Front Populaire",
+            "couleur": "#C00D0D"
+          },
+          "position": "abstention",
+          "compte": {
+            "pour": 0,
+            "contre": 0,
+            "abstention": 12,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "SOC",
+            "abrege": "SOC",
+            "libelle": "Socialistes et apparentés",
+            "couleur": "#F5B4CE"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 8,
+            "contre": 0,
+            "abstention": 3,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DR",
+            "abrege": "DR",
+            "libelle": "Droite Républicaine",
+            "couleur": "#8CB0DC"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 4,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "ECOS",
+            "abrege": "ECOS",
+            "libelle": "Écologiste et Social",
+            "couleur": "#77AA79"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 8,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DEM",
+            "abrege": "DEM",
+            "libelle": "Les Démocrates",
+            "couleur": "#F07E26"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 4,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "HOR",
+            "abrege": "HOR",
+            "libelle": "Horizons & Indépendants",
+            "couleur": "#B5E2F9"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 6,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "LIOT",
+            "abrege": "LIOT",
+            "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+            "couleur": "#FFD96F"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 6,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "UDDPLR",
+            "abrege": "UDDPLR",
+            "libelle": "Union des droites pour la République",
+            "couleur": "#3367A7"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 3,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "GDR",
+            "abrege": "GDR",
+            "libelle": "Gauche Démocrate et Républicaine",
+            "couleur": "#830E21"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 2,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "NI",
+            "abrege": "NI",
+            "libelle": "Non inscrits",
+            "couleur": "#8D949A"
+          },
+          "position": "nonvotant",
+          "compte": {
+            "pour": 0,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        }
+      ]
+    },
+    {
+      "dossier": "DLR5L17N52746",
+      "titreCourt": "Proposition de loi visant à moderniser la gestion du patrimoine immobilier de l'État",
+      "titreOfficiel": "l'ensemble de la proposition de loi visant à moderniser la gestion du patrimoine immobilier de l'État (texte de la commission mixte paritaire).",
+      "lecture": "texte de la commission mixte paritaire",
+      "statut": null,
+      "voteFinal": {
+        "numero": 8434,
+        "date": "2026-07-20T22:00:00+00:00",
+        "titre": "l'ensemble de la proposition de loi visant à moderniser la gestion du patrimoine immobilier de l'État (texte de la commission mixte paritaire).",
+        "type": "final",
+        "adopte": true,
+        "compte": {
+          "pour": 276,
+          "contre": 86,
+          "abstention": 2,
+          "nonvotant": 2
+        },
+        "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8434"
+      },
+      "groupes": [
+        {
+          "groupe": {
+            "id": "RN",
+            "abrege": "RN",
+            "libelle": "Rassemblement National",
+            "couleur": "#313567"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 61,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "EPR",
+            "abrege": "EPR",
+            "libelle": "Ensemble pour la République",
+            "couleur": "#7B4591"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 67,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LFI-NFP",
+            "abrege": "LFI-NFP",
+            "libelle": "La France insoumise - Nouveau Front Populaire",
+            "couleur": "#C00D0D"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 48,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "SOC",
+            "abrege": "SOC",
+            "libelle": "Socialistes et apparentés",
+            "couleur": "#F5B4CE"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 26,
+            "contre": 0,
+            "abstention": 2,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DR",
+            "abrege": "DR",
+            "libelle": "Droite Républicaine",
+            "couleur": "#8CB0DC"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 26,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "ECOS",
+            "abrege": "ECOS",
+            "libelle": "Écologiste et Social",
+            "couleur": "#77AA79"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 26,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DEM",
+            "abrege": "DEM",
+            "libelle": "Les Démocrates",
+            "couleur": "#F07E26"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 29,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "HOR",
+            "abrege": "HOR",
+            "libelle": "Horizons & Indépendants",
+            "couleur": "#B5E2F9"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 28,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LIOT",
+            "abrege": "LIOT",
+            "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+            "couleur": "#FFD96F"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 18,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "UDDPLR",
+            "abrege": "UDDPLR",
+            "libelle": "Union des droites pour la République",
+            "couleur": "#3367A7"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 14,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "GDR",
+            "abrege": "GDR",
+            "libelle": "Gauche Démocrate et Républicaine",
+            "couleur": "#830E21"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 11,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "NI",
+            "abrege": "NI",
+            "libelle": "Non inscrits",
+            "couleur": "#8D949A"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 7,
+            "contre": 1,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        }
+      ]
+    },
+    {
+      "dossier": "DLR5L17N53980",
+      "titreCourt": "Projet de loi visant à offrir des réponses immédiates aux phénomènes troublant l'ordre public, la sécurité et la tranquilité de nos concitoyens",
+      "titreOfficiel": "l'ensemble du projet de loi visant à offrir des réponses immédiates aux phénomènes troublant l'ordre public, la sécurité et la tranquilité de nos concitoyens (texte de la commission mixte paritaire).",
+      "lecture": "texte de la commission mixte paritaire",
+      "statut": null,
+      "voteFinal": {
+        "numero": 8433,
+        "date": "2026-07-20T22:00:00+00:00",
+        "titre": "l'ensemble du projet de loi visant à offrir des réponses immédiates aux phénomènes troublant l'ordre public, la sécurité et la tranquilité de nos concitoyens (texte de la commission mixte paritaire).",
+        "type": "final",
+        "adopte": true,
+        "compte": {
+          "pour": 351,
+          "contre": 179,
+          "abstention": 7,
+          "nonvotant": 2
+        },
+        "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8433"
+      },
+      "groupes": [
+        {
+          "groupe": {
+            "id": "RN",
+            "abrege": "RN",
+            "libelle": "Rassemblement National",
+            "couleur": "#313567"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 110,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "EPR",
+            "abrege": "EPR",
+            "libelle": "Ensemble pour la République",
+            "couleur": "#7B4591"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 81,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LFI-NFP",
+            "abrege": "LFI-NFP",
+            "libelle": "La France insoumise - Nouveau Front Populaire",
+            "couleur": "#C00D0D"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 70,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "SOC",
+            "abrege": "SOC",
+            "libelle": "Socialistes et apparentés",
+            "couleur": "#F5B4CE"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 55,
+            "abstention": 1,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DR",
+            "abrege": "DR",
+            "libelle": "Droite Républicaine",
+            "couleur": "#8CB0DC"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 45,
+            "contre": 0,
+            "abstention": 1,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "ECOS",
+            "abrege": "ECOS",
+            "libelle": "Écologiste et Social",
+            "couleur": "#77AA79"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 36,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DEM",
+            "abrege": "DEM",
+            "libelle": "Les Démocrates",
+            "couleur": "#F07E26"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 33,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "HOR",
+            "abrege": "HOR",
+            "libelle": "Horizons & Indépendants",
+            "couleur": "#B5E2F9"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 31,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LIOT",
+            "abrege": "LIOT",
+            "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+            "couleur": "#FFD96F"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 17,
+            "contre": 1,
+            "abstention": 4,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "UDDPLR",
+            "abrege": "UDDPLR",
+            "libelle": "Union des droites pour la République",
+            "couleur": "#3367A7"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 17,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "GDR",
+            "abrege": "GDR",
+            "libelle": "Gauche Démocrate et Républicaine",
+            "couleur": "#830E21"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 15,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "NI",
+            "abrege": "NI",
+            "libelle": "Non inscrits",
+            "couleur": "#8D949A"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 17,
+            "contre": 2,
+            "abstention": 1,
+            "nonvotant": 0
+          }
+        }
+      ]
+    },
+    {
+      "dossier": "DLR5L17N53187",
+      "titreCourt": "Proposition de loi visant à protéger les mineurs des risques auxquels les expose l'utilisation des réseaux sociaux",
+      "titreOfficiel": "l'ensemble de la proposition de loi visant à protéger les mineurs des risques auxquels les expose l'utilisation des réseaux sociaux (texte de la commission mixte paritaire).",
+      "lecture": "texte de la commission mixte paritaire",
+      "statut": null,
+      "voteFinal": {
+        "numero": 8431,
+        "date": "2026-07-20T22:00:00+00:00",
+        "titre": "l'ensemble de la proposition de loi visant à protéger les mineurs des risques auxquels les expose l'utilisation des réseaux sociaux (texte de la commission mixte paritaire).",
+        "type": "final",
+        "adopte": true,
+        "compte": {
+          "pour": 279,
+          "contre": 81,
+          "abstention": 66,
+          "nonvotant": 2
+        },
+        "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8431"
+      },
+      "groupes": [
+        {
+          "groupe": {
+            "id": "RN",
+            "abrege": "RN",
+            "libelle": "Rassemblement National",
+            "couleur": "#313567"
+          },
+          "position": "abstention",
+          "compte": {
+            "pour": 0,
+            "contre": 2,
+            "abstention": 14,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "EPR",
+            "abrege": "EPR",
+            "libelle": "Ensemble pour la République",
+            "couleur": "#7B4591"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 80,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LFI-NFP",
+            "abrege": "LFI-NFP",
+            "libelle": "La France insoumise - Nouveau Front Populaire",
+            "couleur": "#C00D0D"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 63,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "SOC",
+            "abrege": "SOC",
+            "libelle": "Socialistes et apparentés",
+            "couleur": "#F5B4CE"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 29,
+            "contre": 0,
+            "abstention": 28,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DR",
+            "abrege": "DR",
+            "libelle": "Droite Républicaine",
+            "couleur": "#8CB0DC"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 39,
+            "contre": 0,
+            "abstention": 3,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "ECOS",
+            "abrege": "ECOS",
+            "libelle": "Écologiste et Social",
+            "couleur": "#77AA79"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 19,
+            "contre": 7,
+            "abstention": 7,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DEM",
+            "abrege": "DEM",
+            "libelle": "Les Démocrates",
+            "couleur": "#F07E26"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 32,
+            "contre": 1,
+            "abstention": 2,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "HOR",
+            "abrege": "HOR",
+            "libelle": "Horizons & Indépendants",
+            "couleur": "#B5E2F9"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 33,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "LIOT",
+            "abrege": "LIOT",
+            "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+            "couleur": "#FFD96F"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 21,
+            "contre": 0,
+            "abstention": 1,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "UDDPLR",
+            "abrege": "UDDPLR",
+            "libelle": "Union des droites pour la République",
+            "couleur": "#3367A7"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 8,
+            "contre": 5,
+            "abstention": 4,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "GDR",
+            "abrege": "GDR",
+            "libelle": "Gauche Démocrate et Républicaine",
+            "couleur": "#830E21"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 6,
+            "contre": 3,
+            "abstention": 5,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "NI",
+            "abrege": "NI",
+            "libelle": "Non inscrits",
+            "couleur": "#8D949A"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 12,
+            "contre": 0,
+            "abstention": 2,
+            "nonvotant": 0
+          }
+        }
+      ]
+    },
+    {
+      "dossier": "DLR5L17N54372",
+      "titreCourt": "Projet de loi relatif à la protection des enfants",
+      "titreOfficiel": "l'ensemble du projet de loi relatif à la protection des enfants (première lecture).",
+      "lecture": "première lecture",
+      "statut": null,
+      "voteFinal": {
+        "numero": 8430,
+        "date": "2026-07-20T22:00:00+00:00",
+        "titre": "l'ensemble du projet de loi relatif à la protection des enfants (première lecture).",
+        "type": "final",
+        "adopte": true,
+        "compte": {
+          "pour": 378,
+          "contre": 7,
+          "abstention": 173,
+          "nonvotant": 1
+        },
+        "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8430"
+      },
+      "groupes": [
+        {
+          "groupe": {
+            "id": "RN",
+            "abrege": "RN",
+            "libelle": "Rassemblement National",
+            "couleur": "#313567"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 115,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "EPR",
+            "abrege": "EPR",
+            "libelle": "Ensemble pour la République",
+            "couleur": "#7B4591"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 83,
+            "contre": 0,
+            "abstention": 2,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LFI-NFP",
+            "abrege": "LFI-NFP",
+            "libelle": "La France insoumise - Nouveau Front Populaire",
+            "couleur": "#C00D0D"
+          },
+          "position": "abstention",
+          "compte": {
+            "pour": 0,
+            "contre": 0,
+            "abstention": 68,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "SOC",
+            "abrege": "SOC",
+            "libelle": "Socialistes et apparentés",
+            "couleur": "#F5B4CE"
+          },
+          "position": "abstention",
+          "compte": {
+            "pour": 0,
+            "contre": 0,
+            "abstention": 62,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DR",
+            "abrege": "DR",
+            "libelle": "Droite Républicaine",
+            "couleur": "#8CB0DC"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 47,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "ECOS",
+            "abrege": "ECOS",
+            "libelle": "Écologiste et Social",
+            "couleur": "#77AA79"
+          },
+          "position": "abstention",
+          "compte": {
+            "pour": 3,
+            "contre": 0,
+            "abstention": 33,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DEM",
+            "abrege": "DEM",
+            "libelle": "Les Démocrates",
+            "couleur": "#F07E26"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 33,
+            "contre": 0,
+            "abstention": 1,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "HOR",
+            "abrege": "HOR",
+            "libelle": "Horizons & Indépendants",
+            "couleur": "#B5E2F9"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 34,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "LIOT",
+            "abrege": "LIOT",
+            "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+            "couleur": "#FFD96F"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 22,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "UDDPLR",
+            "abrege": "UDDPLR",
+            "libelle": "Union des droites pour la République",
+            "couleur": "#3367A7"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 17,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "GDR",
+            "abrege": "GDR",
+            "libelle": "Gauche Démocrate et Républicaine",
+            "couleur": "#830E21"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 5,
+            "contre": 7,
+            "abstention": 5,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "NI",
+            "abrege": "NI",
+            "libelle": "Non inscrits",
+            "couleur": "#8D949A"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 19,
+            "contre": 0,
+            "abstention": 2,
+            "nonvotant": 0
+          }
+        }
+      ]
+    },
+    {
+      "dossier": "DLR5L17N54085",
+      "titreCourt": "Projet de loi d'urgence pour la protection et la souveraineté agricoles",
+      "titreOfficiel": "l'ensemble du projet de loi d'urgence pour la protection et la souveraineté agricoles (texte de la commission mixte paritaire).",
+      "lecture": "texte de la commission mixte paritaire",
+      "statut": null,
+      "voteFinal": {
+        "numero": 8427,
+        "date": "2026-07-19T22:00:00+00:00",
+        "titre": "l'ensemble du projet de loi d'urgence pour la protection et la souveraineté agricoles (texte de la commission mixte paritaire).",
+        "type": "final",
+        "adopte": true,
+        "compte": {
+          "pour": 296,
+          "contre": 224,
+          "abstention": 41,
+          "nonvotant": 1
+        },
+        "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8427"
+      },
+      "groupes": [
+        {
+          "groupe": {
+            "id": "RN",
+            "abrege": "RN",
+            "libelle": "Rassemblement National",
+            "couleur": "#313567"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 118,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "EPR",
+            "abrege": "EPR",
+            "libelle": "Ensemble pour la République",
+            "couleur": "#7B4591"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 49,
+            "contre": 14,
+            "abstention": 16,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LFI-NFP",
+            "abrege": "LFI-NFP",
+            "libelle": "La France insoumise - Nouveau Front Populaire",
+            "couleur": "#C00D0D"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 70,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "SOC",
+            "abrege": "SOC",
+            "libelle": "Socialistes et apparentés",
+            "couleur": "#F5B4CE"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 65,
+            "abstention": 2,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DR",
+            "abrege": "DR",
+            "libelle": "Droite Républicaine",
+            "couleur": "#8CB0DC"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 47,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "ECOS",
+            "abrege": "ECOS",
+            "libelle": "Écologiste et Social",
+            "couleur": "#77AA79"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 38,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DEM",
+            "abrege": "DEM",
+            "libelle": "Les Démocrates",
+            "couleur": "#F07E26"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 19,
+            "contre": 11,
+            "abstention": 6,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "HOR",
+            "abrege": "HOR",
+            "libelle": "Horizons & Indépendants",
+            "couleur": "#B5E2F9"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 23,
+            "contre": 3,
+            "abstention": 4,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "LIOT",
+            "abrege": "LIOT",
+            "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+            "couleur": "#FFD96F"
+          },
+          "position": "abstention",
+          "compte": {
+            "pour": 8,
+            "contre": 4,
+            "abstention": 10,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "UDDPLR",
+            "abrege": "UDDPLR",
+            "libelle": "Union des droites pour la République",
+            "couleur": "#3367A7"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 17,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "GDR",
+            "abrege": "GDR",
+            "libelle": "Gauche Démocrate et Républicaine",
+            "couleur": "#830E21"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 15,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "NI",
+            "abrege": "NI",
+            "libelle": "Non inscrits",
+            "couleur": "#8D949A"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 15,
+            "contre": 4,
+            "abstention": 3,
+            "nonvotant": 0
+          }
+        }
+      ]
+    },
+    {
+      "dossier": "DLR5L17N54006",
+      "titreCourt": "Proposition de loi pour une montagne vivante et souveraine",
+      "titreOfficiel": "l'ensemble de la proposition de loi pour une montagne vivante et souveraine (texte de la commission mixte paritaire).",
+      "lecture": "texte de la commission mixte paritaire",
+      "statut": null,
+      "voteFinal": {
+        "numero": 8421,
+        "date": "2026-07-19T22:00:00+00:00",
+        "titre": "l'ensemble de la proposition de loi pour une montagne vivante et souveraine (texte de la commission mixte paritaire).",
+        "type": "final",
+        "adopte": true,
+        "compte": {
+          "pour": 376,
+          "contre": 92,
+          "abstention": 4,
+          "nonvotant": 1
+        },
+        "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8421"
+      },
+      "groupes": [
+        {
+          "groupe": {
+            "id": "RN",
+            "abrege": "RN",
+            "libelle": "Rassemblement National",
+            "couleur": "#313567"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 93,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "EPR",
+            "abrege": "EPR",
+            "libelle": "Ensemble pour la République",
+            "couleur": "#7B4591"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 65,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LFI-NFP",
+            "abrege": "LFI-NFP",
+            "libelle": "La France insoumise - Nouveau Front Populaire",
+            "couleur": "#C00D0D"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 62,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "SOC",
+            "abrege": "SOC",
+            "libelle": "Socialistes et apparentés",
+            "couleur": "#F5B4CE"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 42,
+            "contre": 0,
+            "abstention": 1,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DR",
+            "abrege": "DR",
+            "libelle": "Droite Républicaine",
+            "couleur": "#8CB0DC"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 47,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "ECOS",
+            "abrege": "ECOS",
+            "libelle": "Écologiste et Social",
+            "couleur": "#77AA79"
+          },
+          "position": "contre",
+          "compte": {
+            "pour": 0,
+            "contre": 29,
+            "abstention": 1,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DEM",
+            "abrege": "DEM",
+            "libelle": "Les Démocrates",
+            "couleur": "#F07E26"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 35,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "HOR",
+            "abrege": "HOR",
+            "libelle": "Horizons & Indépendants",
+            "couleur": "#B5E2F9"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 33,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "LIOT",
+            "abrege": "LIOT",
+            "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+            "couleur": "#FFD96F"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 19,
+            "contre": 0,
+            "abstention": 2,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "UDDPLR",
+            "abrege": "UDDPLR",
+            "libelle": "Union des droites pour la République",
+            "couleur": "#3367A7"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 17,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "GDR",
+            "abrege": "GDR",
+            "libelle": "Gauche Démocrate et Républicaine",
+            "couleur": "#830E21"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 14,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "NI",
+            "abrege": "NI",
+            "libelle": "Non inscrits",
+            "couleur": "#8D949A"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 11,
+            "contre": 1,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        }
+      ]
+    },
+    {
+      "dossier": "DLR5L17N53426",
+      "titreCourt": "Proposition de loi visant à doter la France d'une stratégie nationale de lutte contre les maladies cardio-neuro-vasculaires",
+      "titreOfficiel": "l'ensemble de la proposition de loi visant à doter la France d'une stratégie nationale de lutte contre les maladies cardio-neuro-vasculaires (texte de la commission mixte paritaire).",
+      "lecture": "texte de la commission mixte paritaire",
+      "statut": null,
+      "voteFinal": {
+        "numero": 8419,
+        "date": "2026-07-19T22:00:00+00:00",
+        "titre": "l'ensemble de la proposition de loi visant à doter la France d'une stratégie nationale de lutte contre les maladies cardio-neuro-vasculaires (texte de la commission mixte paritaire).",
+        "type": "final",
+        "adopte": true,
+        "compte": {
+          "pour": 462,
+          "contre": 0,
+          "abstention": 0,
+          "nonvotant": 1
+        },
+        "urlOfficielle": "https://www.assemblee-nationale.fr/dyn/17/scrutins/8419"
+      },
+      "groupes": [
+        {
+          "groupe": {
+            "id": "RN",
+            "abrege": "RN",
+            "libelle": "Rassemblement National",
+            "couleur": "#313567"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 98,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "EPR",
+            "abrege": "EPR",
+            "libelle": "Ensemble pour la République",
+            "couleur": "#7B4591"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 59,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 1
+          }
+        },
+        {
+          "groupe": {
+            "id": "LFI-NFP",
+            "abrege": "LFI-NFP",
+            "libelle": "La France insoumise - Nouveau Front Populaire",
+            "couleur": "#C00D0D"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 49,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "SOC",
+            "abrege": "SOC",
+            "libelle": "Socialistes et apparentés",
+            "couleur": "#F5B4CE"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 44,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DR",
+            "abrege": "DR",
+            "libelle": "Droite Républicaine",
+            "couleur": "#8CB0DC"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 47,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "ECOS",
+            "abrege": "ECOS",
+            "libelle": "Écologiste et Social",
+            "couleur": "#77AA79"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 34,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "DEM",
+            "abrege": "DEM",
+            "libelle": "Les Démocrates",
+            "couleur": "#F07E26"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 32,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "HOR",
+            "abrege": "HOR",
+            "libelle": "Horizons & Indépendants",
+            "couleur": "#B5E2F9"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 33,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "LIOT",
+            "abrege": "LIOT",
+            "libelle": "Libertés, Indépendants, Outre-mer et Territoires",
+            "couleur": "#FFD96F"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 19,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "UDDPLR",
+            "abrege": "UDDPLR",
+            "libelle": "Union des droites pour la République",
+            "couleur": "#3367A7"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 17,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "GDR",
+            "abrege": "GDR",
+            "libelle": "Gauche Démocrate et Républicaine",
+            "couleur": "#830E21"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 15,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        },
+        {
+          "groupe": {
+            "id": "NI",
+            "abrege": "NI",
+            "libelle": "Non inscrits",
+            "couleur": "#8D949A"
+          },
+          "position": "pour",
+          "compte": {
+            "pour": 15,
+            "contre": 0,
+            "abstention": 0,
+            "nonvotant": 0
+          }
+        }
+      ]
+    }
+  ],
+  "page": 1,
+  "pageSuivante": true,
+  "miseAJour": "2026-10-19T04:53:48.000Z"
+}
