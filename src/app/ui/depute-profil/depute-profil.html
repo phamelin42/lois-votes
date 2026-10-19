@@ -1,0 +1,68 @@
+<dl class="app-depute-profil__liste">
+  @if (naissance(); as naissance) {
+    <div class="app-depute-profil__ligne">
+      <dt class="caption">Naissance</dt>
+      <dd class="body">{{ naissance }}</dd>
+    </div>
+  }
+  @if (deces(); as deces) {
+    <div class="app-depute-profil__ligne">
+      <dt class="caption">Décès</dt>
+      <dd class="body">{{ deces }}</dd>
+    </div>
+  }
+  @if (depute().profession; as profession) {
+    <div class="app-depute-profil__ligne">
+      <dt class="caption">Profession</dt>
+      <dd class="body">{{ profession }}</dd>
+    </div>
+  }
+  @if (depute().circonscription; as circonscription) {
+    <div class="app-depute-profil__ligne">
+      <dt class="caption">Circonscription</dt>
+      <dd class="body">{{ circonscription }}</dd>
+    </div>
+  }
+  @if (mandat(); as mandat) {
+    <div class="app-depute-profil__ligne">
+      <dt class="caption">Mandat de député</dt>
+      <dd class="body">{{ mandat }}</dd>
+    </div>
+  }
+  @if (legislatures(); as legislatures) {
+    <div class="app-depute-profil__ligne">
+      <dt class="caption">Législatures</dt>
+      <dd class="body">{{ legislatures }}</dd>
+    </div>
+  }
+  @if (groupes().length > 0) {
+    <div class="app-depute-profil__ligne">
+      <dt class="caption">Groupes (17ᵉ législature)</dt>
+      <dd class="body">
+        <ul class="app-depute-profil__sous-liste">
+          @for (groupe of groupes(); track $index) {
+            <li>{{ groupe.nom }}, {{ groupe.periode }}</li>
+          }
+        </ul>
+      </dd>
+    </div>
+  }
+  @if (fonctions().length > 0) {
+    <div class="app-depute-profil__ligne">
+      <dt class="caption">{{ fonctions().length > 1 ? 'Fonctions' : 'Fonction' }}</dt>
+      <dd class="body">
+        <ul class="app-depute-profil__sous-liste">
+          @for (fonction of fonctions(); track $index) {
+            <li>{{ fonction.intitule }}, {{ fonction.periode }}</li>
+          }
+        </ul>
+      </dd>
+    </div>
+  }
+  @if (depute().partiRattachement; as parti) {
+    <div class="app-depute-profil__ligne">
+      <dt class="caption">Parti de rattachement</dt>
+      <dd class="body">{{ parti }}</dd>
+    </div>
+  }
+</dl>

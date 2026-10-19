@@ -18,18 +18,60 @@ describe('AProposPage', () => {
     expect(TestBed.inject(Title).getTitle()).toContain('À propos');
   });
 
-  it('cite la source des données et sa licence', () => {
+  it("cite l'Assemblée nationale comme seule origine des données, et sa licence", () => {
     const texte = afficher();
 
-    expect(texte).toContain('data.gouv.fr');
-    expect(texte).toContain('NosParlementaires');
-    expect(texte).toContain('Datan');
+    expect(texte).toContain('data.assemblee-nationale.fr');
     expect(texte).toContain('Licence Ouverte 2.0');
-    expect(texte).toMatch(/quotidien/i);
+    expect(texte).not.toMatch(/data\.gouv|NosParlementaires|Datan/i);
   });
 
-  it('signale que la position est rattachée au groupe actuel du député', () => {
-    expect(afficher()).toMatch(/groupe actuel/i);
+  it('cite la HATVP pour les liens de déclarations, et Wikidata comme source communautaire non officielle pour Wikipédia', () => {
+    const texte = afficher();
+
+    expect(texte).toMatch(/Haute Autorité pour la transparence de la vie publique \(HATVP\)/);
+    expect(texte).toMatch(/Page Wikipédia/);
+    expect(texte).toMatch(/Wikidata/);
+    expect(texte).toMatch(/communautaire et non officielle/);
+    expect(texte).toMatch(/n'est pas dans les données officielles/);
+  });
+
+  it("dit que les photos viennent du site de l'Assemblée, et que le site ne publie ni téléphone ni e-mail", () => {
+    const texte = afficher();
+
+    expect(texte).toMatch(/photos et les fiches des députés sont celles du site de l'Assemblée/);
+    expect(texte).toMatch(/ne publie jamais de numéro de téléphone/);
+  });
+
+  it("ne prétend plus que l'Assemblée est l'unique source : la page Wikipédia est l'exception", () => {
+    const texte = afficher();
+
+    expect(texte).not.toMatch(/Toutes les données viennent de l'open data officiel/);
+    expect(texte).toMatch(/seule donnée qui n'est pas officielle/);
+  });
+
+  it('annonce la mise à jour nocturne', () => {
+    expect(afficher()).toMatch(/chaque nuit/i);
+  });
+
+  it("définit la participation, l'abstention et le vote avec son groupe", () => {
+    const texte = afficher();
+
+    expect(texte).toContain('Participation aux scrutins');
+    expect(texte).toContain("Taux d'abstention");
+    expect(texte).toContain('Vote avec son groupe');
+    expect(texte).toMatch(/calculés par le site, d'après les scrutins publics/);
+  });
+
+  it('signale la fiche au groupe actuel et les scrutins au groupe du jour du vote', () => {
+    const texte = afficher();
+
+    expect(texte).toMatch(/groupe actuel/i);
+    expect(texte).toMatch(/le jour du vote/i);
+  });
+
+  it('signale que les mises au point ne sont pas appliquées', () => {
+    expect(afficher()).toMatch(/n'applique pas les mises au point/i);
   });
 
   it('explique les notions : vote final, amendement, motion de censure', () => {
@@ -52,6 +94,16 @@ describe('AProposPage', () => {
 
     expect(texte).toMatch(/participation/i);
     expect(texte).toMatch(/présence/i);
+  });
+
+  it("définit « ont voté » et « n'ont pas voté » et explique ces mots plutôt que « présents » et « absents »", () => {
+    const texte = afficher();
+
+    expect(texte).toContain('Ont voté');
+    expect(texte).toContain("N'ont pas voté");
+    expect(texte).toMatch(/ne veut donc pas dire/);
+    expect(texte).toMatch(/voter par délégation/);
+    expect(texte).toMatch(/Groupes sans aucun votant/);
   });
 
   it("mentionne la mesure d'audience Umami sans cookie", () => {

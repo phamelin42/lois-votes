@@ -29,6 +29,41 @@ export function pourcent(valeur: number | null | undefined): string {
   return valeur === null || valeur === undefined ? '—' : pourcentage.format(valeur);
 }
 
+/**
+ * Répartit 100 entre des parts par la méthode du plus fort reste : des entiers dont la somme vaut exactement 100,
+ * pour qu'une série de pourcentages arrondis ne dépasse jamais 100 de façon visible. Sans aucune part (total nul),
+ * tout vaut 0 : jamais de division par zéro.
+ */
+export function repartir(parts: readonly number[]): number[] {
+  const total = parts.reduce((somme, p) => somme + p, 0);
+  if (total <= 0) return parts.map(() => 0);
+  const exactes = parts.map((p) => (p * 100) / total);
+  const entiers = exactes.map(Math.floor);
+  const reste = 100 - entiers.reduce((somme, n) => somme + n, 0);
+  const ordre = exactes
+    .map((exacte, i) => ({ i, fraction: exacte - entiers[i], poids: parts[i] }))
+    .sort((a, b) => b.fraction - a.fraction || b.poids - a.poids || a.i - b.i);
+  for (let k = 0; k < reste; k++) entiers[ordre[k].i]++;
+  return entiers;
+}
+
+/** Pourcentage entier déjà arrondi (`27` donne « 27 % »), à la française. */
+export function pourcentEntier(valeur: number): string {
+  return pourcentage.format(valeur / 100);
+}
+
+/**
+ * Part de `n` dans `total` en pourcentage entier, sans jamais écrire 0 % ni 100 % quand ce n'est pas exact :
+ * « moins de 1 % » et « 99 % » disent qu'il reste quelqu'un d'un côté ou de l'autre.
+ */
+export function pourcentPartiel(n: number, total: number): string {
+  if (total <= 0) return pourcentEntier(0);
+  const arrondi = Math.round((n * 100) / total);
+  if (n > 0 && arrondi < 1) return `moins de ${pourcentEntier(1)}`;
+  if (n < total && arrondi > 99) return pourcentEntier(99);
+  return pourcentEntier(arrondi);
+}
+
 /** Date ISO affichée dans le fuseau de Paris (« 8 oct. 2024 »). */
 export function dateCourte(iso: string): string {
   return dateCourteFormat.format(new Date(iso));
@@ -70,4 +105,28 @@ export function libelleType(type: TypeScrutin): string {
 /** Résultat d'un vote, écrit en toutes lettres : jamais « loi adoptée » (voir CLAUDE.md). */
 export function libelleAdoption(adopte: boolean): string {
   return adopte ? "Adopté par l'Assemblée" : "Rejeté par l'Assemblée";
+}
+
+/** Complément de lieu : « à Beauvais », « au Havre », « aux Lilas » (l'article défini se contracte). */
+export function aLieu(lieu: string): string {
+  const article = /^(Le|Les)\s+(.+)$/.exec(lieu);
+  if (article) return `${article[1] === 'Le' ? 'au' : 'aux'} ${article[2]}`;
+  return `à ${lieu}`;
+}
+
+/** Âge écrit avec son unité : « 52 ans », « 1 an ». */
+export function ans(age: number): string {
+  return `${age} ${age > 1 ? 'ans' : 'an'}`;
+}
+
+/** Numéro de législature en ordinal : « 17ᵉ », « 1ʳᵉ ». */
+export function ordinalLegislature(numero: number): string {
+  return `${numero}${numero === 1 ? 'ʳᵉ' : 'ᵉ'}`;
+}
+
+/** Période entre deux dates ISO, la fin pouvant manquer : « depuis le 19 juillet 2024 », « du 1 juillet 2024 au 18 juillet 2024 ». */
+export function periode(debut: string, fin: string | null): string {
+  return fin === null
+    ? `depuis le ${dateLongue(debut)}`
+    : `du ${dateLongue(debut)} au ${dateLongue(fin)}`;
 }

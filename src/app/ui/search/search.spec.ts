@@ -93,6 +93,7 @@ describe('AppSearch', () => {
     const index = deputeListe();
     index.deputes = Array.from({ length: 12 }, (_, i) => ({
       slug: `martin-${i}`,
+      pa: String(3000 + i),
       nom: `Martin ${i}`,
       nomTri: `Martin ${i}`,
       groupe: 'RN',

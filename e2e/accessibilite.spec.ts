@@ -27,10 +27,10 @@ test.describe('axe — états ouverts', () => {
   });
 
   test('liste nominative dépliée', async ({ page }) => {
-    await page.goto('/lois/DLR5L17N1110');
+    await page.goto('/lois/DLR5L17N54445');
     await attendreHydratation(page);
     await page.getByRole('button', { name: 'Voir comment chaque député a voté' }).click();
-    await page.getByRole('link', { name: 'Alice Durand' }).first().waitFor();
+    await page.getByRole('link', { name: 'Jérôme Guedj' }).first().waitFor();
 
     await verifierAxe(page);
   });

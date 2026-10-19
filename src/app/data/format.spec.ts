@@ -1,4 +1,17 @@
-import { dateCourte, dateLongue, libellePosition, normaliser, pourcent } from './format';
+import {
+  aLieu,
+  ans,
+  ordinalLegislature,
+  periode,
+  dateCourte,
+  dateLongue,
+  libellePosition,
+  normaliser,
+  pourcent,
+  pourcentEntier,
+  pourcentPartiel,
+  repartir,
+} from './format';
 
 const espaces = (texte: string) => texte.replace(/\s/g, ' ');
 
@@ -13,6 +26,47 @@ describe('pourcent', () => {
   it('affiche un tiret quand la valeur est inconnue', () => {
     expect(pourcent(null)).toBe('—');
     expect(pourcent(undefined)).toBe('—');
+  });
+});
+
+describe('repartir', () => {
+  it('répartit 100 par la méthode du plus fort reste, somme exacte', () => {
+    expect(repartir([351, 179, 7])).toEqual([66, 33, 1]);
+    expect(repartir([1, 1, 1])).toEqual([34, 33, 33]);
+    expect(repartir([1, 1])).toEqual([50, 50]);
+    expect(repartir([0, 0, 5])).toEqual([0, 0, 100]);
+  });
+
+  it('ne divise pas par zéro : tout vaut 0 sans aucune part', () => {
+    expect(repartir([0, 0, 0])).toEqual([0, 0, 0]);
+    expect(repartir([])).toEqual([]);
+  });
+
+  it("somme toujours 100 dès qu'il y a une part", () => {
+    for (let a = 0; a < 15; a++)
+      for (let b = 0; b < 15; b++)
+        for (let c = 0; c < 15; c++) {
+          if (a + b + c === 0) continue;
+          expect(repartir([a, b, c]).reduce((x, y) => x + y, 0)).toBe(100);
+        }
+  });
+});
+
+describe('pourcentEntier et pourcentPartiel', () => {
+  it('écrit un entier en pourcentage à la française', () => {
+    expect(espaces(pourcentEntier(27))).toBe('27 %');
+  });
+
+  it("écrit « moins de 1 % » et « 99 % » plutôt qu'un 0 % ou un 100 % faux", () => {
+    expect(espaces(pourcentPartiel(1, 1001))).toBe('moins de 1 %');
+    expect(espaces(pourcentPartiel(999, 1000))).toBe('99 %');
+  });
+
+  it('garde 0 % et 100 % quand ils sont exacts, et ne divise pas par zéro', () => {
+    expect(espaces(pourcentPartiel(0, 10))).toBe('0 %');
+    expect(espaces(pourcentPartiel(10, 10))).toBe('100 %');
+    expect(espaces(pourcentPartiel(0, 0))).toBe('0 %');
+    expect(espaces(pourcentPartiel(40, 577))).toBe('7 %');
   });
 });
 
@@ -54,5 +108,36 @@ describe('libellePosition', () => {
     expect(libellePosition('abstention')).toBe('Abstention');
     expect(libellePosition('nonvotant')).toBe('Non-votant');
     expect(libellePosition('partage')).toBe('Partagé');
+  });
+});
+
+describe('aLieu', () => {
+  it("écrit « à » devant un nom de ville et contracte l'article défini", () => {
+    expect(aLieu('Beauvais')).toBe('à Beauvais');
+    expect(aLieu('Alger (Algérie)')).toBe('à Alger (Algérie)');
+    expect(aLieu('La Rochelle')).toBe('à La Rochelle');
+    expect(aLieu('Le Havre')).toBe('au Havre');
+    expect(aLieu('Les Lilas')).toBe('aux Lilas');
+  });
+});
+
+describe('ans', () => {
+  it('accorde l’unité', () => {
+    expect(ans(52)).toBe('52 ans');
+    expect(ans(1)).toBe('1 an');
+  });
+});
+
+describe('ordinalLegislature', () => {
+  it('écrit la législature en ordinal', () => {
+    expect(ordinalLegislature(17)).toBe('17ᵉ');
+    expect(ordinalLegislature(1)).toBe('1ʳᵉ');
+  });
+});
+
+describe('periode', () => {
+  it('écrit « depuis le … » quand la fin manque, « du … au … » sinon', () => {
+    expect(periode('2024-07-19', null)).toBe('depuis le 19 juillet 2024');
+    expect(periode('2024-07-01', '2024-07-18')).toBe('du 1 juillet 2024 au 18 juillet 2024');
   });
 });

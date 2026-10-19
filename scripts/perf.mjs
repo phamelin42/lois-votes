@@ -1,5 +1,5 @@
-// Mesure Lighthouse (profil mobile) de trois pages du site construit, contre le faux serveur de l'API tabulaire.
-// Échoue si la performance ou l'accessibilité est sous le seuil. Usage : npm run perf (après npm run build).
+// Mesure Lighthouse (profil mobile) de trois pages du site construit sur le jeu de données de test (fixtures).
+// Échoue si la performance ou l'accessibilité est sous le seuil. Usage : npm run perf (qui construit d'abord).
 
 import { execFile, spawn } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -7,17 +7,15 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { setTimeout as attendre } from 'node:timers/promises';
 import { promisify } from 'node:util';
-import { demarrer } from '../e2e/faux-tabulaire.mjs';
 
 const execFileAsync = promisify(execFile);
 
-const PORT_FAUX = 4020;
 const PORT_SITE = 4021;
 const SEUIL = 95;
 const PAGES = [
   { nom: 'accueil', chemin: '/' },
-  { nom: 'loi', chemin: '/lois/DLR5L17N1110' },
-  { nom: 'député', chemin: '/deputes/david-moreau' },
+  { nom: 'loi', chemin: '/lois/DLR5L17N54445' },
+  { nom: 'député', chemin: '/deputes/jerome-guedj' },
 ];
 
 async function attendreSite(url) {
@@ -54,12 +52,11 @@ async function mesurer(url, nom, dossier) {
   };
 }
 
-const faux = await demarrer({ port: PORT_FAUX });
 const site = spawn(process.execPath, ['dist/lois-votes/server/server.mjs'], {
   env: {
     ...process.env,
     PORT: String(PORT_SITE),
-    TABULAR_API_BASE: `${faux.url}/api`,
+    DONNEES_DIR: '',
     UMAMI_WEBSITE_ID: '',
   },
   stdio: 'inherit',
@@ -81,7 +78,6 @@ try {
   }
 } finally {
   site.kill();
-  await faux.fermer();
   if (dossier) await rm(dossier, { recursive: true, force: true });
 }
 

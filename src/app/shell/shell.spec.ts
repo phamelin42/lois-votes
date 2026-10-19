@@ -107,10 +107,9 @@ describe('AppShell', () => {
     const pied = racine.querySelector('footer')!;
     const texte = pied.textContent!.replace(/\s+/g, ' ');
 
-    expect(texte).toContain('data.gouv.fr');
-    expect(texte).toContain('NosParlementaires');
-    expect(texte).toContain('Datan');
-    expect(texte).toContain('Licence Ouverte 2.0');
+    expect(texte).toContain(
+      'Données : Assemblée nationale (data.assemblee-nationale.fr), Licence Ouverte 2.0.',
+    );
     expect(
       Array.from(pied.querySelectorAll('a'))
         .find((a) => a.textContent!.trim() === 'À propos')!

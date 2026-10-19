@@ -8,9 +8,8 @@ import compression from 'compression';
 import express from 'express';
 import { join } from 'node:path';
 import type { DeputeListe } from '@contrat';
-import { appelerBffActif } from './server/bff';
+import { appelerBffActif, prechargerDonnees } from './server/bff';
 import { cacheControlPage, enTetesSecurite, extraireScriptsEnLigne } from './server/en-tetes';
-import { creerCache } from './server/cache';
 import { genererRobots, genererSitemap } from './server/seo';
 import { injecterUmami, scriptUmami, sourceUmami } from './server/umami';
 
@@ -21,7 +20,6 @@ const umamiActif = scriptUmami(process.env) !== '';
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
-const sitemap = creerCache();
 
 // Compression des réponses texte (HTML, JSON, JS, CSS). Vercel compresse aussi à son CDN ; ailleurs, c'est le serveur.
 app.use(compression());
@@ -33,7 +31,7 @@ app.use((_req, res, suivant) => {
   suivant();
 });
 
-// BFF : /api/* interroge l'API tabulaire de data.gouv.fr (src/server/bff.ts), ou les fixtures avec MOCK_BFF=1.
+// BFF : /api/* répond depuis data/, chargé en mémoire (src/server/bff.ts). Aucun appel réseau.
 app.use('/api', async (req, res, suivant) => {
   try {
     const reponse = await appelerBffActif(req.originalUrl);
@@ -62,7 +60,7 @@ app.get('/robots.txt', (_req, res) => {
     .send(genererRobots(ADRESSE_DU_SITE));
 });
 
-/** Lois récentes et index des députés, en une requête au BFF, gardés un jour. */
+/** Lois récentes et index des députés, en une requête au BFF (donc depuis data/). */
 async function construireSitemap(): Promise<string> {
   const reponse = await appelerBffActif('/api/deputes');
   if (reponse.status !== 200) throw new Error(`BFF : statut ${reponse.status} pour le sitemap`);
@@ -70,9 +68,17 @@ async function construireSitemap(): Promise<string> {
   return genererSitemap(ADRESSE_DU_SITE, { lois: liste.loisRecentes, deputes: liste.deputes });
 }
 
+/** Le plan du site ne change qu'avec les données, donc à chaque déploiement : calculé une fois, sauf échec. */
+let sitemapMemo: Promise<string> | undefined;
+const sitemap = () =>
+  (sitemapMemo ??= construireSitemap().catch((erreur: unknown) => {
+    sitemapMemo = undefined;
+    throw erreur;
+  }));
+
 app.get('/sitemap.xml', async (_req, res) => {
   try {
-    const xml = await sitemap.memo('sitemap', 86400, 86400, construireSitemap);
+    const xml = await sitemap();
     res
       .type('application/xml')
       .set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=86400')
@@ -132,6 +138,10 @@ app.use((req, res, next) => {
  * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
  */
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
+  // Les données officielles (data/) sont lues au démarrage : le premier visiteur n'attend pas leur chargement.
+  // (Fonction Vercel : pas de démarrage explicite, data/ est lu à la première requête, une fois par instance.
+  // Et pas pendant `ng build`, qui importe ce module pour pré-rendre /a-propos avant la copie de data/.)
+  prechargerDonnees();
   const port = process.env['PORT'] || 4000;
   app.listen(port, (error) => {
     if (error) {

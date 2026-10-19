@@ -14,19 +14,34 @@
       </tr>
     </thead>
     <tbody>
-      @for (vote of groupes(); track vote.groupe.id) {
+      @for (ligne of lignes(); track ligne.vote.groupe.id) {
         <tr>
-          <th scope="row"><app-group-pill [groupe]="vote.groupe" /></th>
+          <th scope="row"><app-group-pill [groupe]="ligne.vote.groupe" /></th>
           <td>
-            <app-position [position]="vote.position" />
-            <app-vote-bar [compte]="vote.compte" taille="sm" />
+            <app-position [position]="ligne.vote.position" />
+            <app-vote-bar [compte]="ligne.vote.compte" taille="sm" />
           </td>
-          <td class="app-group-table__nombre">{{ vote.compte.pour }}</td>
-          <td class="app-group-table__nombre">{{ vote.compte.contre }}</td>
-          <td class="app-group-table__nombre">{{ vote.compte.abstention }}</td>
-          <td class="app-group-table__nombre">{{ vote.compte.nonvotant }}</td>
+          <td class="app-group-table__nombre">
+            {{ ligne.vote.compte.pour }}
+            <span class="app-group-table__part">({{ ligne.pour }})</span>
+          </td>
+          <td class="app-group-table__nombre">
+            {{ ligne.vote.compte.contre }}
+            <span class="app-group-table__part">({{ ligne.contre }})</span>
+          </td>
+          <td class="app-group-table__nombre">
+            {{ ligne.vote.compte.abstention }}
+            <span class="app-group-table__part">({{ ligne.abstention }})</span>
+          </td>
+          <td class="app-group-table__nombre">{{ ligne.vote.compte.nonvotant }}</td>
         </tr>
       }
     </tbody>
   </table>
 </div>
+@if (sansVotant().length > 0) {
+  <p class="app-group-table__note caption">
+    Groupes sans aucun votant sur ce scrutin : {{ nomsSansVotant() }}. Aucun de leurs députés n'a
+    voté ni n'est listé comme non-votant ; ils n'ont donc pas de ligne dans le tableau.
+  </p>
+}

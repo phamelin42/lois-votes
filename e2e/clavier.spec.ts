@@ -42,11 +42,11 @@ test.describe('clavier et focus', () => {
     await recherche.press('Escape');
     await expect(recherche).toHaveAttribute('aria-expanded', 'false');
 
-    await recherche.fill('roux');
+    await recherche.fill('guedj');
     await recherche.press('ArrowDown');
     await expect(recherche).toHaveAttribute('aria-activedescendant', /.+/);
     await recherche.press('Enter');
-    await expect(page).toHaveURL('/deputes/elodie-roux');
+    await expect(page).toHaveURL('/deputes/jerome-guedj');
   });
 
   test('la bascule de thème se commande au clavier et se mémorise', async ({ page }) => {

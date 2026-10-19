@@ -11,7 +11,7 @@
     <fd-badge [tone]="loi().voteFinal.adopte ? 'tokiwa' : 'enji'">
       {{ loi().voteFinal.adopte ? "Adopté par l'Assemblée" : "Rejeté par l'Assemblée" }}
     </fd-badge>
-    <app-vote-bar [compte]="loi().voteFinal.compte" />
+    <app-vote-bar [compte]="loi().voteFinal.compte" [enMandat]="loi().voteFinal.enMandat" />
     <app-group-pills [groupes]="loi().groupes" />
   </div>
 </a>

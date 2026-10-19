@@ -1,14 +1,14 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page } from '@playwright/test';
 
-/** Pages parcourues par les tests d'accessibilité (adresses de l'univers de test). */
+/** Pages parcourues par les tests d'accessibilité (adresses du jeu de données de test, voir src/server/fixtures/officiel). */
 export const PAGES = [
   { nom: 'accueil', chemin: '/' },
-  { nom: 'loi', chemin: '/lois/DLR5L17N1110' },
-  { nom: 'loi à plusieurs lectures', chemin: '/lois/DLR5L17N2000' },
-  { nom: 'scrutin', chemin: '/scrutins/110' },
+  { nom: 'loi', chemin: '/lois/DLR5L17N54445' },
+  { nom: 'loi à plusieurs lectures', chemin: '/lois/DLR5L17N53980' },
+  { nom: 'scrutin', chemin: '/scrutins/8706' },
   { nom: 'députés', chemin: '/deputes' },
-  { nom: 'député', chemin: '/deputes/david-moreau' },
+  { nom: 'député', chemin: '/deputes/jerome-guedj' },
   { nom: 'recherche', chemin: '/recherche?q=ou' },
   { nom: 'à propos', chemin: '/a-propos' },
   { nom: 'introuvable', chemin: '/cette-page-n-existe-pas' },

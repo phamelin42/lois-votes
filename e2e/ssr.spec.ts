@@ -11,40 +11,57 @@ test.describe('rendu serveur (JavaScript désactivé)', () => {
     await expect(page).toHaveTitle(/Qui a voté quoi \?/);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(page.locator('app-loi-card')).toHaveCount(10);
-    await expect(page.locator('app-loi-card').first()).toContainText(/\d+ pour/);
+    await expect(page.locator('app-loi-card').first()).toContainText(/\d+\s%\spour \(\d+\)/);
+    await expect(page.locator('app-loi-card').first()).toContainText(
+      /\d+ n'(?:ont|a) pas voté sur \d+ en mandat/,
+    );
   });
 
   test('loi : titre, vote final et tableau par groupe', async ({ page }) => {
-    const reponse = await page.goto('/lois/DLR5L17N1110');
+    const reponse = await page.goto('/lois/DLR5L17N54445');
 
     expect(reponse!.status()).toBe(200);
-    await expect(page).toHaveTitle(/sobriété foncière/);
+    await expect(page).toHaveTitle(/titre-restaurant/);
     await expect(page.getByRole('table', { name: 'Vote par groupe' })).toBeVisible();
+    await expect(page.locator('app-vote-bar').first()).toContainText(
+      /\d+ n'(?:ont|a) pas voté sur \d+ en mandat/,
+    );
   });
 
   test('député : nom, chiffres clés et votes', async ({ page }) => {
-    const reponse = await page.goto('/deputes/david-moreau');
+    const reponse = await page.goto('/deputes/jerome-guedj');
 
     expect(reponse!.status()).toBe(200);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('David Moreau');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Jérôme Guedj');
     await expect(page.getByText('Participation aux scrutins')).toBeVisible();
+    // Jérôme Guedj : 19 scrutins en mandat, 10 votes (7 pour, 3 contre), 9 sans vote.
+    await expect(
+      page.getByText("A voté à 10 scrutins sur 19 en mandat, n'a pas voté à 9."),
+    ).toBeVisible();
+    const votes = page.locator('.app-depute__tuile', {
+      has: page.getByRole('heading', { name: 'Ses votes', exact: true }),
+    });
+    await expect(votes).toContainText(/70\s%\spour \(7\)/);
+    await expect(votes).toContainText(/30\s%\scontre \(3\)/);
     await expect(page.locator('tbody tr')).toHaveCount(10);
   });
 
   test('la recherche fonctionne sans JavaScript', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('combobox').fill('abeilles');
+    await page.getByRole('combobox').fill('titre-restaurant');
     await page.getByRole('combobox').press('Enter');
 
-    await expect(page).toHaveURL(/\/recherche\?q=abeilles/);
-    await expect(page.getByRole('link', { name: /protéger les abeilles/ })).toBeVisible();
+    await expect(page).toHaveURL(/\/recherche\?q=titre-restaurant/);
+    await expect(
+      page.getByRole('link', { name: /fonctionnement du titre-restaurant/ }),
+    ).toBeVisible();
   });
 
   test('la recherche à un seul résultat redirige en 302', async ({ request }) => {
-    const reponse = await request.get('/recherche?q=elodie', { maxRedirects: 0 });
+    const reponse = await request.get('/recherche?q=jerome', { maxRedirects: 0 });
 
     expect(reponse.status()).toBe(302);
-    expect(reponse.headers()['location']).toBe('/deputes/elodie-roux');
+    expect(reponse.headers()['location']).toBe('/deputes/jerome-guedj');
   });
 
   test('les pages inconnues répondent 404', async ({ request }) => {
@@ -58,7 +75,9 @@ test.describe('rendu serveur (JavaScript désactivé)', () => {
     const reponse = await request.get('/a-propos');
 
     expect(reponse.status()).toBe(200);
-    expect(await reponse.text()).toContain('groupe actuel');
+    const texte = await reponse.text();
+    expect(texte).toContain('groupe actuel');
+    expect(texte).toContain('data.assemblee-nationale.fr');
   });
 
   test('robots.txt et sitemap.xml existent', async ({ request }) => {
@@ -69,7 +88,10 @@ test.describe('rendu serveur (JavaScript désactivé)', () => {
     expect(await robots.text()).toContain('Sitemap:');
     expect(sitemap.status()).toBe(200);
     expect(sitemap.headers()['content-type']).toContain('xml');
-    expect(await sitemap.text()).toContain('/lois/DLR5L17N1110');
+    const xml = await sitemap.text();
+    expect(xml).toContain('/lois/DLR5L17N54445');
+    expect(xml).toContain('/deputes/jerome-guedj');
+    expect(xml).not.toContain('/deputes/nicolas-forissier'); // plus en mandat : hors du plan du site
   });
 
   test('les en-têtes de sécurité et de cache sont posés', async ({ request }) => {
@@ -83,10 +105,10 @@ test.describe('rendu serveur (JavaScript désactivé)', () => {
   });
 
   test('les routes /api renvoient du JSON avec Cache-Control', async ({ request }) => {
-    const reponse = await request.get('/api/lois/DLR5L17N1110');
+    const reponse = await request.get('/api/lois/DLR5L17N53980');
 
     expect(reponse.status()).toBe(200);
     expect(reponse.headers()['cache-control']).toContain('s-maxage=3600');
-    expect((await reponse.json()).dossier).toBe('DLR5L17N1110');
+    expect((await reponse.json()).dossier).toBe('DLR5L17N53980');
   });
 });

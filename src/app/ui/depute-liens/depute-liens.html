@@ -1,0 +1,9 @@
+<ul class="app-depute-liens__liste" aria-label="Liens externes">
+  @for (lien of affiches(); track lien.libelle) {
+    <li>
+      <a fdLink [href]="lien.url" target="_blank" rel="noopener noreferrer"
+        >{{ lien.libelle }}<span class="app-depute-liens__onglet"> (nouvel onglet)</span></a
+      >
+    </li>
+  }
+</ul>

@@ -18,9 +18,10 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      - run: npm run build
+      # Données du jeu de test (fixtures) : la CI ne dépend d'aucun réseau externe.
+      - run: npm run build:fixtures
       - run: npx playwright install --with-deps chromium
-      # Le build est déjà fait : Playwright lance les trois instances SSR et les deux faux serveurs.
+      # Le build est déjà fait : Playwright lance les trois instances SSR.
       - run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: failure()

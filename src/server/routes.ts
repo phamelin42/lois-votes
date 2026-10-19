@@ -1,21 +1,11 @@
-import type { Cache } from './cache';
-import { creerAgregation, type Agregation } from './agregation';
-import { ErreurSource, type Tabulaire } from './source/tabulaire';
-import { lireRessources, type Rids } from './source/ressources';
+import { type Agregation } from './agregation';
+import { ErreurDonnees } from './donnees';
 
-/** Même forme que la réponse du BFF factice (mock-bff.ts) : c'est la signature de appelerBff. */
+/** Réponse d'un appel au BFF : c'est la signature de `appelerBff`. */
 export interface ReponseBff {
   status: number;
   headers: Record<string, string>;
   body: unknown;
-}
-
-export interface OptionsBff {
-  tabulaire: Tabulaire;
-  cache: Cache;
-  /** Identifiants des ressources ; par défaut, lus dans l'environnement. */
-  rids?: Rids;
-  maintenant?: () => number;
 }
 
 export interface Bff {
@@ -63,39 +53,35 @@ function lirePage(brute: string | null): number | null {
   return page >= 1 && page <= PAGE_MAX ? page : null;
 }
 
-async function traiter(
-  agregation: Agregation,
-  chemin: string,
-  params: URLSearchParams,
-): Promise<ReponseBff> {
+function traiter(agregation: Agregation, chemin: string, params: URLSearchParams): ReponseBff {
   if (chemin === '/api/accueil') {
     const page = lirePage(params.get('page'));
     if (page === null) return echec(404, 'Page invalide : de 1 à 50');
-    return reussite(await agregation.accueil(page), CACHE_CONTROL.accueil);
+    return reussite(agregation.accueil(page), CACHE_CONTROL.accueil);
   }
 
   const loi = /^\/api\/lois\/([^/]+)$/.exec(chemin);
   if (loi) {
     const dossier = identifiant(loi[1], /^DL[A-Z0-9]+$/);
-    const detail = dossier ? await agregation.loi(dossier) : null;
+    const detail = dossier ? agregation.loi(dossier) : null;
     return detail ? reussite(detail, CACHE_CONTROL.loi) : echec(404, 'Loi introuvable');
   }
 
   const scrutin = /^\/api\/scrutins\/([^/]+)$/.exec(chemin);
   if (scrutin) {
     const numero = identifiant(scrutin[1], /^\d+$/);
-    const detail = numero ? await agregation.scrutin(Number(numero)) : null;
+    const detail = numero ? agregation.scrutin(Number(numero)) : null;
     return detail ? reussite(detail, CACHE_CONTROL.scrutin) : echec(404, 'Scrutin introuvable');
   }
 
   if (chemin === '/api/deputes') {
-    return reussite(await agregation.deputes(), CACHE_CONTROL.deputes);
+    return reussite(agregation.deputes(), CACHE_CONTROL.deputes);
   }
 
   const depute = /^\/api\/deputes\/([^/]+)$/.exec(chemin);
   if (depute) {
     const slug = identifiant(depute[1], /^[a-z0-9-]+$/);
-    const detail = slug ? await agregation.depute(slug) : null;
+    const detail = slug ? agregation.depute(slug) : null;
     return detail ? reussite(detail, CACHE_CONTROL.depute) : echec(404, 'Député introuvable');
   }
 
@@ -103,26 +89,25 @@ async function traiter(
 }
 
 /**
- * Le BFF : une route `/api/*` par fonction de l'agrégation. Une erreur de la source devient 503 (sans
- * valeur en cache) ; toute autre erreur devient 500, sans détail vers le navigateur.
+ * Le BFF : une route `/api/*` par fonction de l'agrégation, toutes servies depuis la mémoire. Une erreur
+ * de données devient 503, toute autre erreur 500, sans détail vers le navigateur.
  */
-export function creerBff({
-  tabulaire,
-  cache,
-  rids = lireRessources(process.env),
-  maintenant = () => Date.now(),
-}: OptionsBff): Bff {
-  const agregation = creerAgregation({ tabulaire, cache, rids, maintenant });
+export function creerBff(agregation: Agregation): Bff {
   return {
     async appelerBff(url) {
       const adresse = new URL(url, 'http://bff.local');
       try {
-        return await traiter(agregation, adresse.pathname, adresse.searchParams);
+        return traiter(agregation, adresse.pathname, adresse.searchParams);
       } catch (erreur) {
-        if (erreur instanceof ErreurSource) return echec(503, 'Source de données indisponible');
+        if (erreur instanceof ErreurDonnees) return echec(503, 'Données indisponibles');
         console.error('[bff] erreur inattendue', erreur);
         return echec(500, 'Erreur interne');
       }
     },
   };
+}
+
+/** Données absentes ou invalides : toutes les routes `/api/*` répondent 503, jamais un faux contenu. */
+export function creerBffIndisponible(): Bff {
+  return { appelerBff: async () => echec(503, 'Données indisponibles') };
 }

@@ -1,33 +1,47 @@
-import { creerBff, type ReponseBff } from './routes';
-import { creerCache } from './cache';
-import { appelerMock } from './mock-bff';
-import { creerLimiteur } from './source/limiter';
-import { BASE_PAR_DEFAUT, creerTabulaire } from './source/tabulaire';
+import { join } from 'node:path';
+import { creerAgregation } from './agregation';
+import { chargerDonnees, decrireChargement, dossierDonnees } from './donnees';
+import { creerBff, creerBffIndisponible, type Bff, type ReponseBff } from './routes';
 
 export type AppelerBff = (url: string) => Promise<ReponseBff>;
 
-/** BFF réel : l'API tabulaire, avec son cache et son limiteur partagés par toutes les requêtes. */
-function creerBffReel(): AppelerBff {
-  const tabulaire = creerTabulaire({
-    base: process.env['TABULAR_API_BASE'] || BASE_PAR_DEFAUT,
-    fetch: globalThis.fetch,
-    limiteur: creerLimiteur(),
-  });
-  const bff = creerBff({ tabulaire, cache: creerCache() });
-  return async (url) => {
-    const debut = performance.now();
-    const avant = tabulaire.requetesEmises();
-    const reponse = await bff.appelerBff(url);
-    // Approximatif quand plusieurs requêtes s'exécutent en même temps : le compteur est global.
-    const requetes = tabulaire.requetesEmises() - avant;
-    const duree = Math.round(performance.now() - debut);
-    console.log(
-      `[bff] ${url} ${reponse.status} ${duree} ms, ${requetes} requête(s) à la source (cache: ${requetes > 0 ? 'miss' : 'hit'})`,
+/**
+ * Le BFF est partagé par `globalThis` : le build en fait deux copies de ce module (celle de `server.mjs` pour
+ * `/api/*`, celle du rendu serveur Angular pour les pages), et chacune relirait `data/` : deux fois la mémoire.
+ */
+const CLE_BFF = Symbol.for('lois-votes.bff');
+const partage = globalThis as typeof globalThis & { [CLE_BFF]?: Bff };
+
+/**
+ * Charge `data/` (`DONNEES_DIR`, sinon `data/` à côté de `server/` dans le build) et prépare le BFF. Si les
+ * données manquent ou sont invalides, l'erreur est journalisée et toutes les routes `/api/*` répondent 503.
+ * Le chargement a lieu une fois, au premier appel ou à `prechargerDonnees()`.
+ */
+function obtenirBff(): Bff {
+  const existant = partage[CLE_BFF];
+  if (existant) return existant;
+  const dossier = dossierDonnees(process.env, join(import.meta.dirname, '..', 'data'));
+  try {
+    const donnees = chargerDonnees(dossier);
+    console.log(`[donnees] ${dossier} chargé : ${decrireChargement(donnees)}`);
+    return (partage[CLE_BFF] = creerBff(creerAgregation(donnees)));
+  } catch (erreur) {
+    console.error(
+      `[donnees] ${dossier} inutilisable, les routes /api répondent 503 : ${(erreur as Error).message}`,
     );
-    return reponse;
-  };
+    return (partage[CLE_BFF] = creerBffIndisponible());
+  }
 }
 
-/** `MOCK_BFF=1` : les fixtures du BFF factice ; sinon le BFF réel. */
-export const appelerBffActif: AppelerBff =
-  process.env['MOCK_BFF'] === '1' ? (url) => appelerMock(url) : creerBffReel();
+/** Lit `data/` maintenant plutôt qu'à la première requête (démarrage du serveur). */
+export function prechargerDonnees(): void {
+  obtenirBff();
+}
+
+/** Le BFF de l'application : `/api/*` répond depuis `data/`, en mémoire, sans réseau. */
+export const appelerBffActif: AppelerBff = async (url) => {
+  const debut = performance.now();
+  const reponse = await obtenirBff().appelerBff(url);
+  console.log(`[bff] ${url} ${reponse.status} ${Math.round(performance.now() - debut)} ms`);
+  return reponse;
+};

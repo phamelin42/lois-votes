@@ -8,7 +8,7 @@ import {
 import { inject, InjectionToken } from '@angular/core';
 import { catchError, from, mergeMap, Observable, of, throwError } from 'rxjs';
 
-/** Réponse du BFF, telle que la produit appelerBff (ou le BFF factice en MOCK_BFF=1). */
+/** Réponse du BFF, telle que la produit appelerBff. */
 export interface ReponseBff {
   status: number;
   headers: Record<string, string>;

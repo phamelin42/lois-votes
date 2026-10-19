@@ -13,24 +13,42 @@ import type {
 } from '@contrat';
 
 export const RN: Groupe = {
-  id: 'RN',
+  id: 'PO845401',
   abrege: 'RN',
   libelle: 'Rassemblement National',
   couleur: '#1b3a8a',
 };
 export const SOC: Groupe = {
-  id: 'SOC',
+  id: 'PO845419',
   abrege: 'SOC',
   libelle: 'Socialistes et apparentés',
   couleur: '#e4002b',
 };
 export const LFI: Groupe = {
-  id: 'LFI-NFP',
+  id: 'PO845413',
   abrege: 'LFI-NFP',
   libelle: 'La France insoumise - Nouveau Front Populaire',
   couleur: '#c4001d',
 };
-export const NI: Groupe = { id: 'NI', abrege: 'NI', libelle: 'Non inscrits', couleur: null };
+export const NI: Groupe = {
+  id: 'PO840056',
+  abrege: 'NI',
+  libelle: 'Non inscrits',
+  couleur: null,
+};
+/** Deux organes officiels portent l'abrégé « UDR » : le groupe d'origine (2024) et celui recréé en 2025. */
+export const UDR_2024: Groupe = {
+  id: 'PO847173',
+  abrege: 'UDR',
+  libelle: 'UDR',
+  couleur: '#3367a7',
+};
+export const UDR_2025: Groupe = {
+  id: 'PO872880',
+  abrege: 'UDR',
+  libelle: 'Union des droites pour la République',
+  couleur: '#3367a7',
+};
 
 export const compte = (pour = 312, contre = 201, abstention = 18, nonvotant = 46): Compte => ({
   pour,
@@ -62,6 +80,7 @@ export function scrutin(numero = 8317, surcharge: Partial<ScrutinResume> = {}): 
     type: 'final',
     adopte: true,
     compte: compte(),
+    enMandat: 577,
     urlOfficielle: `https://www.assemblee-nationale.fr/dyn/17/scrutins/${numero}`,
     ...surcharge,
   };
@@ -106,7 +125,7 @@ export function loiDetail(surcharge: Partial<LoiDetail> = {}): LoiDetail {
     lecture: 'première lecture',
     statut: null,
     urlDossier: null,
-    voteFinal: { ...scrutin(8317), groupes: groupes() },
+    voteFinal: { ...scrutin(8317), groupes: groupes(), groupesSansVotant: [] },
     lectures: [],
     scrutins: [],
     ...surcharge,
@@ -118,14 +137,15 @@ export function scrutinDetail(surcharge: Partial<ScrutinDetail> = {}): ScrutinDe
     ...scrutin(8317),
     loi: { dossier: 'DLR5L17N54372', titreCourt: 'Projet de loi relatif à la sobriété foncière' },
     groupes: groupes(),
+    groupesSansVotant: [],
     nominatif: [
       {
-        groupeId: 'RN',
+        groupeId: 'PO845401',
         position: 'pour',
         deputes: [{ slug: 'alice-durand', nom: 'Alice Durand' }],
       },
       {
-        groupeId: 'SOC',
+        groupeId: 'PO845419',
         position: 'contre',
         deputes: [{ slug: 'emilie-laurent', nom: 'Émilie Laurent' }],
       },
@@ -137,6 +157,7 @@ export function scrutinDetail(surcharge: Partial<ScrutinDetail> = {}): ScrutinDe
 export function deputeListe(): DeputeListe {
   const d = (
     slug: string,
+    pa: string,
     nom: string,
     nomTri: string,
     groupe: string | null,
@@ -144,6 +165,7 @@ export function deputeListe(): DeputeListe {
     circonscription: string,
   ) => ({
     slug,
+    pa,
     nom,
     nomTri,
     groupe,
@@ -152,11 +174,11 @@ export function deputeListe(): DeputeListe {
   });
   return {
     deputes: [
-      d('alice-durand', 'Alice Durand', 'Durand', 'RN', '69', 'Rhône (7)'),
-      d('bruno-martin', 'Bruno Martin', 'Martin', 'RN', '13', 'Bouches-du-Rhône (3)'),
-      d('elodie-roux', 'Élodie Roux', 'Roux', 'LFI-NFP', '75', 'Paris (11)'),
-      d('emilie-laurent', 'Émilie Laurent', 'Laurent', 'SOC', '69', 'Rhône (2)'),
-      d('julie-fournier', 'Julie Fournier', 'Fournier', null, '69', 'Rhône (1)'),
+      d('alice-durand', '1001', 'Alice Durand', 'Durand', 'RN', '69', 'Rhône (7)'),
+      d('bruno-martin', '1002', 'Bruno Martin', 'Martin', 'RN', '13', 'Bouches-du-Rhône (3)'),
+      d('elodie-roux', '1003', 'Élodie Roux', 'Roux', 'LFI-NFP', '75', 'Paris (11)'),
+      d('emilie-laurent', '1004', 'Émilie Laurent', 'Laurent', 'SOC', '69', 'Rhône (2)'),
+      d('julie-fournier', '1005', 'Julie Fournier', 'Fournier', null, '69', 'Rhône (1)'),
     ],
     groupes: [RN, SOC, LFI, NI],
     loisRecentes: [
@@ -181,8 +203,33 @@ export function deputeDetail(surcharge: Partial<DeputeDetail> = {}): DeputeDetai
     photo: 'https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/1001.jpg',
     groupe: RN,
     circonscription: 'Rhône (7)',
-    urlFiche: 'https://www.assemblee-nationale.fr/dyn/deputes/PA1001',
+    naissance: { date: '1973-04-13', age: 52, lieu: 'Beauvais' },
+    deces: null,
+    profession: 'Conseillère en communication',
+    mandat: { depuis: '2024-06-30', fin: null, legislatures: [16, 17] },
+    groupes: [
+      { groupe: NI, debut: '2024-07-01', fin: '2024-07-18' },
+      { groupe: RN, debut: '2024-07-19', fin: null },
+    ],
+    fonctions: [
+      {
+        organe: "Bureau de l'Assemblée nationale",
+        qualite: "Vice-présidente de l'Assemblée nationale",
+        depuis: '2025-10-01',
+      },
+      { organe: 'Commission des affaires étrangères', qualite: 'Membre', depuis: '2024-07-20' },
+    ],
+    partiRattachement: 'Rassemblement national',
+    liens: {
+      assemblee: 'https://www.assemblee-nationale.fr/dyn/deputes/PA1001',
+      hatvp: 'https://www.hatvp.fr/pages_nominatives/durand-alice',
+      wikipedia: 'https://fr.wikipedia.org/wiki/Alice_Durand',
+      siteWeb: 'https://www.alice-durand.fr/',
+      x: 'https://x.com/aliceDurand',
+      facebook: 'https://www.facebook.com/alice.durand',
+    },
     taux: { participation: 0.91, abstention: 0.12, loyaute: 0.99 },
+    scrutins: { enMandat: 200, pour: 120, contre: 40, abstention: 22, nonVote: 18 },
     dernieresLois: [
       {
         loi: {
