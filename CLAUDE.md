@@ -82,6 +82,10 @@ Reprendre celles de Fuda (`/home/user/design-system-fuda/CLAUDE.md`) :
 - Hydratation : `@defer (on viewport; hydrate on viewport)` pour ce qui est sous la ligne de flottaison. La liste nominative est `@defer (on interaction)` **sans** `hydrate` : `hydrate` ferait rendre la liste entière côté serveur, alors que le bouton « Voir comment chaque député a voté » doit être dans le HTML et la requête ne partir qu'au clic. Chaque `@defer` a son `@placeholder` de hauteur fixe.
 - Pré-chargement : `ViewportPreloadingStrategy` charge le code d'une route quand un `a[routerLink]` qui y mène entre dans l'écran (`AppLienVisible`). `appPrefetch="/api/…"` précharge les données au survol, au focus ou au toucher, par un seul `fetch` de priorité basse. Rien ne se précharge avec l'économiseur de données (`saveData`) ; le code d'une route ne se précharge pas non plus en 2g.
 
+## Préférences de l'utilisateur (valables pour tous ses projets)
+
+- **Icône de site dès la mise en place** : chaque projet web a une icône d'onglet (`favicon.ico`, `favicon.svg`, `apple-touch-icon`, manifeste) **et** les conditions pour apparaître dans les résultats Google (`<link rel="icon">` dans la page d'accueil, carrée, 48×48 au moins, explorable, adresse stable). Ne pas attendre qu'il le demande. Détail et exécution : [docs/prompts/14-icone-du-site.md](docs/prompts/14-icone-du-site.md) et `docs/ICONE.md`.
+
 ## Textes
 
 Tous les textes de l'interface et de la documentation sont en français, ainsi que les messages de commit.
