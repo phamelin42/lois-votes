@@ -117,6 +117,7 @@ export function creerAgregation(
       titre: donnees.titre(s),
       type: donnees.type(s),
       adopte: donnees.adopte(s),
+      solennel: donnees.solennel(s),
       compte: donnees.compte(s),
       enMandat: donnees.enMandat(s),
       urlOfficielle: URL_SCRUTIN(donnees.numero(s)),

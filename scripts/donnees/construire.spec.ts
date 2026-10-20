@@ -159,10 +159,13 @@ const ACTEURS = [
   acteur('PA4', 'Dan', 'Petit', [mandatAn('2025-03-01'), mandatGp('PO5', '2025-03-01')]),
 ];
 
-const S1 = scrutin(1, '2025-02-10', "l'ensemble du projet de loi relatif à X (première lecture).", [
-  entree('PO1', { pour: ['PA1'], contre: ['PA2'] }),
-  entree('PO3', { abstention: ['PA3'] }),
-]);
+const S1 = scrutin(
+  1,
+  '2025-02-10',
+  "l'ensemble du projet de loi relatif à X (première lecture).",
+  [entree('PO1', { pour: ['PA1'], contre: ['PA2'] }), entree('PO3', { abstention: ['PA3'] })],
+  { codeTypeVote: 'SPS' },
+);
 const S2 = scrutin(
   2,
   '2025-09-20',
@@ -448,6 +451,10 @@ describe('construire : scrutins', () => {
       compte: { pour: 2, contre: 1, abstention: 0, nonvotant: 1 },
     });
     expect(par(1)).toMatchObject({ dossier: null, adopte: true });
+  });
+
+  it("marque solennel seulement le scrutin public solennel (SPS), pas l'ordinaire (SPO) ni la motion (MOC)", () => {
+    expect([par(1).solennel, par(2).solennel, par(3).solennel]).toEqual([true, false, false]);
   });
 
   it("classe le type d'après le titre et le type de vote", () => {

@@ -188,8 +188,11 @@ function ecarts(d: Donnees): string[] {
   d.scrutins.forEach((s, i) => {
     verifie(entier(s.n) && DATE.test(s.date) && typeof s.titre === 'string', `scrutins[${i}]`);
     verifie(
-      TYPES.includes(s.type) && typeof s.adopte === 'boolean' && texteOuNull(s.dossier),
-      `scrutins[${i}] : type, adopte, dossier`,
+      TYPES.includes(s.type) &&
+        typeof s.adopte === 'boolean' &&
+        typeof s.solennel === 'boolean' &&
+        texteOuNull(s.dossier),
+      `scrutins[${i}] : type, adopte, solennel, dossier`,
     );
     verifie(
       Object.values(s.compte).every(entier) &&

@@ -461,6 +461,7 @@ export function construire({
       titre: s.lu.titre,
       type: types[i],
       adopte: s.lu.sortCode === 'adopté',
+      solennel: s.lu.codeTypeVote === 'SPS',
       dossier: s.lu.dossier,
       compte: s.compte,
       groupes: s.entrees
