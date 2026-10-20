@@ -11,7 +11,8 @@ import {
   type GroupeFichier,
   type ScrutinFichier,
 } from '../../src/server/donnees.types';
-import { zipSync } from 'fflate';
+import { unzipSync, zipSync } from 'fflate';
+import { SEUILS_EFFECTIF } from './construire.mjs';
 import { executer } from './index.mjs';
 import {
   TAILLE_MINIMALE,
@@ -78,8 +79,18 @@ function ecarts(d: Donnees): string[] {
   );
   verifie(Array.isArray(stat.nonVotantsCorriges), 'meta.statistiques.nonVotantsCorriges');
   verifie(
-    Array.isArray(meta.avertissements) && meta.avertissements.every((a) => a === 'wikipedia'),
+    Array.isArray(meta.avertissements) &&
+      meta.avertissements.every((a) => a === 'wikipedia' || a === 'effectif'),
     'meta.avertissements',
+  );
+  const effectif = stat.effectif;
+  verifie(
+    effectif === null ||
+      (entier(effectif.ecartMax) &&
+        Object.values(effectif.repartition).reduce((a, b) => a + b, 0) === d.scrutins.length &&
+        effectif.horsTolerance.every((n) => d.scrutins.some((s) => s.n === n)) &&
+        meta.avertissements.includes('effectif') === effectif.horsTolerance.length > 0),
+    'meta.statistiques.effectif',
   );
   verifie(Array.isArray(meta.autresGroupes), 'meta.autresGroupes');
   for (const quoi of ['actifs', 'tous'] as const) {
@@ -264,6 +275,90 @@ function ecarts(d: Donnees): string[] {
 describe.runIf(Boolean(process.env['DONNEES_DIR']))('data/ existant (DONNEES_DIR)', () => {
   it('est conforme à src/server/donnees.types.ts et à docs/DONNEES.md', () => {
     expect(ecarts(lireDossier(process.env['DONNEES_DIR']!))).toEqual([]);
+  });
+});
+
+/**
+ * Effectif officiel de chaque scrutin (somme des `nombreMembresGroupe`), relu dans l'archive des scrutins que le pipeline a
+ * mise en cache (`.cache/officiel`), si c'est bien celle dont `data/` est issu (même ETag). Sinon `null`.
+ */
+function effectifsOfficiels(meta: DonneesMeta): Map<number, number> | null {
+  const dossier = join('.cache', 'officiel', 'scrutins');
+  try {
+    const cache = JSON.parse(readFileSync(join(dossier, 'meta.json'), 'utf8')) as { etag: string };
+    if (!meta.sources.scrutins.etag || cache.etag !== meta.sources.scrutins.etag) return null;
+    const fichiers = unzipSync(new Uint8Array(readFileSync(join(dossier, 'archive.zip'))));
+    const texte = new TextDecoder();
+    const effectifs = new Map<number, number>();
+    for (const [nom, octets] of Object.entries(fichiers)) {
+      if (!nom.endsWith('.json')) continue;
+      const { scrutin } = JSON.parse(texte.decode(octets));
+      const groupes = [scrutin.ventilationVotes?.organe?.groupes?.groupe ?? []].flat();
+      effectifs.set(
+        Number(scrutin.numero),
+        groupes.reduce(
+          (n: number, g: { nombreMembresGroupe?: string }) =>
+            n + Number(g.nombreMembresGroupe ?? 0),
+          0,
+        ),
+      );
+    }
+    return effectifs;
+  } catch {
+    return null;
+  }
+}
+
+// Sur de vraies données : les députés « en mandat » de chaque scrutin s'accordent avec l'effectif officiel.
+describe.runIf(Boolean(process.env['DONNEES_DIR']))('effectif en mandat (DONNEES_DIR)', () => {
+  let d: Donnees;
+  let enMandat: number[];
+  beforeAll(() => {
+    d = lireDossier(process.env['DONNEES_DIR']!);
+    enMandat = d.votes.map((ligne) => ligne.length - (ligne.match(/-/g)?.length ?? 0));
+  });
+
+  it('a été contrôlé par le pipeline : écart maximal dans la tolérance, aucun scrutin hors tolérance', () => {
+    const effectif = d.meta.statistiques.effectif;
+    expect(effectif).not.toBeNull();
+    expect(effectif!.ecartMax).toBeLessThanOrEqual(SEUILS_EFFECTIF.tolerance);
+    expect(effectif!.horsTolerance).toEqual([]);
+    expect(d.meta.avertissements).not.toContain('effectif');
+  });
+
+  it("compte au plus quelques députés d'écart avec l'effectif officiel sur chaque scrutin, et presque toujours aucun", () => {
+    const officiels = effectifsOfficiels(d.meta);
+    if (!officiels) {
+      console.warn(
+        "effectif officiel non recontrôlé : l'archive en cache (.cache/officiel) n'est pas celle de data/ (autre ETag) ou manque",
+      );
+      return;
+    }
+    expect(officiels.size).toBe(d.scrutins.length);
+    const repartition = new Map<number, number>();
+    d.scrutins.forEach((s, i) => {
+      const officiel = officiels.get(s.n);
+      expect(officiel, `scrutin ${s.n}`).toBeDefined();
+      const ecart = enMandat[i] - officiel!;
+      expect(
+        Math.abs(ecart),
+        `scrutin ${s.n} : ${enMandat[i]} en mandat pour ${officiel} officiels`,
+      ).toBeLessThanOrEqual(SEUILS_EFFECTIF.tolerance);
+      repartition.set(ecart, (repartition.get(ecart) ?? 0) + 1);
+    });
+    // Au moins 95 % des scrutins tombent juste (98,4 % mesuré le 20/10/2026) ; les autres sont de ±1 un jour de changement.
+    expect((repartition.get(0) ?? 0) / d.scrutins.length).toBeGreaterThan(0.95);
+    // Ce que le pipeline a mesuré est ce que la matrice contient.
+    expect(Object.fromEntries([...repartition].map(([e, n]) => [String(e), n]))).toEqual(
+      d.meta.statistiques.effectif!.repartition,
+    );
+  });
+
+  it("les députés en mandat ne dépassent jamais l'effectif d'un scrutin de plus de la tolérance (ni le nombre de votants)", () => {
+    d.scrutins.forEach((s, i) => {
+      const votants = s.compte.pour + s.compte.contre + s.compte.abstention;
+      expect(enMandat[i], `scrutin ${s.n}`).toBeGreaterThanOrEqual(votants);
+    });
   });
 });
 

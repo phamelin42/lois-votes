@@ -553,7 +553,7 @@ describe('construire : garde-fous', () => {
   };
 
   it('échoue sous les seuils du plan (8 000 scrutins, 570 députés)', () => {
-    expect(SEUILS_OFFICIELS).toEqual({ scrutins: 8000, deputes: 570 });
+    expect(SEUILS_OFFICIELS).toMatchObject({ scrutins: 8000, deputes: 570 });
     echoue(() => ({ seuils: SEUILS_OFFICIELS }), /3 scrutins lus, au moins 8000 attendus/);
     const nombreux = Array.from({ length: 8000 }, (_, i) => ({ ...S3, numero: i + 1 }));
     echoue(
@@ -665,6 +665,7 @@ describe('construire : meta et fichiers', () => {
         misesAuPoint: 0,
         groupesRattaches: 0,
         nonVotantsCorriges: [],
+        effectif: null,
         couverture: {
           actifs: { ...VIDE, deputes: 3 },
           tous: { ...VIDE, deputes: 4 },

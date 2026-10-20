@@ -21,7 +21,7 @@ export interface DonneesMeta {
   groupes: number;
   /** Groupes de la 17ᵉ législature qu'aucun scrutin ne liste (« AD ») : sans index dans les matrices, ils ne servent qu'à l'historique des députés. */
   autresGroupes: GroupeFichier[];
-  /** Sources facultatives manquantes à la préparation : `wikipedia` quand Wikidata n'a pas répondu (le site vit sans ces liens). */
+  /** Défauts non bloquants de la préparation : `wikipedia` quand Wikidata n'a pas répondu (le site vit sans ces liens), `effectif` quand des scrutins s'écartent de l'effectif officiel au-delà de la tolérance. */
   avertissements: string[];
   sources: { scrutins: SourceArchive; acteurs: SourceArchive };
   /** Mesures faites pendant la réduction, pour le journal de build et la page « à propos ». */
@@ -35,6 +35,17 @@ export interface DonneesMeta {
     groupesRattaches: number;
     /** Scrutins dont le nombre de non-votants officiel ne valait pas la somme des groupes (remplacé par la somme). */
     nonVotantsCorriges: number[];
+    /**
+     * Écart entre les députés en mandat de chaque scrutin (cases ≠ `-` de `votes.txt`) et l'effectif officiel (somme des
+     * `nombreMembresGroupe`), à la préparation. `null` en mode `fixtures` (liste de députés réduite : l'effectif n'est pas celui
+     * de l'Assemblée). `repartition` : nombre de scrutins par écart (clé « -1 », « 0 », « 1 »…) ; `horsTolerance` : numéros des
+     * scrutins dont l'écart dépasse la tolérance (avertissement `effectif` dans `avertissements`).
+     */
+    effectif: {
+      ecartMax: number;
+      repartition: Record<string, number>;
+      horsTolerance: number[];
+    } | null;
     /** Part des députés qui ont chaque information, pour les députés en mandat et pour tous. */
     couverture: { actifs: Couverture; tous: Couverture };
   };

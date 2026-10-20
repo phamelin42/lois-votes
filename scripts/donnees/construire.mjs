@@ -4,8 +4,30 @@
 import { CARACTERES_GROUPE } from '../../src/server/donnees.types.ts';
 import { classerTous } from './classer.mjs';
 
-/** Seuils du plan : en dessous, l'archive est incomplète ou ce n'est pas la bonne. */
-export const SEUILS_OFFICIELS = { scrutins: 8000, deputes: 570 };
+/**
+ * Contrôle de l'effectif : pour chaque scrutin, le nombre de députés « en mandat » (cases ≠ `-` de `votes.txt`) est
+ * comparé à l'effectif officiel (somme des `nombreMembresGroupe`). Mesuré sur l'archive du 20/10/2026 : l'écart va de
+ * -1 à +1 sur les 8 894 scrutins (8 748 exacts), alors que, avant la correction des dates de début de mandat, il allait
+ * de 0 à +65.
+ *
+ * - `tolerance` : un écart d'au plus 3 est normal. Un jour de changement (décès, démission, entrée en fonction), le
+ *   décompte officiel varie d'un scrutin à l'autre de la journée alors que nos dates sont des jours entiers : +1 ou -1.
+ *   Le 13/11/2025, une trentaine d'entrées et de sorties le même jour ne donnent que ±1, car chaque départ a son
+ *   remplaçant ; 3 laisse de la marge sans cacher un vrai défaut.
+ * - Au-delà, c'est un **avertissement** (journal et `meta.avertissements`), jamais un échec : une anomalie de la source
+ *   bloquerait aussi la mise à jour nocturne.
+ * - `grossier` et `partGrossiere` : l'échec est réservé à un défaut systématique. Plus de 1 % des scrutins (89 sur
+ *   8 894) avec un écart de plus de 20, ce qui est la signature d'un champ de date disparu ou changé de sens (le défaut
+ *   corrigé ici en donnait 6 284, soit 71 %). Quelques journées anormales de l'archive (une soixantaine de scrutins au
+ *   plus par jour) ne font donc pas échouer le build.
+ */
+export const SEUILS_EFFECTIF = { tolerance: 3, grossier: 20, partGrossiere: 0.01 };
+
+/**
+ * Seuils du plan : en dessous, l'archive est incomplète ou ce n'est pas la bonne. `effectif` est absent du mini-jeu de
+ * fixtures (les listes nominatives y sont réduites à 99 députés : son effectif n'est pas celui de l'Assemblée).
+ */
+export const SEUILS_OFFICIELS = { scrutins: 8000, deputes: 570, effectif: SEUILS_EFFECTIF };
 
 /** Au plus ce nombre de scrutins dont le nombre de non-votants officiel diffère de la somme des groupes (corrigé). */
 export const MAX_NONVOTANTS_CORRIGES = 5;
@@ -70,6 +92,74 @@ const JOUR = 24 * 60 * 60 * 1000;
 /** Jour suivant une date `AAAA-MM-JJ`. */
 function lendemain(date) {
   return new Date(Date.parse(`${date}T00:00:00Z`) + JOUR).toISOString().slice(0, 10);
+}
+
+/**
+ * Premier jour où un mandat de député compte « en mandat » : la prise de fonction (`mandature.datePriseFonction`) quand
+ * elle est postérieure à `dateDebut`, sinon `dateDebut`. L'archive donne à un **remplaçant** (nommé au gouvernement,
+ * démissionnaire, décédé, en mission…) la `dateDebut` de l'élection générale (2024-06-30 ou 2024-07-07) au lieu du jour de
+ * son arrivée : lu tel quel, il serait compté « en mandat » avec son titulaire pendant des mois, et sa participation
+ * s'effondrerait (Pauline Cestrières : 10 % au lieu de 35 %). Voir DONNEES.md, « Effectif en mandat ».
+ *
+ * @param {{ debut: string, priseFonction?: string | null }} mandat
+ */
+export function debutEffectif(mandat) {
+  return mandat.priseFonction && mandat.priseFonction > mandat.debut
+    ? mandat.priseFonction
+    : mandat.debut;
+}
+
+/**
+ * Date de début affichée sur la fiche (`mandat.depuis`). Un député élu garde la `dateDebut` de l'archive (la date de son
+ * élection : « 30 juin 2024 ») ; la prise de fonction d'un élu tombe le lendemain, sans intérêt. Un remplaçant, lui,
+ * montre sa prise de fonction, puisque la `dateDebut` de l'archive (l'élection de son titulaire) serait fausse.
+ *
+ * @param {{ debut: string, priseFonction?: string | null }} mandat
+ */
+export function debutAffiche(mandat) {
+  return mandat.priseFonction && mandat.priseFonction > lendemain(mandat.debut)
+    ? mandat.priseFonction
+    : mandat.debut;
+}
+
+/**
+ * Compare, pour chaque scrutin, les députés en mandat à l'effectif officiel (voir `SEUILS_EFFECTIF`).
+ *
+ * @param {{ numero: number, enMandat: number, officiel: number }[]} scrutins
+ * @param {{ tolerance: number, grossier: number, partGrossiere: number }} seuils
+ * @returns {{ ecartMax: number, repartition: Record<string, number>, horsTolerance: number[] }}
+ * @throws {ErreurDonnees} quand plus de `partGrossiere` des scrutins ont un écart de plus de `grossier`.
+ */
+export function controlerEffectif(scrutins, seuils) {
+  /** @type {Map<number, number>} */
+  const histogramme = new Map();
+  /** @type {{ numero: number, enMandat: number, officiel: number, ecart: number } | null} */
+  let pire = null;
+  const horsTolerance = [];
+  let grossiers = 0;
+  for (const s of scrutins) {
+    const ecart = s.enMandat - s.officiel;
+    histogramme.set(ecart, (histogramme.get(ecart) ?? 0) + 1);
+    if (pire === null || Math.abs(ecart) > Math.abs(pire.ecart)) pire = { ...s, ecart };
+    if (Math.abs(ecart) > seuils.tolerance) horsTolerance.push(s.numero);
+    if (Math.abs(ecart) > seuils.grossier) grossiers++;
+  }
+  if (pire && grossiers > Math.floor(scrutins.length * seuils.partGrossiere)) {
+    throw new ErreurDonnees(
+      `effectif : ${grossiers} scrutins sur ${scrutins.length} ont plus de ${seuils.grossier} députés d'écart entre ` +
+        `« en mandat » et l'effectif officiel (le pire : scrutin ${pire.numero}, ${pire.enMandat} en mandat pour ` +
+        `${pire.officiel} officiels) : les dates de mandat sont sans doute fausses`,
+    );
+  }
+  return {
+    ecartMax: pire ? Math.abs(pire.ecart) : 0,
+    repartition: Object.fromEntries(
+      [...histogramme]
+        .sort((a, b) => a[0] - b[0])
+        .map(([ecart, nombre]) => [String(ecart), nombre]),
+    ),
+    horsTolerance: horsTolerance.sort((a, b) => a - b),
+  };
 }
 
 /**
@@ -185,7 +275,7 @@ export function couverture(deputes) {
  * @param {Map<string, string> | null} [entree.wikipedia] Articles Wikipédia par numéro d'acteur sans « PA » ; `null` quand Wikidata est indisponible.
  * @param {string[]} [entree.avertissements] Sources facultatives manquantes (`wikipedia`), recopiées dans `meta.json`.
  * @param {Date} [entree.maintenant]
- * @param {{ scrutins: number, deputes: number }} [entree.seuils]
+ * @param {{ scrutins: number, deputes: number, effectif?: typeof SEUILS_EFFECTIF }} [entree.seuils] `effectif` absent : pas de contrôle de l'effectif (fixtures, tests).
  */
 export function construire({
   scrutins,
@@ -347,7 +437,12 @@ export function construire({
     vus.set(base, n);
     const slug = n === 1 ? base : `${base}-${n}`;
 
-    const assemblee = mandatsAssemblee(pa);
+    // Le mandat en cours se choisit sur son début effectif : un remplaçant qui revient a deux mandats de même `dateDebut`.
+    const assemblee = mandatsAssemblee(pa).map((m) => ({
+      ...m,
+      debut: debutEffectif(m),
+      depuis: debutAffiche(m),
+    }));
     const mandat = assemblee.length ? plusRecent(assemblee) : null;
     const lieu = mandat?.lieu ?? null;
     const groupe = (() => {
@@ -380,7 +475,7 @@ export function construire({
       profession: fiche.profession,
       mandat: mandat
         ? {
-            depuis: mandat.debut,
+            depuis: mandat.depuis,
             fin: mandat.fin,
             legislatures: legislaturesDeDepute(fiche.mandats),
           }
@@ -414,9 +509,13 @@ export function construire({
   if (slugs.size !== deputes.length) throw new ErreurDonnees('deux députés avec le même slug');
   const colonne = new Map(pas.map((pa, i) => [pa, i]));
 
-  // Mandats de député, pour distinguer « absent » (en mandat, dans aucune liste) de « pas en mandat ».
+  // Mandats de député, pour distinguer « absent » (en mandat, dans aucune liste) de « pas en mandat ». Un mandat compte
+  // du jour de la prise de fonction au jour de `dateFin`, bornes comprises (`debutEffectif`) : un remplaçant n'est pas
+  // « en mandat » pendant que son titulaire siège. Le jour d'un changement, titulaire et remplaçant seraient tous deux
+  // « en mandat » s'ils se chevauchaient ; l'archive donne la prise de fonction du remplaçant le lendemain du dernier
+  // jour du titulaire (aucun chevauchement sur les 75 sièges concernés), donc pas de règle de départage à ajouter.
   const intervalles = pas.map((pa) =>
-    mandatsAssemblee(pa).map((m) => [m.debut, m.fin ?? FIN_DES_TEMPS]),
+    mandatsAssemblee(pa).map((m) => [debutEffectif(m), m.fin ?? FIN_DES_TEMPS]),
   );
   const groupesDesMandats = pas.map((pa) => mandatsGp(pa));
 
@@ -429,6 +528,8 @@ export function construire({
   const CODE = { pour: 'P', contre: 'C', abstention: 'A', nonvotant: 'N' };
   const lignesVotes = [];
   const lignesGroupes = [];
+  /** Députés en mandat et effectif officiel de chaque scrutin, pour le contrôle de l'effectif. */
+  const effectifs = [];
   const scrutinsFichier = ordonnes.map((s, i) => {
     const votes = new Array(deputes.length).fill('-');
     const parGroupe = new Array(deputes.length).fill('-');
@@ -454,6 +555,12 @@ export function construire({
     }
     lignesVotes.push(votes.join(''));
     lignesGroupes.push(parGroupe.join(''));
+    effectifs.push({
+      numero: s.lu.numero,
+      enMandat: votes.reduce((n, c) => (c === '-' ? n : n + 1), 0),
+      // Toutes les entrées de groupe de l'archive, y compris celles écartées faute de député listé.
+      officiel: s.lu.groupes.reduce((n, g) => n + g.nombreMembres, 0),
+    });
 
     return {
       n: s.lu.numero,
@@ -487,13 +594,18 @@ export function construire({
     }
   }
 
+  // --- Garde-fou sur l'effectif en mandat -------------------------------------------------------------------------
+  const effectif = seuils.effectif ? controlerEffectif(effectifs, seuils.effectif) : null;
+  const avertissementsFinaux = [...avertissements];
+  if (effectif?.horsTolerance.length) avertissementsFinaux.push('effectif');
+
   const meta = {
     genereLe: maintenant.toISOString().replace(/\.\d{3}Z$/, 'Z'),
     scrutins: scrutinsFichier.length,
     deputes: deputes.length,
     groupes: groupes.length,
     autresGroupes,
-    avertissements: [...avertissements],
+    avertissements: avertissementsFinaux,
     sources,
     statistiques: {
       adoptes: scrutinsFichier.filter((s) => s.adopte).length,
@@ -502,6 +614,7 @@ export function construire({
       misesAuPoint: ordonnes.filter((s) => s.lu.miseAuPoint).length,
       groupesRattaches,
       nonVotantsCorriges,
+      effectif,
       couverture: couverture(deputes),
     },
   };
