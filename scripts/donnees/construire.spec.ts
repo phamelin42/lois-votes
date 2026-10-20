@@ -159,10 +159,13 @@ const ACTEURS = [
   acteur('PA4', 'Dan', 'Petit', [mandatAn('2025-03-01'), mandatGp('PO5', '2025-03-01')]),
 ];
 
-const S1 = scrutin(1, '2025-02-10', "l'ensemble du projet de loi relatif à X (première lecture).", [
-  entree('PO1', { pour: ['PA1'], contre: ['PA2'] }),
-  entree('PO3', { abstention: ['PA3'] }),
-]);
+const S1 = scrutin(
+  1,
+  '2025-02-10',
+  "l'ensemble du projet de loi relatif à X (première lecture).",
+  [entree('PO1', { pour: ['PA1'], contre: ['PA2'] }), entree('PO3', { abstention: ['PA3'] })],
+  { codeTypeVote: 'SPS' },
+);
 const S2 = scrutin(
   2,
   '2025-09-20',
@@ -450,6 +453,10 @@ describe('construire : scrutins', () => {
     expect(par(1)).toMatchObject({ dossier: null, adopte: true });
   });
 
+  it("marque solennel seulement le scrutin public solennel (SPS), pas l'ordinaire (SPO) ni la motion (MOC)", () => {
+    expect([par(1).solennel, par(2).solennel, par(3).solennel]).toEqual([true, false, false]);
+  });
+
   it("classe le type d'après le titre et le type de vote", () => {
     expect([par(1).type, par(2).type, par(3).type]).toEqual(['final', 'amendement', 'motion']);
   });
@@ -546,7 +553,7 @@ describe('construire : garde-fous', () => {
   };
 
   it('échoue sous les seuils du plan (8 000 scrutins, 570 députés)', () => {
-    expect(SEUILS_OFFICIELS).toEqual({ scrutins: 8000, deputes: 570 });
+    expect(SEUILS_OFFICIELS).toMatchObject({ scrutins: 8000, deputes: 570 });
     echoue(() => ({ seuils: SEUILS_OFFICIELS }), /3 scrutins lus, au moins 8000 attendus/);
     const nombreux = Array.from({ length: 8000 }, (_, i) => ({ ...S3, numero: i + 1 }));
     echoue(
@@ -658,6 +665,7 @@ describe('construire : meta et fichiers', () => {
         misesAuPoint: 0,
         groupesRattaches: 0,
         nonVotantsCorriges: [],
+        effectif: null,
         couverture: {
           actifs: { ...VIDE, deputes: 3 },
           tous: { ...VIDE, deputes: 4 },

@@ -19,7 +19,7 @@ describe('donnees.ts', () => {
 
       expect(d.meta.genereLe).toBe(GENERE_LE);
       expect(d.nbScrutins).toBe(19);
-      expect(d.nbDeputes).toBe(97);
+      expect(d.nbDeputes).toBe(99);
       expect(d.groupes).toHaveLength(13);
     });
 
@@ -31,6 +31,7 @@ describe('donnees.ts', () => {
         titre: string;
         type: string;
         adopte: boolean;
+        solennel: boolean;
         dossier: string | null;
         compte: unknown;
         groupes: unknown[];
@@ -42,6 +43,7 @@ describe('donnees.ts', () => {
         expect(d.titre(s)).toBe(attendu.titre);
         expect(d.type(s)).toBe(attendu.type);
         expect(d.adopte(s)).toBe(attendu.adopte);
+        expect(d.solennel(s)).toBe(attendu.solennel);
         expect(d.dossier(s)).toBe(attendu.dossier);
         expect(d.compte(s)).toEqual(attendu.compte);
         expect(d.groupesDuScrutin(s)).toEqual(attendu.groupes);
@@ -93,7 +95,7 @@ describe('donnees.ts', () => {
       expect(m.dureeMs).toBeGreaterThan(0);
       expect(m.rss).toBeGreaterThan(0);
       expect(decrireChargement(jeu.donnees)).toMatch(
-        /19 scrutins, 97 députés, 13 groupes .* en \d+ ms/,
+        /19 scrutins, 99 députés, 13 groupes .* en \d+ ms/,
       );
     });
   });
@@ -147,14 +149,14 @@ describe('donnees.ts', () => {
       modifier('votes.txt', (c) => c.slice(0, c.lastIndexOf('\n')));
 
       expect(() => chargerDonnees(copie)).toThrow(
-        /votes\.txt : .* octets pour 19 scrutins × 97 députés/,
+        /votes\.txt : .* octets pour 19 scrutins × 99 députés/,
       );
     });
 
     it("refuse une ligne qui n'a pas autant de caractères que de députés", () => {
       modifier('votes.txt', (c) => c.replace('\n', 'P\n').slice(0, -1));
 
-      expect(() => chargerDonnees(copie)).toThrow(/votes\.txt : la ligne 1 n'a pas 97 caractères/);
+      expect(() => chargerDonnees(copie)).toThrow(/votes\.txt : la ligne 1 n'a pas 99 caractères/);
     });
 
     it('refuse un caractère de vote inconnu', () => {

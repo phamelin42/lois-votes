@@ -69,3 +69,31 @@ export function extraireScriptsEnLigne(html: string): string[] {
   }
   return scripts;
 }
+
+/**
+ * Fichiers de `public/`, servis à la racine sans hachage (icônes du site et manifeste). Leur adresse doit rester
+ * stable (Google le demande pour le favicon) : ils ne peuvent donc pas être « immutables ».
+ */
+export const FICHIERS_PUBLICS = [
+  'favicon.ico',
+  'favicon.svg',
+  'apple-touch-icon.png',
+  'icon-48.png',
+  'icon-192.png',
+  'icon-512.png',
+  'site.webmanifest',
+] as const;
+
+const CACHE_FICHIER_PUBLIC = 'public, max-age=86400';
+const CACHE_FICHIER_HACHE = 'public, max-age=31536000, immutable';
+
+/**
+ * Cache-Control d'un fichier du build, d'après son chemin relatif au dossier `browser/` : un jour pour les fichiers
+ * de `public/`, un an (immutable) pour le reste, dont le nom contient l'empreinte du contenu.
+ */
+export function cacheControlFichier(cheminRelatif: string): string {
+  const chemin = cheminRelatif.replaceAll('\\', '/');
+  return (FICHIERS_PUBLICS as readonly string[]).includes(chemin)
+    ? CACHE_FICHIER_PUBLIC
+    : CACHE_FICHIER_HACHE;
+}

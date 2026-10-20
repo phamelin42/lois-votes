@@ -26,6 +26,28 @@ describe('ScrutinPage', () => {
     expect(racine.querySelector('time')).not.toBeNull();
   });
 
+  it('écrit « Vote solennel » et sa phrase pour un scrutin solennel', async () => {
+    const { racine } = await afficher(scrutinDetail({ solennel: true }));
+
+    expect(sansEspaces(racine.querySelector('.app-scrutin__resultat')!.textContent)).toContain(
+      'Vote solennel',
+    );
+    expect(sansEspaces(racine.textContent)).toContain(
+      'Vote solennel : tous les députés sont convoqués.',
+    );
+  });
+
+  it('écrit « Vote ordinaire » et sa phrase pour un scrutin ordinaire', async () => {
+    const { racine } = await afficher(scrutinDetail({ solennel: false }));
+
+    expect(sansEspaces(racine.querySelector('.app-scrutin__resultat')!.textContent)).toContain(
+      'Vote ordinaire',
+    );
+    expect(sansEspaces(racine.textContent)).toContain(
+      "Vote ordinaire : en séance, seuls les députés présents dans l'hémicycle votent.",
+    );
+  });
+
   it("écrit combien de députés en mandat n'ont pas voté", async () => {
     const { racine } = await afficher();
 

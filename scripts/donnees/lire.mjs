@@ -30,6 +30,7 @@
  * @property {string} legislature
  * @property {string} debut
  * @property {string | null} fin
+ * @property {string | null} priseFonction `mandature.datePriseFonction` : le jour où le député entre vraiment en fonction. Pour un député élu, c'est le lendemain de `debut` ; pour un remplaçant (nommé au gouvernement, démissionnaire, décédé…), `debut` est la date de l'élection générale et `priseFonction` celle de son arrivée (voir DONNEES.md, « Effectif en mandat »).
  * @property {string | null} organe `organes.organeRef`
  * @property {string | null} qualite `infosQualite` (version accordée au genre quand elle existe) : « Membre », « Vice-présidente de l'Assemblée nationale ».
  * @property {{ departement: string | null, numDepartement: string | null, numCirco: string | null } | null} lieu Circonscription d'un mandat `ASSEMBLEE`.
@@ -332,6 +333,7 @@ export function lireActeur(brut) {
       legislature: String(mandat.legislature),
       debut: mandat.dateDebut ?? '',
       fin: mandat.dateFin ?? null,
+      priseFonction: dateIso(mandat.mandature?.datePriseFonction),
       organe: texte(mandat.organes?.organeRef),
       qualite:
         chaine(mandat.infosQualite?.libQualiteSex) ?? chaine(mandat.infosQualite?.libQualite),

@@ -6,10 +6,15 @@ import {
 } from '@angular/ssr/node';
 import compression from 'compression';
 import express from 'express';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import type { DeputeListe } from '@contrat';
 import { appelerBffActif, prechargerDonnees } from './server/bff';
-import { cacheControlPage, enTetesSecurite, extraireScriptsEnLigne } from './server/en-tetes';
+import {
+  cacheControlFichier,
+  cacheControlPage,
+  enTetesSecurite,
+  extraireScriptsEnLigne,
+} from './server/en-tetes';
 import { genererRobots, genererSitemap } from './server/seo';
 import { injecterUmami, scriptUmami, sourceUmami } from './server/umami';
 
@@ -42,7 +47,8 @@ app.use('/api', async (req, res, suivant) => {
 });
 
 /**
- * Fichiers du build (noms hachés) : gardés un an par le navigateur et le CDN.
+ * Fichiers du build (noms hachés) : gardés un an par le navigateur et le CDN. Les icônes et le manifeste (public/)
+ * sont à la racine, sans hachage : leur adresse ne change pas mais leur contenu peut changer, un jour de cache seulement.
  */
 app.use(
   express.static(browserDistFolder, {
@@ -50,6 +56,9 @@ app.use(
     immutable: true,
     index: false,
     redirect: false,
+    setHeaders: (res, chemin) => {
+      res.setHeader('Cache-Control', cacheControlFichier(relative(browserDistFolder, chemin)));
+    },
   }),
 );
 

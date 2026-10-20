@@ -119,6 +119,22 @@ export async function executer({
         `naissance ${part(c.naissance)}, site ${part(c.siteWeb)}, X ${part(c.x)}, Facebook ${part(c.facebook)}`,
     );
   }
+  if (stat.effectif) {
+    const { ecartMax, repartition, horsTolerance } = stat.effectif;
+    const repartitionTexte = Object.entries(repartition)
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([ecart, nombre]) => `${Number(ecart) > 0 ? '+' : ''}${ecart} : ${nombre}`)
+      .join(', ');
+    journal(
+      `[donnees] effectif en mandat comparé à l'effectif officiel, écart par scrutin (nombre de scrutins) : ${repartitionTexte} ; ` +
+        `écart maximal ${ecartMax}`,
+    );
+    if (horsTolerance.length)
+      journal(
+        `[donnees] AVERTISSEMENT : ${horsTolerance.length} scrutins hors tolérance (écart de plus de ${SEUILS_OFFICIELS.effectif.tolerance}) : ` +
+          `${horsTolerance.slice(0, 20).join(', ')}${horsTolerance.length > 20 ? '…' : ''}`,
+      );
+  }
   if (meta.avertissements.length)
     journal(`[donnees] avertissements : ${meta.avertissements.join(', ')}`);
   journal(

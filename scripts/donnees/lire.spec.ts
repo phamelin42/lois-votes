@@ -234,6 +234,7 @@ const mandatAssemblee = {
   typeOrgane: 'ASSEMBLEE',
   dateDebut: '2024-06-30',
   dateFin: null,
+  mandature: { datePriseFonction: '2024-07-01', causeFin: null, mandatRemplaceRef: null },
   organes: { organeRef: 'PO838901' },
   election: {
     lieu: { region: 'Hauts-de-France', departement: 'Nord', numDepartement: '59', numCirco: '19' },
@@ -251,6 +252,7 @@ describe('lireActeur', () => {
         legislature: '17',
         debut: '2024-07-19',
         fin: null,
+        priseFonction: null,
         organe: 'PO845401',
         qualite: null,
         lieu: null,
@@ -261,6 +263,7 @@ describe('lireActeur', () => {
         legislature: '17',
         debut: '2024-06-30',
         fin: null,
+        priseFonction: '2024-07-01',
         organe: 'PO838901',
         qualite: null,
         lieu: { departement: 'Nord', numDepartement: '59', numCirco: '19' },

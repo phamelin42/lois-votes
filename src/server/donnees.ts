@@ -195,6 +195,7 @@ export class DonneesChargees {
   private readonly titres: string[];
   private readonly types: Uint8Array;
   private readonly adoptes: Uint8Array;
+  private readonly solennels: Uint8Array;
   private readonly dossiers: (string | null)[];
   private readonly comptes: Uint16Array;
   /** Députés en mandat à chaque scrutin (cases ≠ « - » de la matrice), calculés une fois au chargement. */
@@ -302,6 +303,7 @@ export class DonneesChargees {
     const titres = new Array<string>(nbScrutins);
     const types = new Uint8Array(nbScrutins);
     const adoptes = new Uint8Array(nbScrutins);
+    const solennels = new Uint8Array(nbScrutins);
     const dossiers = new Array<string | null>(nbScrutins);
     const comptes = new Uint16Array(nbScrutins * 4);
     const debutGroupes = new Uint32Array(nbScrutins + 1);
@@ -328,6 +330,7 @@ export class DonneesChargees {
       const type = TYPES.indexOf(s.type);
       verifier(type >= 0, `${ctx} : type ${s.type}`);
       verifier(typeof s.adopte === 'boolean', `${ctx} : adopte`);
+      verifier(typeof s.solennel === 'boolean', `${ctx} : solennel`);
       verifier(s.dossier === null || typeof s.dossier === 'string', `${ctx} : dossier`);
       verifierCompte(s.compte, ctx);
       verifier(Array.isArray(s.groupes), `${ctx} : groupes`);
@@ -337,6 +340,7 @@ export class DonneesChargees {
       titres[i] = s.titre;
       types[i] = type;
       adoptes[i] = s.adopte ? 1 : 0;
+      solennels[i] = s.solennel ? 1 : 0;
       let dossierInterne: string | null = null;
       if (s.dossier !== null) {
         dossierInterne = internes.get(s.dossier) ?? s.dossier;
@@ -386,6 +390,7 @@ export class DonneesChargees {
     this.titres = titres;
     this.types = types;
     this.adoptes = adoptes;
+    this.solennels = solennels;
     this.dossiers = dossiers;
     this.comptes = comptes;
     this.debutGroupes = debutGroupes;
@@ -468,6 +473,10 @@ export class DonneesChargees {
   }
   adopte(s: number): boolean {
     return this.adoptes[s] === 1;
+  }
+  /** Scrutin public solennel (tous les députés sont convoqués) ; faux pour un scrutin ordinaire. */
+  solennel(s: number): boolean {
+    return this.solennels[s] === 1;
   }
   dossier(s: number): string | null {
     return this.dossiers[s];

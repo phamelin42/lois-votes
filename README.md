@@ -36,6 +36,7 @@ Si `data/` manque ou est invalide, le serveur démarre quand même : les routes 
 | `npm test`               | Tests unitaires (Vitest, jsdom), dont le pipeline des données et le serveur.                                                                                                         |
 | `npm run build:fixtures` | Comme `npm run build`, sur le jeu de test : aucun réseau.                                                                                                                            |
 | `npm run e2e`            | `build:fixtures`, puis Playwright contre trois instances SSR (normale, sans données, avec Umami). Navigateur de Playwright, ou `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/chemin/chrome`. |
+| `npm run icones`         | Régénère les icônes de `public/` à partir de `public/favicon.svg` (Chromium de Playwright). Les fichiers sont versionnés ; voir [docs/ICONE.md](docs/ICONE.md).                      |
 | `npm run perf`           | `build:fixtures`, puis Lighthouse (profil mobile) sur l'accueil, une loi et un député. Échoue sous 95 en performance ou en accessibilité.                                            |
 
 ## Mise en ligne (Vercel Hobby)
@@ -48,6 +49,15 @@ Le site se déploie sur Vercel avec `vercel.json` (fonction `api/index.mjs` qui 
 4. **Créer le CNAME** chez le registraire de `phamelin.fr` : `quiavotequoi` → `cname.vercel-dns.com`.
 
 Le préréglage « Angular » de Vercel n'a pas été vérifié : le projet passe par la fonction explicite de `api/index.mjs`. Si le téléchargement des archives échoue pendant le build, le build échoue et l'ancien déploiement reste en ligne.
+
+## Icône du site dans Google
+
+Le site déclare son icône (`favicon.ico`, `favicon.svg`, PNG, manifeste) dans l'en-tête de la page d'accueil ; les fichiers sont dans `public/` (détail et exigences de Google dans [docs/ICONE.md](docs/ICONE.md)). Un geste, **après le premier déploiement** (et après tout changement d'icône) :
+
+1. Ouvrir la [Search Console](https://search.google.com/search-console) pour `quiavotequoi.phamelin.fr`, outil « Inspection d'URL », saisir `https://quiavotequoi.phamelin.fr/`, puis « Demander une indexation ».
+2. Patienter : Google annonce un délai de quelques jours à plusieurs semaines, et ne garantit pas qu'un favicon s'affiche dans les résultats.
+
+Contrôle à faire une fois en ligne : `curl -sI https://quiavotequoi.phamelin.fr/favicon.ico` doit répondre 200, `Cache-Control: public, max-age=86400` et un type `image/…` (Vercel sert les fichiers de `public/` lui-même, voir docs/ICONE.md).
 
 ## Mise à jour nocturne
 

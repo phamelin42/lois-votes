@@ -58,7 +58,7 @@ test.describe('rendu serveur (JavaScript désactivé)', () => {
   });
 
   test('la recherche à un seul résultat redirige en 302', async ({ request }) => {
-    const reponse = await request.get('/recherche?q=jerome', { maxRedirects: 0 });
+    const reponse = await request.get('/recherche?q=guedj', { maxRedirects: 0 });
 
     expect(reponse.status()).toBe(302);
     expect(reponse.headers()['location']).toBe('/deputes/jerome-guedj');

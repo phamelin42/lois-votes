@@ -38,6 +38,8 @@ export interface ScrutinResume {
   titre: string;         // titre officiel du scrutin
   type: TypeScrutin;
   adopte: boolean;       // résultat officiel : sort.code === 'adopté'
+  /** Scrutin public solennel (typeVote SPS) : tous les députés sont convoqués. Faux : scrutin public ordinaire (SPO, en séance, seuls les députés présents dans l'hémicycle votent) ou motion de censure. */
+  solennel: boolean;
   compte: Compte;
   /**
    * Députés en mandat le jour du scrutin (cases ≠ « - » de la matrice des votes). Ont voté = pour + contre + abstention ;

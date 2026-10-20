@@ -30,6 +30,7 @@ function verifierEnMandat(scrutin: ScrutinResume) {
   const { pour, contre, abstention } = scrutin.compte;
   expect(Number.isInteger(scrutin.enMandat)).toBe(true);
   expect(scrutin.enMandat).toBeGreaterThanOrEqual(pour + contre + abstention);
+  expect(typeof scrutin.solennel).toBe('boolean');
 }
 
 describe('routes /api/*', () => {

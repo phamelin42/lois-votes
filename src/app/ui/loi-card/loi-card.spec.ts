@@ -94,6 +94,32 @@ describe('AppLoiCard', () => {
     expect(texte).toMatch(/59\s%\spour \(312\)/);
   });
 
+  it('écrit « Vote solennel » à côté du résultat', () => {
+    const { racine } = monter();
+
+    expect(
+      Array.from(racine.querySelectorAll('fd-badge')).map((b) => b.textContent!.trim()),
+    ).toEqual(["Adopté par l'Assemblée", 'Vote solennel']);
+  });
+
+  it('écrit « Vote ordinaire » à côté du résultat', () => {
+    const { racine } = monter(
+      loiCarte('DLR5L17N1', 1, { voteFinal: { ...loiCarte().voteFinal, solennel: false } }),
+    );
+
+    expect(
+      Array.from(racine.querySelectorAll('fd-badge')).map((b) => b.textContent!.trim()),
+    ).toEqual(["Adopté par l'Assemblée", 'Vote ordinaire']);
+  });
+
+  it('a une hauteur fixe, des titres coupés et des pastilles sur une ligne (feuille de style)', () => {
+    const scss = readFileSync('src/app/ui/loi-card/loi-card.scss', 'utf8');
+
+    expect(scss).toMatch(/\.app-loi-card\s*\{[^}]*\bheight:\s*calc\(/);
+    expect(scss).toMatch(/\.app-loi-card__titre\s*\{[^}]*line-clamp:\s*2/);
+    expect(scss).toMatch(/\.app-loi-card \.app-group-pills\s*\{[^}]*max-height:\s*1lh/);
+  });
+
   it('a un nom accessible de lien qui ne se réduit pas à « Voir »', () => {
     const { lien } = monter();
 

@@ -221,6 +221,24 @@ describe('agregation', () => {
       expect(detail.adopte).toBe(true);
       expect((agregation.scrutin(7979) as ScrutinDetail).adopte).toBe(false);
     });
+
+    it('dit si le scrutin est solennel (SPS) ou ordinaire (SPO), partout où un résumé est produit', () => {
+      // Scrutins publics solennels de l'archive de test : 5729, 8279, 8433, 8705, 8706 ; les autres sont ordinaires
+      // (SPO) ou des motions de censure (MOC, 1 et 7979), qui ne sont pas solennelles.
+      const solennels = [5729, 8279, 8433, 8705, 8706];
+      for (const s of fichiers.scrutins) {
+        const detail = agregation.scrutin(s.n) as ScrutinDetail;
+        expect(detail.solennel, `scrutin ${s.n}`).toBe(solennels.includes(s.n));
+      }
+      const accueil = agregation.accueil(1).lois;
+      expect(accueil.find((l) => l.voteFinal.numero === 8706)!.voteFinal.solennel).toBe(true);
+      expect(accueil.find((l) => l.voteFinal.numero === 8696)!.voteFinal.solennel).toBe(false);
+      const loi = agregation.loi('DLR5L17N53980')!;
+      expect(loi.voteFinal!.solennel).toBe(true);
+      for (const r of [...loi.lectures, ...loi.scrutins]) {
+        expect(r.solennel, `scrutin ${r.numero}`).toBe(solennels.includes(r.numero));
+      }
+    });
   });
 
   describe('accueil', () => {

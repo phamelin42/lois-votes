@@ -14,13 +14,15 @@ Tous les fichiers sont du JSON compact (sans indentation), sauf `votes.txt` et `
   "avertissements": [],
   "sources": { "scrutins": { "url": "…", "lastModified": "Mon, 19 Oct 2026 04:25:16 GMT", "etag": "\"…\"" }, "acteurs": { "url": "…", "lastModified": "…", "etag": "…" } },
   "statistiques": { "adoptes": 3031, "rejetes": 5846, "sansDossier": 5826, "misesAuPoint": 1636, "groupesRattaches": 134, "nonVotantsCorriges": [1],
+    "effectif": { "ecartMax": 1, "repartition": { "0": 8748, "1": 129, "-1": 17 }, "horsTolerance": [] },
     "couverture": { "actifs": { "deputes": 574, "wikipedia": 574, "hatvp": 565, "profession": 574, "naissance": 574, "siteWeb": 209, "x": 354, "facebook": 242 },
                     "tous": { "deputes": 652, "wikipedia": 652, "hatvp": 565, "profession": 652, "naissance": 652, "siteWeb": 232, "x": 394, "facebook": 275 } } } }
 ```
 
 - En mode `fixtures`, `sources.*.url` est le dossier des fixtures et `lastModified` et `etag` valent `null`.
 - `autresGroupes` : les organes `GP` de la 17ᵉ législature qu'aucun scrutin ne liste (aujourd'hui « AD », `PO845520`, 2024-07-18 → 2024-09-11, dont 16 députés ont fait partie). Même forme que `groupes.json`, mais sans index dans les matrices : ils ne servent qu'à nommer les groupes de l'historique d'un député (`deputes[].groupes`) et n'entrent ni dans `groupesSansVotant` ni dans les filtres.
-- `avertissements` : sources facultatives manquantes à la préparation. Vaut `["wikipedia"]` quand Wikidata n'a pas répondu (les `liens.wikipedia` sont alors tous `null`) ; vide sinon. Le build ne l'échoue jamais pour cela.
+- `avertissements` : défauts non bloquants de la préparation. Contient `"wikipedia"` quand Wikidata n'a pas répondu (les `liens.wikipedia` sont alors tous `null`) et `"effectif"` quand des scrutins s'écartent de l'effectif officiel de plus que la tolérance (voir « Effectif en mandat »). Vide sinon. Le build n'échoue jamais pour cela.
+- `statistiques.effectif` : écart entre les députés en mandat de chaque scrutin (cases ≠ `-` de `votes.txt`) et l'effectif officiel (somme des `nombreMembresGroupe`), mesuré à la préparation : `ecartMax` (valeur absolue), `repartition` (nombre de scrutins par écart, clés « -1 », « 0 », « 1 »…), `horsTolerance` (numéros des scrutins dont l'écart dépasse 3). `null` en mode `fixtures` : la liste de députés y est réduite, son effectif n'est pas celui de l'Assemblée.
 - `statistiques.couverture` : pour les députés en mandat (`actifs`) et pour tous, le nombre de députés qui ont chaque information (Wikipédia, HATVP, profession, naissance, site, X, Facebook). Le script l'écrit aussi dans son journal.
 - `statistiques` : `sansDossier` (scrutins sans `dossier`), `misesAuPoint` (scrutins dont la section `miseAuPoint` n'est pas vide, voir plus bas), `groupesRattaches` (entrées de groupe dont l'identifiant d'organe était `PO0`, rattachées à leur vrai groupe), `nonVotantsCorriges` (numéros des scrutins dont le nombre de non-votants a été remplacé par la somme des groupes).
 
@@ -60,7 +62,7 @@ Tout acteur qui a voté au moins une fois sous la 17ᵉ législature (652 observ
 - `circonscription` : `election.lieu.departement` + `(numCirco)` du mandat `ASSEMBLEE` de la 17ᵉ (« Nord (19) », « Français établis hors de France (3) ») ; `departement` : `numDepartement` tel quel (`"59"`, `"2A"`, `"971"`, `"099"` pour les Français de l'étranger). Le mandat retenu est celui en cours, sinon le dernier : 29 députés ont plusieurs mandats `ASSEMBLEE` dans la législature (un membre du gouvernement perd son mandat à sa nomination et le retrouve ensuite). `actif` : au moins un de ces mandats est sans `dateFin` (574 observés).
 - **État civil** (`etatCivil` de l'archive des acteurs) : `naissance` = `{ date, lieu }` (`infoNaissance.dateNais` ; `lieu` = `villeNais`, suivie du pays entre parenthèses quand il n'est pas la France, « Alger (Algérie) »), `null` sans date valide ; `deces` = `dateDeces` (2 députés de la 17ᵉ sont décédés en cours de mandat). **L'âge n'est pas stocké** : le serveur le calcule à la requête. Un champ vide de l'archive n'est jamais `null` mais un objet `{ "@xsi:nil": "true" }` (`villeNais`, `paysNais`, `dateDeces`, `uri_hatvp`) : tout ce qui n'est pas du texte est ignoré (`chaine()` de `lire.mjs`).
 - **`profession`** : `profession.libelleCourant`, sans le préfixe de code INSEE que l'archive met parfois devant (« (33) - Cadre de la fonction publique » devient « Cadre de la fonction publique »).
-- **`mandat`** : mandat `ASSEMBLEE` de la 17ᵉ législature en cours, sinon le dernier (même règle que la circonscription) : `depuis` = `dateDebut`, `fin` = `dateFin` (`null` tant qu'il est en cours), `legislatures` = les législatures de **tous** ses mandats `ASSEMBLEE` (de la plus ancienne à la plus récente, de 1 à 6 observées). `null` sans mandat.
+- **`mandat`** : mandat `ASSEMBLEE` de la 17ᵉ législature en cours (le plus récent d'après son début effectif, voir « Effectif en mandat »), sinon le dernier (même règle que la circonscription) : `depuis` = `dateDebut` pour un député élu (la date de son élection : « 30 juin 2024 »), mais la prise de fonction (`mandature.datePriseFonction`) pour un remplaçant, dont la `dateDebut` de l'archive est celle de l'élection de son titulaire ; `fin` = `dateFin` (`null` tant qu'il est en cours), `legislatures` = les législatures de **tous** ses mandats `ASSEMBLEE` (de la plus ancienne à la plus récente, de 1 à 6 observées). `null` sans mandat.
 - **`groupes`** : l'historique de ses mandats `GP` de la 17ᵉ législature, du plus ancien au plus récent, `{ id, debut, fin }`. `id` est dans `groupes.json` ou dans `meta.autresGroupes`. Les mandats en double (même groupe et mêmes dates : un second mandat sous une autre qualité) sont écartés, et deux périodes qui se suivent sans trou dans un même groupe sont fusionnées (« NI 2024-07-08 → 2024-07-18 » puis « NI 2024-07-19 → » donne « NI 2024-07-08 → »). Un organe inconnu est ignoré. Cet historique est celui des mandats, pas des scrutins : le groupe d'un député un jour de vote reste celui de `groupes-votes.txt`.
 - **`fonctions`** (députés en mandat seulement) : mandats `BUREAU` (« Vice-président de l'Assemblée nationale ») puis `COMPER` (commission permanente : « Membre » de la « Commission des affaires étrangères ») de la 17ᵉ législature sans `dateFin`, `{ organe, qualite, depuis }`. `organe` = libellé de l'organe référencé par `organeRef` ; `qualite` = `infosQualite.libQualiteSex` (accordée au genre : « Vice-présidente de l'Assemblée nationale »), sinon `libQualite`, sinon « Membre ». Doublons écartés.
 - **`parti`** (députés en mandat seulement) : libellé de l'organe du mandat `PARPOL` en cours (le plus récent) : le parti de rattachement (financement des partis), tel que déclaré. Ces mandats n'ont pas de législature (`legislature` vaut `null`).
@@ -101,12 +103,12 @@ Tableau trié par numéro **décroissant** (le plus récent d'abord), un éléme
 
 ```json
 { "n": 8317, "date": "2026-07-16", "titre": "l'amendement n° 770 de Mme Parmentier à l'article premier du projet de loi relatif à la protection des enfants (première lecture).",
-  "type": "amendement", "adopte": false, "dossier": "DLR5L17N54372",
+  "type": "amendement", "adopte": false, "solennel": false, "dossier": "DLR5L17N54372",
   "compte": { "pour": 37, "contre": 87, "abstention": 0, "nonvotant": 2 },
   "groupes": [{ "g": 0, "position": "pour", "compte": { "pour": 33, "contre": 0, "abstention": 0, "nonvotant": 1 } }] }
 ```
 
-- `n` : champ `numero`. `titre` : titre officiel, tel quel (avec son point final). `adopte` : `sort.code === 'adopté'`. `dossier` : `objet.dossierLegislatif.dossierRef` ou `null` (3 051 scrutins sur 8 877 en ont un, 5 826 non, dont 154 des 235 votes finaux). Les dossiers de la 16ᵉ législature (`DLR5L16N…`, 12 scrutins) sont conservés tels quels.
+- `n` : champ `numero`. `titre` : titre officiel, tel quel (avec son point final). `adopte` : `sort.code === 'adopté'`. `solennel` : `typeVote.codeTypeVote === 'SPS'` (scrutin public solennel : tous les députés sont convoqués) ; faux pour `SPO` (scrutin public ordinaire : en séance, seuls les députés présents dans l'hémicycle votent) et `MOC` (motion de censure). `dossier` : `objet.dossierLegislatif.dossierRef` ou `null` (3 051 scrutins sur 8 877 en ont un, 5 826 non, dont 154 des 235 votes finaux). Les dossiers de la 16ᵉ législature (`DLR5L16N…`, 12 scrutins) sont conservés tels quels.
 - `type` : `classerTous` de `src/shared/classer.ts` (final, motion, article, amendement, autre). Une motion de censure est reconnue par `typeVote.codeTypeVote === 'MOC'` ou par le titre ; le classement des titres est décrit dans PLAN.md. « L'article unique » d'un projet ou d'une proposition de loi compte comme `final` quand le texte (même titre, même lecture) n'a ni vote sur l'ensemble ni vote sur un autre article ; une proposition de résolution n'est pas une loi, son article unique reste un `article`, et le vote sur l'ensemble d'une résolution est `autre`.
 - `compte` : `syntheseVote.decompte` (`nonvotant` = `nonVotants` ; les abstentions comprennent les « non-votants volontaires », voir plus bas). Seule exception : si le nombre de non-votants annoncé diffère de la somme des groupes, on garde la somme des groupes (observé : le scrutin 1, 10 annoncés contre 21 listés) et le script le consigne dans `meta.statistiques.nonVotantsCorriges` ; au-delà de 5 scrutins, il échoue.
 - `groupes` : `g` est l'index dans `groupes.json`, par ordre croissant ; `compte` le `decompteVoix` du groupe ; `position` la position majoritaire du groupe **calculée par nous** sur ses suffrages exprimés : la position (pour, contre, abstention) qui a le plus de voix, `partage` quand deux positions sont à égalité en tête, `nonvotant` quand le groupe n'a aucun suffrage exprimé. Le champ officiel `positionMajoritaire` n'est pas utilisé (voir « Écarts constatés »). La somme des groupes égale `compte` ; sinon le script échoue.
@@ -119,7 +121,7 @@ Un fichier texte par matrice, **une ligne par scrutin, dans l'ordre de `scrutins
 
 - `votes.txt` :
   - `P` pour, `C` contre, `A` abstention (les « non-votants volontaires » y sont, voir plus bas), `N` non-votant : le député figure dans la liste des non-votants du scrutin (président de séance, membre du gouvernement, ou député présent qui n'a pas voté) ;
-  - `X` : **absent**. Le député est en mandat ce jour-là (un mandat `ASSEMBLEE` de la 17ᵉ couvre la date du scrutin, bornes comprises) mais ne figure dans aucune liste ;
+  - `X` : **absent**. Le député est en mandat ce jour-là (un mandat `ASSEMBLEE` de la 17ᵉ couvre la date du scrutin, bornes comprises, **de sa prise de fonction à sa `dateFin`** : voir « Effectif en mandat ») mais ne figure dans aucune liste ;
   - `-` : le député n'est pas en mandat à cette date.
 - `groupes-votes.txt` : pour chaque case `P`, `C`, `A` ou `N`, un caractère qui code l'index du groupe **au jour du vote** (`0`-`9`, puis `a`-`z`), d'après la ventilation du scrutin. Pour une case `X`, le groupe de ses mandats ce jour-là s'il figure dans le scrutin, sinon `-`. `-` pour une case `-`. Même longueur que `votes.txt`.
 - Mises au point (`miseAuPoint`, dont `dysfonctionnement`) : les listes nominatives de `ventilationVotes` sont la référence ; les mises au point ne sont **pas** appliquées. Elles concernent **1 636 scrutins sur 8 877 (18 %)** : 1 534 avec des mises au point et 102 avec seulement des dysfonctionnements de boîtier. C'est fréquent : à signaler dans `/a-propos`.
@@ -129,6 +131,92 @@ Taille observée : 5,8 Mo bruts par matrice (`votes.txt` 0,73 Mo en gzip, `group
 ## Entrées de groupe `PO0`
 
 Dans 14 scrutins (146 entrées de groupe au total), l'archive ne renseigne pas l'organe du groupe : `organeRef` vaut `PO0`. Ce n'est pas un groupe de députés sans étiquette : c'est un identifiant manquant (voir « Écarts constatés »). Dans 12 scrutins du 2 décembre 2024 (489, 491 à 501) toutes les entrées sont `PO0` ; dans les scrutins 1302 et 6256, seule l'entrée du Rassemblement National l'est. Le script rattache chaque entrée à son vrai groupe : celui que ses députés ont ce jour-là d'après leurs mandats `GP` (en pratique, tous les députés d'une entrée sont dans le même groupe). Il échoue si la majorité stricte des députés de l'entrée ne désigne pas un groupe, ou si deux entrées désignent le même groupe. Une entrée sans aucun député listé (12 cas) n'a rien à compter : elle est écartée.
+
+## Effectif en mandat
+
+Le nombre de députés « en mandat » d'un scrutin (`ScrutinResume.enMandat`, cases ≠ `-` de `votes.txt`) doit être celui de l'Assemblée. Mesuré sur l'archive du 20/10/2026 (8 894 scrutins, 654 acteurs avec un mandat `ASSEMBLEE` de la 17ᵉ), il ne l'était pas : le site annonçait 609 députés en mandat le 9 décembre 2025 (scrutin 4696) pour un effectif officiel de 575, donc « 35 n'ont pas voté » quand l'Assemblée en compte 1.
+
+### Cause
+
+**Confirmée dans son effet, corrigée dans son mécanisme.** L'hypothèse de départ (un titulaire dont un suppléant siège garde un mandat ouvert, à retrancher) n'est pas ce que dit l'archive. Les trois députés cités en exemple (Éric Gérard, Pauline Cestrières, Jérôme End) ne sont pas des titulaires : ce sont les **remplaçants**. Un mandat de remplaçant porte pour `dateDebut` la date de l'élection générale (`2024-07-07`, ou `2024-06-30`), pas le jour de son arrivée ; le jour réel est dans `mandature.datePriseFonction`. Lu tel quel, le remplaçant est « en mandat » dès 2024, en même temps que son titulaire (qui, lui, a la bonne `dateFin`) : un siège compte deux fois pendant des mois, et la participation du remplaçant s'écroule (il est `X` partout avant d'être arrivé).
+
+Les cas lus dans l'archive (mandats `ASSEMBLEE` de la 17ᵉ ; dates : `dateDebut` / `datePriseFonction` / `dateFin`) :
+
+| Siège | Titulaire | Remplaçant | Ce que dit l'archive |
+|---|---|---|---|
+| Moselle 4 | Fabien Di Filippo (`PA720386`) : `2024-07-07` / `2024-07-08` / **`2026-04-20`**, démission pour incompatibilité | Jérôme End (`PA720390`) : `2024-07-07` / **`2026-04-21`** / ouvert | Le remplaçant entre le lendemain du dernier jour du titulaire. `mandatRemplaceRef` vaut `null` ; sa `dateDebut` est celle de 2024. |
+| Aveyron 1 | Stéphane Mazars (`PA677483`) : fin **`2026-04-26`** | Pauline Cestrières (`PA718820`) : `2024-07-07` / **`2026-04-27`** / ouvert | Même schéma. |
+| Eure-et-Loir 3 | Harold Huwart (`PA841017`) : fin **`2026-07-25`** | Éric Gérard (`PA642734`) : `2024-07-07` / **`2026-07-26`** / ouvert | Même schéma. |
+| Nord 14 | Paul Christophe (`PA642868`) : `2024-07-08` → `2024-10-21` (ministre), puis `2025-01-24` → `2026-04-06` (démission) | Pierre Marle (`PA794518`) : `2024-10-22` → `2025-01-23`, puis `2026-04-07` → ouvert | Quatre mandats, tous avec la `dateDebut` de 2024. Le **retour** d'un titulaire est un nouveau mandat dont `mandatRemplaceRef` désigne l'ancien (`PM843122`) ; il en va de même du second mandat de Marle. |
+| Eure-et-Loir 2 | Olivier Marleix (`PA606098`) : fin **`2025-07-07`**, décès | Christelle Minard (`PA643104`) : `2024-07-07` / **`2025-07-08`** / ouvert | Un décès : le remplaçant siège le lendemain. |
+| Loiret 1 | Stéphanie Rist (`PA720066`) : `2024-07-08` → `2025-11-12` (ministre), puis élue à une partielle (`dateDebut` `2026-01-25`, prise de fonction `2026-01-26`) → `2026-02-26` (ministre de nouveau) | Stéphane Chouin (`PA841347`) : `2025-11-13` → `2025-11-13`, puis Marie-Philippe Lubet (`PA879389`) : `2026-02-27` → ouvert | Un remplaçant peut ne siéger qu'un jour : Chouin démissionne le jour même. |
+
+`mandatRemplaceRef` n'est donc **pas** le marqueur d'une suspension : il ne figure que sur 27 mandats (sur 683), toujours un mandat de retour, jamais sur celui d'un premier remplaçant (Cestrières, End, Gérard : `null`). Le bloc `suppleants` du mandat d'un titulaire (`suppleantRef`, `dateDebut` `2024-07-07`, `dateFin` égale à celle du titulaire) nomme son suppléant mais ne donne pas la période où celui-ci siège. Seule `datePriseFonction` la donne.
+
+Sur les 683 mandats `ASSEMBLEE` de la 17ᵉ, `datePriseFonction` est toujours présente et jamais antérieure à `dateDebut`. Pour les 587 mandats d'un député élu (577 élections générales, 10 élections partielles), elle tombe le lendemain de `dateDebut` (le jour de l'élection, un dimanche). Pour les **96 mandats de remplaçants**, elle tombe de 33 à 830 jours plus tard : 42 « remplacement d'un député nommé au Gouvernement », 27 « remplacement d'un député ayant démissionné pour cause d'incompatibilité », 21 « reprise de l'exercice du mandat d'un ancien membre du Gouvernement », 4 « remplacement d'un député en mission au-delà de 6 mois », 2 « remplacement d'un député décédé ». Aucune `dateFin` ne précède une `datePriseFonction`.
+
+Les autres causes ont été cherchées et écartées : la `dateFin` des titulaires est juste (décès, démission, nomination au gouvernement, élection au Sénat, annulation d'élection) ; aucun jour de chevauchement entre un titulaire et son remplaçant (75 sièges ont plusieurs mandats, la prise de fonction du suivant tombe toujours après la fin du précédent) ; aucune case listée d'un scrutin ne tombe hors de la période recalculée (0 sur 1 323 978 positions, comme avant).
+
+### Règle retenue
+
+Un mandat de député compte « en mandat » **du jour de sa prise de fonction à sa `dateFin`, bornes comprises** : début effectif = `mandature.datePriseFonction` quand elle est postérieure à `dateDebut`, sinon `dateDebut` (`debutEffectif`, `scripts/donnees/construire.mjs`). Une case reste `-` en dehors, comme pour un député pas encore élu. Le format des fichiers de `data/` ne change pas.
+
+- **Le jour du remplacement** : les bornes sont incluses des deux côtés et chaque mandat est jugé seul. Quand le remplaçant entre le lendemain du dernier jour de son titulaire (91 transitions de l'archive ; les autres laissent le siège vacant quelques jours), un seul des deux est en mandat chaque jour. Si l'archive donnait un jour commun (aucun cas observé), les deux compteraient ce jour-là, et le garde-fou y verrait un écart de plus un.
+- **Un vote listé n'est jamais effacé** : si un député figurait dans une liste nominative hors de sa période calculée (aucun cas), sa case garderait `P`, `C`, `A` ou `N`.
+- **Sans `datePriseFonction`** (champ absent de l'archive), le début est `dateDebut` : l'ancien comportement, que le garde-fou détecte.
+- **Fiche** : `mandat.depuis` est la prise de fonction pour un remplaçant (« En cours depuis le 21 avril 2026 » pour Jérôme End) et la `dateDebut` pour un élu (« 30 juin 2024 »). Le mandat en cours se choisit sur le début effectif : les mandats de retour ont tous la même `dateDebut`.
+
+### Mesures
+
+Écart `enMandat − effectif officiel` (somme des `nombreMembresGroupe`, relue dans l'archive), sur les 8 894 scrutins :
+
+| | Avant | Après |
+|---|---|---|
+| Plus petit et plus grand écart | 0 et +65 | -1 et +1 |
+| Scrutins exacts | 286 (3 %) | 8 748 (98,4 %) |
+| Scrutins à ±1 au plus | 286 | 8 894 (129 à +1, 17 à -1) |
+| Scrutins à plus de 3 | 8 608 | 0 |
+| Scrutins à plus de 20 | 6 284 (71 %) | 0 |
+
+Avant, l'écart moyen baissait avec le temps (62 au dernier trimestre 2024, 52 au deuxième trimestre 2025, 34 au premier trimestre 2026, 13 au deuxième, 2 depuis octobre 2026) : chaque remplaçant à venir était déjà compté, et il y en a de moins en moins à venir.
+
+Valeurs réelles (archive du 20/10/2026) :
+
+| Scrutin | Date | Votants | `enMandat` avant | `enMandat` après | Effectif officiel | « N'ont pas voté » : avant / après / officiel |
+|---|---|---|---|---|---|---|
+| 4696 | 2025-12-09 | 574 | 609 | 575 | 575 | 35 / 1 / 1 |
+| 1018 | 2025-03-13 | 23 | 628 | 575 | 575 | 605 / 552 / 552 |
+| 8433 | 2026-07-21 | 537 | 585 | 577 | 577 | 48 / 40 / 40 |
+| 8317 | 2026-07-16 | 124 | 586 | 577 | 577 | 462 / 453 / 453 |
+| 8877 | 2026-10-16 | 71 | 574 | 574 | 574 | 503 / 503 / 503 |
+
+Participation (votes exprimés sur scrutins en mandat), avant et après :
+
+| Député | Avant | Après |
+|---|---|---|
+| Sébastien Chenu (élu en 2024) | 11,3 % (1 009 / 8 894) | 11,3 % (1 009 / 8 894), inchangée |
+| Pauline Cestrières (en fonction depuis le 2026-04-27) | 10,4 % (922 / 8 894) | 35,3 % (922 / 2 610) |
+| Jérôme End (depuis le 2026-04-21) | 3,1 % (277 / 8 894) | 10,6 % (277 / 2 610) |
+| Éric Gérard (depuis le 2026-07-26) | 0,0 % (2 / 8 894) | 0,4 % (2 / 460) : il n'a voté que deux fois depuis son arrivée, ce chiffre est exact |
+
+47 députés sur 652 changent de plus de 5 points de participation (11 de plus de 20 points) ; 89 changent de dénominateur ; aucune participation ne baisse.
+
+### Écarts résiduels
+
+Cinq journées gardent un écart d'un député (146 scrutins sur 8 894), aucune ne dépasse un :
+
+- **2025-07-07** (+1, 19 scrutins) et **2025-11-06** (+1, 39 scrutins) : le jour d'un décès (Olivier Marleix) et d'une démission (Christelle Petex), qui comptent par leur `dateFin` inclusive, alors que le décompte officiel baisse en cours de journée (577 puis 576). Nos dates sont des jours entiers.
+- **2025-11-13** (-1, 17 scrutins) : Stéphane Chouin entre en fonction et démissionne le même jour, sans jamais voter. L'effectif officiel le compte, mais `deputes.json` ne garde que les acteurs qui figurent dans au moins une liste (652 sur 654 acteurs avec un mandat : Chouin, et Flavien Termet dont le mandat finit le 2024-10-04, avant le premier scrutin).
+- **2026-01-26** (+1, 37 scrutins) et **2026-05-26** (+1, 34 scrutins) : le lendemain de l'élection partielle de Stéphanie Rist (nommée ministre un mois plus tard) et de l'entrée en fonction de Dominique Paillat. Le décompte officiel ne compte pas encore ces deux députés ces jours-là ; les dates de l'archive ne l'expliquent pas, et l'écart ne dure qu'un jour.
+
+### Garde-fou
+
+À chaque préparation (hors mode `fixtures`), `construire` compare, pour chaque scrutin, `enMandat` à la somme des `nombreMembresGroupe` de **toutes** les entrées de groupe de l'archive (y compris celles écartées faute de député listé) et range le résultat dans `meta.statistiques.effectif`. Les seuils, fixés d'après les mesures ci-dessus (`SEUILS_EFFECTIF`) :
+
+- **Tolérance de 3** par scrutin. Le plus grand écart mesuré après correction est de 1, et le 13/11/2025 une trentaine d'entrées et de sorties le même jour ne donnent que ±1 ; 3 laisse de la marge sans cacher un défaut. Au-delà, c'est un **avertissement** (journal, `"effectif"` dans `meta.avertissements`, numéros dans `horsTolerance`) : un build qui échouerait sur une anomalie de la source bloquerait aussi la mise à jour nocturne.
+- **Échec** seulement si plus de **1 %** des scrutins (89 sur 8 894) ont un écart de plus de **20**. Le défaut corrigé ici donnait un écart de plus de 20 sur 71 % des scrutins : un champ de date qui disparaît ou change de sens est attrapé, alors que quelques journées anormales de la source (une soixantaine de scrutins au plus par jour) ne bloquent rien.
+
+`DONNEES_DIR=data npm test` rejoue le contrôle sur un `data/` réel : écart maximal dans la tolérance et, quand l'archive des scrutins mise en cache par le pipeline (`.cache/officiel`) est bien celle de `data/` (même ETag), recalcul indépendant de l'effectif officiel de chaque scrutin, avec au moins 95 % de scrutins exacts. Les specs `scripts/donnees/effectif.spec.ts` rejouent des fragments réels de l'archive (Di Filippo et End, Christophe et Marle, Bellamy et Paillat), le jour du remplacement, un mandat sans suppléant, plusieurs suspensions et le garde-fou. Les fixtures (`src/server/fixtures/officiel/`) contiennent les mandats réels de Di Filippo, End, Christophe et Marle avec leur `datePriseFonction` (`PAIRES_DE_REMPLACEMENT` dans `fixtures.mjs`).
 
 ## Garde-fous (le script échoue si…)
 
@@ -143,12 +231,13 @@ Dans 14 scrutins (146 entrées de groupe au total), l'archive ne renseigne pas l
 - une entrée de groupe `PO0` ou inconnue impossible à rattacher, ou deux entrées pour le même groupe ;
 - plus de 36 groupes ;
 - deux députés avec le même `slug` ;
-- une matrice dont une ligne n'a pas exactement `deputes.length` caractères, ou dont le nombre de lignes diffère de celui des scrutins.
+- une matrice dont une ligne n'a pas exactement `deputes.length` caractères, ou dont le nombre de lignes diffère de celui des scrutins ;
+- plus de 1 % des scrutins (89 sur 8 894) dont le nombre de députés en mandat diffère de plus de 20 de l'effectif officiel (contrôle de l'effectif, détail dans « Effectif en mandat » : un écart de plus de 3 sur quelques scrutins n'est qu'un avertissement).
 
 ## Calculs faits par le serveur (`agregation.ts`)
 
-- Participation d'un député = (P + C + A) / (P + C + A + N + X) sur les scrutins où sa case n'est pas `-` (là où il était en mandat). Abstention = A / (P + C + A). Loyauté = nombre de votes P/C/A égaux à la `position` majoritaire du groupe du député **à ce scrutin** (hors `partage` et `nonvotant`) / nombre de ces votes. `null` si le dénominateur est nul. Sur les données réelles, la participation d'un député va de 0 % à 89 % (médiane 22 %) : la plupart des scrutins (amendements) n'ont que 100 à 150 votants.
-- **Ont voté / n'ont pas voté** : `enMandat` d'un scrutin = nombre de cases ≠ `-` de sa ligne de `votes.txt`, compté une fois au chargement (`donnees.ts`) : aucun changement du format de `data/`. « Ont voté » = pour + contre + abstention du `compte` ; « n'ont pas voté » = `enMandat` − votants, soit les non-votants officiels (`N`) plus les absents (`X`). Les pourcentages de pour, contre et abstention sont calculés sur les votants (arrondis par la méthode du plus fort reste, somme de 100) ; le pourcentage de ceux qui n'ont pas voté sur `enMandat`. `enMandat ≥ votants` pour chaque scrutin (vérifié sur les fixtures et sur les vraies archives).
+- Participation d'un député = (P + C + A) / (P + C + A + N + X) sur les scrutins où sa case n'est pas `-` (là où il était en mandat). Abstention = A / (P + C + A). Loyauté = nombre de votes P/C/A égaux à la `position` majoritaire du groupe du député **à ce scrutin** (hors `partage` et `nonvotant`) / nombre de ces votes. `null` si le dénominateur est nul. Sur les données réelles, la participation d'un député va de 0 % à 89 % (médiane 23 % ; 22 % avant la correction de l'effectif en mandat) : la plupart des scrutins (amendements) n'ont que 100 à 150 votants.
+- **Ont voté / n'ont pas voté** : `enMandat` d'un scrutin = nombre de cases ≠ `-` de sa ligne de `votes.txt`, compté une fois au chargement (`donnees.ts`) : aucun changement du format de `data/`. « Ont voté » = pour + contre + abstention du `compte` ; « n'ont pas voté » = `enMandat` − votants, soit les non-votants officiels (`N`) plus les absents (`X`). Les pourcentages de pour, contre et abstention sont calculés sur les votants (arrondis par la méthode du plus fort reste, somme de 100) ; le pourcentage de ceux qui n'ont pas voté sur `enMandat`. `enMandat ≥ votants` pour chaque scrutin (vérifié sur les fixtures et sur les vraies archives), et `enMandat` s'accorde avec l'effectif officiel à un député près (voir « Effectif en mandat »).
 - Compteurs d'un député (`DeputeDetail.scrutins`), dans la même boucle que les taux : `enMandat` = cases ≠ `-`, `pour`, `contre`, `abstention` = cases `P`, `C`, `A`, `nonVote` = cases `N` + `X`, avec `pour + contre + abstention + nonVote = enMandat` et `taux.participation = (pour + contre + abstention) / enMandat`.
 - **Groupes sans votant** (`groupesSansVotant`, sur un scrutin et sur le vote final d'une loi) : les groupes de `groupes.json` dont `debut` ≤ date du scrutin ≤ `fin` (bornes incluses, `null` = sans borne) et qui n'ont aucune ligne dans les groupes affichés. L'interface les nomme sous le tableau par groupe au lieu de les masquer sans explication.
 - Un groupe dont le `compte` est nul (aucun député listé) est écarté des `VoteGroupe` renvoyés par l'API : une ligne « non-votant » à zéro laisserait croire que ses membres se sont tenus à l'écart. La somme des groupes affichés reste égale au décompte du scrutin.
@@ -176,6 +265,8 @@ Vérification faite sur les archives du 19/10/2026 (`Scrutins.json.zip` : 27,6 M
 | `photo` se déduit de `pa`. | Le fichier de photo porte le numéro **sans** `PA`. | Documenté ci-dessus ; appliqué dans `agregation.ts`. |
 | Les listes de scrutins ont tous leurs groupes. | Chaque vrai groupe figure dans tous les scrutins de sa période d'existence (`UDR` ancien : 3 041 scrutins, nouveau : 5 824 ; `AD` : jamais). Les seuls trous sont les 14 scrutins `PO0` (RN absent de la liste sous son nom). Aucun scrutin n'a de groupe unique en objet. | Aucun traitement particulier. |
 | Types de scrutin. | `SPO` 8 780, `SPS` 74, `MOC` 23 : les 23 motions de censure (toutes `MOC`) ont un titre « la motion de censure… ». Des votes sur l'ensemble d'un texte sont écrits sans « l'ensemble » (« la proposition de loi… (première lecture). », 3 cas) ou avec une faute (« l'ensemble de de la… », 1 cas). | `classerTous`. |
+| `dateDebut` d'un mandat `ASSEMBLEE` est le début du mandat. | Vrai pour un député élu, **faux pour un remplaçant** : 96 mandats (nommés au gouvernement, démissionnaires, décédés, en mission, retours de ministres) gardent la `dateDebut` de l'élection générale (2024-06-30 ou 2024-07-07). Le jour réel est `mandature.datePriseFonction` (toujours présente, de 33 à 830 jours après `dateDebut` pour ces 96 mandats, le lendemain pour les 587 autres). Lu tel quel, `enMandat` dépassait l'effectif officiel de 0 à 65 députés. | Début effectif = `datePriseFonction` (voir « Effectif en mandat »). |
+| `mandatRemplaceRef` et `suppleants` donnent les périodes de suspension d'un titulaire. | `mandatRemplaceRef` n'est renseigné que sur 27 mandats de retour (il désigne l'ancien mandat du même député) ; `suppleants` nomme le suppléant mais sa `dateFin` est celle du titulaire. Aucun des deux ne donne la période où le remplaçant siège. | Non utilisés. |
 | Archive régénérée chaque nuit, avec ETag. | Vrai, mais le CDN sert parfois deux versions du fichier : le même jour, `Last-Modified` 04:25:16 GMT (27 563 304 octets, ETag `"1a49528-…"`) et 10:25:07 GMT (27 563 289 octets, ETag `"1a49519-…"`). Les deux sont valides et donnent les mêmes effectifs (8 877 scrutins, 3 031 adoptés) ; elles ne diffèrent que par le scrutin 8805, corrigé entre-temps : l'archive est donc republiée en cours de journée. | `If-None-Match` fonctionne ; un changement d'ETag télécharge à nouveau (27 Mo). |
 
 ### Enrichissement des fiches (prompt 13) : ce que l'archive contient vraiment

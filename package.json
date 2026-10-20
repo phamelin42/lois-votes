@@ -18,6 +18,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.spec.json --noEmit && tsc -p tsconfig.e2e.json",
     "donnees": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/donnees/index.mjs",
+    "icones": "node scripts/icones.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "serve:ssr": "node dist/lois-votes/server/server.mjs"

@@ -1,5 +1,9 @@
 @use '../../ui/shared/sr-only' as sr;
 
+.app-accueil {
+  padding: var(--space-8) 0 var(--space-12);
+}
+
 .app-accueil__accroche {
   margin: 0;
   color: var(--ink);
@@ -28,12 +32,12 @@
 .app-accueil__suite {
   display: flex;
   justify-content: center;
-  margin-top: var(--space-6);
+  margin: var(--space-8) 0;
 }
 
 /* Hauteur fixe : la liste ne saute pas quand les cartes arrivent. */
 .app-accueil__squelette {
-  height: calc(var(--space-16) * 2);
+  height: calc(var(--space-16) * 5 + var(--space-8));
   border-radius: var(--radius-lg);
   background: var(--surface-sunken);
   animation: fd-pulse var(--duration-slow) var(--ease-mizu) infinite;
