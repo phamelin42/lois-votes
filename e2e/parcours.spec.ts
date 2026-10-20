@@ -54,7 +54,7 @@ test.describe('parcours complet', () => {
 
     // Recherche d'un autre député depuis l'en-tête : ouvre son profil
     const recherche = page.getByRole('combobox');
-    await recherche.fill('jerome');
+    await recherche.fill('guedj');
     await expect(page.getByRole('option', { name: /Jérôme Guedj/ })).toBeVisible();
     await recherche.press('ArrowDown');
     await recherche.press('Enter');
@@ -82,7 +82,7 @@ test.describe('parcours complet', () => {
   });
 
   test('une recherche à un seul résultat atterrit sur le profil', async ({ page }) => {
-    await page.goto('/recherche?q=jerome');
+    await page.goto('/recherche?q=guedj');
 
     await expect(page).toHaveURL('/deputes/jerome-guedj');
   });

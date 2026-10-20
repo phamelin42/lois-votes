@@ -244,3 +244,76 @@ describe('agregation : fiche d’un député', () => {
     );
   });
 });
+
+// Un remplaçant n'est « en mandat » qu'à partir de sa prise de fonction (DONNEES.md, « Effectif en mandat ») : sans cela,
+// sa participation compterait aussi les scrutins où son titulaire siégeait seul. Cas réels des fixtures : Fabien Di Filippo
+// et son remplaçant Jérôme End (2026-04-21), Paul Christophe et Pierre Marle (deux suspensions).
+describe('agregation : participation des remplaçants', () => {
+  let jeu: DonneesDeTest;
+  let agregation: Agregation;
+
+  beforeAll(async () => {
+    jeu = await produireDonneesDeTest();
+    agregation = creerAgregation(jeu.donnees, {
+      maintenant: () => new Date('2026-10-19T10:00:00Z'),
+    });
+  });
+  afterAll(() => jeu.nettoyer());
+
+  const fiche = (slug: string) => agregation.depute(slug) as DeputeDetail;
+
+  it('compte un remplaçant en mandat depuis son arrivée seulement : 12 scrutins sur 19 pour Jérôme End', () => {
+    const end = fiche('jerome-end');
+
+    // Les sept scrutins d'avant le 2026-04-21 ne comptent pas (il n'était pas encore député).
+    expect(end.scrutins).toEqual({ enMandat: 12, pour: 5, contre: 0, abstention: 0, nonVote: 7 });
+    expect(end.taux.participation).toBeCloseTo(5 / 12, 10);
+    // La fiche montre son arrivée, non l'élection générale de 2024 que l'archive met dans `dateDebut`.
+    expect(end.mandat).toMatchObject({ depuis: '2026-04-21', fin: null });
+  });
+
+  it('son titulaire Fabien Di Filippo ne compte que les scrutins jusqu’à sa démission', () => {
+    const diFilippo = fiche('fabien-di-filippo');
+
+    expect(diFilippo.scrutins).toEqual({
+      enMandat: 7,
+      pour: 0,
+      contre: 3,
+      abstention: 0,
+      nonVote: 4,
+    });
+    expect(diFilippo.mandat).toMatchObject({ fin: '2026-04-20' });
+  });
+
+  it('deux suspensions : Paul Christophe et Pierre Marle ne sont jamais en mandat le même jour', () => {
+    const christophe = fiche('paul-christophe');
+    const marle = fiche('pierre-marle');
+
+    expect(christophe.scrutins).toEqual({
+      enMandat: 5,
+      pour: 0,
+      contre: 1,
+      abstention: 1,
+      nonVote: 3,
+    });
+    expect(marle.scrutins).toEqual({
+      enMandat: 14,
+      pour: 4,
+      contre: 0,
+      abstention: 0,
+      nonVote: 10,
+    });
+    // Aucun des 19 scrutins ne les compte tous les deux (même siège, Nord 14).
+    const deputes = JSON.parse(readFileSync(join(jeu.dossier, 'deputes.json'), 'utf8')) as {
+      pa: string;
+    }[];
+    const lignes = readFileSync(join(jeu.dossier, 'votes.txt'), 'utf8').split('\n');
+    const colonnes = ['PA642868', 'PA794518'].map((pa) => deputes.findIndex((d) => d.pa === pa));
+    for (const ligne of lignes) {
+      expect(colonnes.filter((c) => ligne[c] !== '-').length).toBeLessThanOrEqual(1);
+    }
+    // Marle a le mandat en cours le plus récent (ouvert depuis le 2026-04-07), Christophe son dernier mandat, fini.
+    expect(marle.mandat).toMatchObject({ depuis: '2026-04-07', fin: null });
+    expect(christophe.mandat).toMatchObject({ depuis: '2025-01-24', fin: '2026-04-06' });
+  });
+});

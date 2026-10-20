@@ -27,6 +27,20 @@ const POSITIONS = /** @type {const} */ ([
   ['nonVotants', 'nonvotant'],
 ]);
 
+/**
+ * Paires réelles [titulaire, remplaçant] gardées dans le jeu, pour tester l'effectif en mandat (DONNEES.md, « Effectif en
+ * mandat ») : le remplaçant a pour `dateDebut` l'élection générale et pour `datePriseFonction` son arrivée.
+ * - Fabien Di Filippo → Jérôme End : démission pour incompatibilité le 2026-04-20, remplaçant en fonction le 2026-04-21.
+ * - Paul Christophe → Pierre Marle : ministre du 2024-10-22 au 2025-01-23 (Marle le remplace, puis lui rend sa place), puis
+ *   démission le 2026-04-06 (Marle revient le 2026-04-07) : deux suspensions du même titulaire par le même remplaçant.
+ * Les ministres qui ont repris leur mandat (Laurent Marcangeli le 2025-11-06, Valérie Létard…) sont dans le jeu par le
+ * choix des scrutins : leur second mandat porte lui aussi la `dateDebut` de l'élection générale.
+ */
+export const PAIRES_DE_REMPLACEMENT = [
+  ['PA720386', 'PA720390'],
+  ['PA642868', 'PA794518'],
+];
+
 const json = (octets) => JSON.parse(new TextDecoder().decode(octets));
 const parNumeroDecroissant = (a, b) => b.numero - a.numero;
 
@@ -148,6 +162,9 @@ export function reduireActeur(brut) {
         dateFin: m.dateFin ?? null,
         organes: { organeRef: m.organes?.organeRef },
       };
+      // Le jour où le député entre vraiment en fonction : celui d'un remplaçant diffère de sa `dateDebut`.
+      if (m.typeOrgane === 'ASSEMBLEE' && m.mandature?.datePriseFonction)
+        reduit.mandature = { datePriseFonction: m.mandature.datePriseFonction };
       if (m.infosQualite) {
         const { codeQualite, libQualite, libQualiteSex } = m.infosQualite;
         reduit.infosQualite = { codeQualite, libQualite, libQualiteSex };
@@ -329,6 +346,9 @@ export function choisir(scrutins, acteurs) {
     )
     .slice(0, 2)
     .forEach(enplus);
+  // paires réelles titulaire / remplaçant (effectif en mandat)
+  for (const paire of PAIRES_DE_REMPLACEMENT)
+    for (const pa of paire) if (fiches.has(pa)) enplus(pa);
   // quelques députés par groupe, dans le scrutin final le plus récent
   const dernier = finals[0];
   const parGroupe = new Map();

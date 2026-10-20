@@ -42,6 +42,22 @@ test.describe('fiche d’un député, sans JavaScript', () => {
     await expect(profil).not.toContainText(/\bnée?\b/i);
   });
 
+  test("Jérôme End, remplaçant : en mandat depuis son arrivée, pas depuis l'élection de 2024", async ({
+    page,
+  }) => {
+    await page.goto('/deputes/jerome-end');
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Jérôme End');
+    // Fabien Di Filippo a démissionné le 20 avril 2026 : son remplaçant siège depuis le lendemain, et les 7 scrutins
+    // d'avant (sur 19) ne comptent pas dans sa participation.
+    await expect(page.locator('app-depute-profil')).toContainText(
+      'En cours depuis le 21 avril 2026',
+    );
+    await expect(
+      page.getByText("A voté à 5 scrutins sur 12 en mandat, n'a pas voté à 7."),
+    ).toBeVisible();
+  });
+
   test('Sébastien Chenu : ses liens externes, chacun dans un nouvel onglet', async ({ page }) => {
     await page.goto('/deputes/sebastien-chenu');
     const liens = page.locator('app-depute-liens a');
