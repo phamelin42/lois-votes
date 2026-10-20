@@ -58,7 +58,7 @@ Téléchargement échoué    le build échoue : l'ancien déploiement reste en l
 ### Pipeline : `scripts/donnees/`
 
 - Téléchargement (ETag, échec si statut ≠ 200), dézippage en mémoire avec `fflate` (dépendance de dev), parsing, réduction, écriture dans `data/`. Les liens Wikipédia (`wikipedia.mjs`) se cherchent en parallèle de la lecture ; leur échec ne fait pas échouer le build.
-- Garde-fous qui font échouer le build : au moins 8 000 scrutins, au moins 570 députés, aucun votant sans fiche, somme des groupes égale au décompte de chaque scrutin, `sort.code` toujours `adopté` ou `rejeté`, entrées de groupe `PO0` rattachables à un groupe (détail et autres contrôles dans DONNEES.md).
+- Garde-fous qui font échouer le build : au moins 8 000 scrutins, au moins 570 députés, aucun votant sans fiche, somme des groupes égale au décompte de chaque scrutin, `sort.code` toujours `adopté` ou `rejeté`, entrées de groupe `PO0` rattachables à un groupe, et plus de 1 % des scrutins dont les députés en mandat s'écartent de plus de 20 de l'effectif officiel (détail et autres contrôles dans DONNEES.md). Un écart d'effectif modéré (plus de 3) n'est qu'un avertissement (`meta.avertissements`).
 - Classement des scrutins (`classer`, dans `src/shared/classer.ts`, partagé avec le serveur) : `final` (« l'ensemble du… », « l'article unique… » quand le texte n'a pas d'autre article, apostrophes droites et typographiques), `motion` (« la motion de censure… »), `article`, `amendement`, `autre`. Titre court et lecture dérivés du titre (« l'ensemble du projet de loi relatif à X (première lecture) » → « Projet de loi relatif à X », « première lecture »).
 
 ### Décisions validées (après le prompt 13)
@@ -68,6 +68,12 @@ Téléchargement échoué    le build échoue : l'ancien déploiement reste en l
 - **Un lien absent n'est pas affiché** : jamais d'URL devinée ni reconstruite.
 - **Photo dans la liste** : `DeputeIndex.pa` (numéro sans préfixe) et `photoDe(pa)` (`src/shared/photo.ts`) ; l'index ne porte pas d'URL de photo pour rester petit. L'hôte du composant réserve toujours 64 px (ou 160 px sur la fiche) : aucun décalage de mise en page, que l'image charge, échoue ou manque.
 - **Historique de groupes** : un groupe qu'aucun scrutin ne liste (« AD ») est gardé dans `meta.autresGroupes` pour nommer les périodes des 16 députés concernés, sans index dans les matrices.
+
+### Décisions validées (après le prompt 15)
+
+- **« En mandat » = de la prise de fonction à la fin du mandat.** Un mandat de remplaçant (nommé au gouvernement, démissionnaire, décédé, retour d'un ministre : 96 mandats sur 683) a pour `dateDebut` l'élection générale de 2024 ; le jour réel est `mandature.datePriseFonction`. Lu tel quel, `enMandat` dépassait l'effectif officiel de 0 à 65 députés (609 pour 575 le 9 décembre 2025) et la participation des remplaçants s'effondrait (Pauline Cestrières : 10 % au lieu de 35 %). Après correction, l'écart va de -1 à +1 (98,4 % des scrutins exacts). Mesures, cas lus et résidus dans DONNEES.md, « Effectif en mandat ».
+- **Garde-fou** : à chaque préparation, `enMandat` est comparé à la somme des `nombreMembresGroupe` de chaque scrutin. Tolérance de 3 (avertissement au-delà), échec si plus de 1 % des scrutins s'écartent de plus de 20. Le format de `data/` ne change pas, et `meta.statistiques.effectif` garde la mesure.
+- **Fiche** : `mandat.depuis` est la prise de fonction d'un remplaçant, la date d'élection d'un élu. `/a-propos` explique ce que « en mandat » veut dire.
 
 ### Serveur : `src/server/`
 
