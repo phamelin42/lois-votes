@@ -1,26 +1,75 @@
+/*
+ * Hauteur fixe, la même pour toutes les cartes : quels que soient les titres, le contenu ne la fait jamais varier.
+ * Le titre et le titre officiel sont coupés à deux lignes (et en gardent deux de place), les pastilles tiennent sur
+ * une ligne, la barre de vote est au bas de la carte.
+ */
 .app-loi-card {
+  height: calc(var(--space-16) * 5 + var(--space-8));
   text-decoration: none;
   color: var(--ink);
 }
 
+.app-loi-card .fd-card__body {
+  flex: 1 1 auto;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  min-height: 0;
+}
+
+.app-loi-card .fd-card__text {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.app-loi-card__titre {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  min-height: 2lh;
+  overflow: hidden;
+}
+
 .app-loi-card__corps {
-  display: grid;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   gap: var(--space-3);
-  justify-items: start;
+  min-height: 0;
 }
 
-.app-loi-card__corps > app-vote-bar,
-.app-loi-card__corps > app-group-pills {
-  justify-self: stretch;
-}
-
-/* Le titre officiel tient sur deux lignes ; le reste est coupé. */
+/* Titre officiel : deux lignes de place, le reste est coupé. */
 .app-loi-card__officiel {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
+  flex: none;
+  min-height: 2lh;
   margin: 0;
   overflow: hidden;
   color: var(--ink);
+}
+
+.app-loi-card__badges {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* La barre et les pastilles sont poussées au bas de la carte. */
+.app-loi-card__corps > app-vote-bar {
+  flex: none;
+  margin-top: auto;
+}
+
+/* Une seule ligne : un groupe qui ne tient pas est coupé en entier (la page de la loi les montre tous). */
+.app-loi-card__corps > app-group-pills {
+  flex: none;
+}
+
+.app-loi-card .app-group-pills {
+  max-height: 1lh;
+  overflow: hidden;
 }

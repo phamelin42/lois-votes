@@ -116,6 +116,8 @@ export interface ScrutinFichier {
   titre: string;
   type: TypeScrutin;
   adopte: boolean;
+  /** Scrutin public solennel (`typeVote.codeTypeVote === 'SPS'`) : tous les députés sont convoqués. Faux pour un scrutin ordinaire (`SPO`) et une motion de censure (`MOC`). */
+  solennel: boolean;
   dossier: string | null;
   compte: Compte;
   groupes: ScrutinGroupeFichier[];

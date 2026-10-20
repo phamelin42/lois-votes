@@ -31,6 +31,7 @@ describe('donnees.ts', () => {
         titre: string;
         type: string;
         adopte: boolean;
+        solennel: boolean;
         dossier: string | null;
         compte: unknown;
         groupes: unknown[];
@@ -42,6 +43,7 @@ describe('donnees.ts', () => {
         expect(d.titre(s)).toBe(attendu.titre);
         expect(d.type(s)).toBe(attendu.type);
         expect(d.adopte(s)).toBe(attendu.adopte);
+        expect(d.solennel(s)).toBe(attendu.solennel);
         expect(d.dossier(s)).toBe(attendu.dossier);
         expect(d.compte(s)).toEqual(attendu.compte);
         expect(d.groupesDuScrutin(s)).toEqual(attendu.groupes);

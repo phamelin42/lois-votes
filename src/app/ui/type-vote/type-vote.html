@@ -1,0 +1,6 @@
+@if (visible()) {
+  <fd-badge [tone]="solennel() ? 'asagi' : 'neutral'">{{ libelle() }}</fd-badge>
+  @if (phrase()) {
+    <p class="app-type-vote__phrase caption">{{ explication() }}</p>
+  }
+}

@@ -48,6 +48,27 @@ describe('LoiPage', () => {
     expect(racine.querySelector('time')).not.toBeNull();
   });
 
+  it('écrit « Vote solennel » ou « Vote ordinaire » et sa phrase dans le bloc « Vote final »', async () => {
+    const solennel = await afficher();
+    expect(sansEspaces(solennel.racine.querySelector('.app-loi__resultat')!.textContent)).toContain(
+      'Vote solennel',
+    );
+    expect(sansEspaces(solennel.racine.textContent)).toContain(
+      'Vote solennel : tous les députés sont convoqués.',
+    );
+
+    TestBed.resetTestingModule();
+    const detail = loiDetail();
+    detail.voteFinal = { ...detail.voteFinal!, solennel: false };
+    const ordinaire = await afficher(detail);
+    expect(
+      sansEspaces(ordinaire.racine.querySelector('.app-loi__resultat')!.textContent),
+    ).toContain('Vote ordinaire');
+    expect(sansEspaces(ordinaire.racine.textContent)).toContain(
+      "Vote ordinaire : en séance, seuls les députés présents dans l'hémicycle votent.",
+    );
+  });
+
   it("écrit combien de députés en mandat n'ont pas voté sur le vote final", async () => {
     const { racine } = await afficher();
 

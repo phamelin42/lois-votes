@@ -23,9 +23,12 @@
       <time [attr.datetime]="scrutin.date">{{ dateLongue(scrutin.date) }}</time>
     </p>
     <h1 class="app-scrutin__titre title-1">{{ scrutin.titre }}</h1>
-    <fd-badge [tone]="scrutin.adopte ? 'tokiwa' : 'enji'">{{
-      libelleAdoption(scrutin.adopte)
-    }}</fd-badge>
+    <div class="app-scrutin__resultat">
+      <fd-badge [tone]="scrutin.adopte ? 'tokiwa' : 'enji'">{{
+        libelleAdoption(scrutin.adopte)
+      }}</fd-badge>
+      <app-type-vote [scrutin]="scrutin" phrase />
+    </div>
     <app-vote-bar [compte]="scrutin.compte" [enMandat]="scrutin.enMandat" taille="md" />
     <p class="app-scrutin__liens">
       @if (scrutin.loi; as loi) {

@@ -79,6 +79,7 @@ export function scrutin(numero = 8317, surcharge: Partial<ScrutinResume> = {}): 
     titre: "l'ensemble du projet de loi relatif à la sobriété foncière (première lecture)",
     type: 'final',
     adopte: true,
+    solennel: true,
     compte: compte(),
     enMandat: 577,
     urlOfficielle: `https://www.assemblee-nationale.fr/dyn/17/scrutins/${numero}`,
