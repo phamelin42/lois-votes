@@ -34,9 +34,12 @@
       <p class="caption">
         <time [attr.datetime]="vote.date">{{ dateLongue(vote.date) }}</time>
       </p>
-      <fd-badge [tone]="vote.adopte ? 'tokiwa' : 'enji'">{{
-        libelleAdoption(vote.adopte)
-      }}</fd-badge>
+      <div class="app-loi__resultat">
+        <fd-badge [tone]="vote.adopte ? 'tokiwa' : 'enji'">{{
+          libelleAdoption(vote.adopte)
+        }}</fd-badge>
+        <app-type-vote [scrutin]="vote" phrase />
+      </div>
       <app-vote-bar [compte]="vote.compte" [enMandat]="vote.enMandat" taille="md" />
       <app-group-table [groupes]="vote.groupes" [sansVotant]="vote.groupesSansVotant" />
 

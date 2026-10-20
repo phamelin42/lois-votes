@@ -15,10 +15,9 @@
   min-width: 0;
 }
 
+/* Le libellé reste le nom accessible du champ (lecteurs d'écran, axe) ; le texte visible est le placeholder. */
 .app-search__libelle {
-  color: var(--ink);
-  font-family: var(--font-text);
-  font-weight: 700;
+  @include sr.sr-only;
 }
 
 .app-search__saisie {

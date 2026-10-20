@@ -106,6 +106,17 @@ describe('AProposPage', () => {
     expect(texte).toMatch(/Groupes sans aucun votant/);
   });
 
+  it('explique la différence entre vote solennel et vote ordinaire, et pourquoi la participation paraît basse', () => {
+    const texte = afficher();
+
+    expect(texte).toContain('Vote solennel et vote ordinaire');
+    expect(texte).toMatch(/Vote solennel : tous les députés sont convoqués/);
+    expect(texte).toMatch(
+      /Vote ordinaire : en séance, seuls les députés présents dans l'hémicycle votent/,
+    );
+    expect(texte).toMatch(/Pourquoi la participation d'un député paraît basse/);
+  });
+
   it("mentionne la mesure d'audience Umami sans cookie", () => {
     const texte = afficher();
 

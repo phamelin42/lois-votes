@@ -11,6 +11,7 @@ import { ScrutinApi } from '../../data/scrutin-api';
 import { estIntrouvable, statutDePage } from '../../data/statut-de-page';
 import { AppGroupTable } from '../../ui/group-table/group-table';
 import { AppNominatif } from '../../ui/nominatif/nominatif';
+import { AppTypeVote } from '../../ui/type-vote/type-vote';
 import { AppVoteBar } from '../../ui/vote-bar/vote-bar';
 
 /** Un scrutin : décompte, tableau par groupe, lien vers sa loi et liste nominative. */
@@ -21,6 +22,7 @@ import { AppVoteBar } from '../../ui/vote-bar/vote-bar';
     AppLienVisible,
     AppNominatif,
     AppPrefetch,
+    AppTypeVote,
     AppVoteBar,
     FdAlert,
     FdBadge,

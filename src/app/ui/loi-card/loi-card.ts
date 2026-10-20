@@ -6,12 +6,22 @@ import { AppLienVisible } from '../../data/lien-visible';
 import { AppPrefetch } from '../../data/prefetch';
 import { dateCourte } from '../../data/format';
 import { AppGroupPills } from '../group-pills/group-pills';
+import { AppTypeVote } from '../type-vote/type-vote';
 import { AppVoteBar } from '../vote-bar/vote-bar';
 
 /** Une loi de l'accueil : carte-lien vers sa page, ou vers le scrutin quand elle n'a pas de dossier. */
 @Component({
   selector: 'app-loi-card',
-  imports: [RouterLink, FdBadge, FdCard, AppGroupPills, AppVoteBar, AppLienVisible, AppPrefetch],
+  imports: [
+    RouterLink,
+    FdBadge,
+    FdCard,
+    AppGroupPills,
+    AppTypeVote,
+    AppVoteBar,
+    AppLienVisible,
+    AppPrefetch,
+  ],
   templateUrl: './loi-card.html',
   styleUrl: './loi-card.scss',
   encapsulation: ViewEncapsulation.None,

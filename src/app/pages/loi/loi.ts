@@ -20,6 +20,7 @@ import { valeurDe } from '../../data/ressource';
 import { estIntrouvable, statutDePage } from '../../data/statut-de-page';
 import { AppGroupTable } from '../../ui/group-table/group-table';
 import { AppNominatif } from '../../ui/nominatif/nominatif';
+import { AppTypeVote } from '../../ui/type-vote/type-vote';
 import { AppVoteBar } from '../../ui/vote-bar/vote-bar';
 
 /** Un groupe d'autres scrutins du texte (articles, amendements, autres), repliable. */
@@ -37,6 +38,7 @@ interface GroupeAutres {
     AppLienVisible,
     AppNominatif,
     AppPrefetch,
+    AppTypeVote,
     AppVoteBar,
     FdAccordion,
     FdAccordionItem,
