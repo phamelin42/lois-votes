@@ -132,7 +132,7 @@ describe('reduireScrutin', () => {
     ).toBeNull();
   });
 
-  it("garde l'identité du scrutin (titre, date, dossier, résultat officiel, position officielle) et retire l'inutile", () => {
+  it("garde l'identité du scrutin (titre, date, séance, dossier, résultat officiel, position officielle) et retire l'inutile", () => {
     const { scrutin } = reduireScrutin(brut(), new Set(['PA1']));
     expect(scrutin).toMatchObject({
       numero: '5',
@@ -146,7 +146,8 @@ describe('reduireScrutin', () => {
     );
     expect(scrutin['@xmlns']).toBeUndefined();
     expect(scrutin.demandeur).toBeUndefined();
-    expect(scrutin.seanceRef).toBeUndefined();
+    // La séance sert à dire si un texte a été adopté à main levée (scripts/donnees/dossiers.mjs).
+    expect(scrutin.seanceRef).toBe('RUANR5L17S2026IDS30861');
   });
 
   it('recalcule votants, suffrages et majorité requise', () => {

@@ -43,6 +43,7 @@ export function rattacher(scrutins, dossiers) {
   return { dossierDe, rattaches, ambigus };
 }
 
+const NOMME_UN_TEXTE = /^(?:projet|proposition) de loi\b/i;
 const ARTICLE_49_3 = /\barticle 49,? alinéa 3\b/i;
 /** « adopté », « adoptée sans modification », « adoptée, dans les conditions prévues à l'article 45, alinéa 3… »
  * (texte de CMP), « modifiée » (adoptée avec des modifications), « considéré comme adopté … 49, alinéa 3 ». */
@@ -74,7 +75,8 @@ export function modeSansVote(decision, { dossier, scrutins, dossierDe }) {
 
 /**
  * Les textes de loi que l'Assemblée a adoptés au moins une fois sans vote nominatif pendant la 17ᵉ législature, du plus
- * récent au plus ancien : identifiant, titre (celui du texte adopté le plus récent, sinon celui du dossier) et ces
+ * récent au plus ancien : identifiant, titre (celui du dossier s'il nomme le texte de loi, sinon celui du texte adopté le
+ * plus récent, sinon celui du dossier) et ces
  * décisions, de la plus récente à la plus ancienne.
  *
  * @param {object} entree
@@ -93,8 +95,13 @@ export function textesSansVote({ dossiers, titres, scrutins, dossierDe }) {
       .filter(({ mode }) => mode !== null)
       .sort((a, b) => (a.x.date < b.x.date ? 1 : a.x.date > b.x.date ? -1 : 0));
     if (!decisions.length) continue;
+    // Le titre du dossier quand il nomme le texte (« Projet de loi de finances pour 2026 » : le texte adopté, lui, s'intitule
+    // « projet de loi de finances de finances pour 2026 ») ; sinon celui du texte adopté, car le dossier d'une proposition de
+    // loi porte souvent un titre court à l'infinitif (« Rétablir le droit commun de la prescription… »).
     const titre =
-      decisions[0].x.textes.map((t) => titres.get(t) ?? null).find((t) => t !== null) ?? d.titre;
+      (d.titre && NOMME_UN_TEXTE.test(d.titre) ? d.titre : null) ??
+      decisions[0].x.textes.map((t) => titres.get(t) ?? null).find((t) => t !== null) ??
+      d.titre;
     textes.push({
       id: d.uid,
       titre,

@@ -202,6 +202,21 @@ describe('textesSansVote', () => {
     ]);
   });
 
+  it('préfère le titre du dossier quand il nomme déjà le texte de loi (le titre du texte adopté peut avoir une coquille)', () => {
+    const avecCoquille = new Map([['TXT', 'projet de loi de finances de finances pour 2026']]);
+    const [t] = textesSansVote({
+      dossiers: [
+        dossier('DLA', [decision({ textes: ['TXT'] })], {
+          titre: 'Projet de loi de finances pour 2026',
+        }),
+      ],
+      titres: avecCoquille,
+      scrutins,
+      dossierDe,
+    });
+    expect(t.titre).toBe('Projet de loi de finances pour 2026');
+  });
+
   it("prend le titre du dossier quand aucun texte associé n'a de titre", () => {
     expect(appel([dossier('DLA', [decision({ textes: ['TXTVIDE', 'INCONNU'] })])])[0].titre).toBe(
       'Titre du dossier DLA',

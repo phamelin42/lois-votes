@@ -540,6 +540,7 @@ describe("construire : garde-fou de l'effectif", () => {
     expect(SEUILS_OFFICIELS).toEqual({
       scrutins: 8000,
       deputes: 570,
+      dossiers: 100,
       effectif: { tolerance: 3, grossier: 20, partGrossiere: 0.01 },
     });
   });

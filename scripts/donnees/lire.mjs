@@ -409,8 +409,13 @@ const LECTURES = [
   [/^CMP-DEBATS-AN-DEC$/, 'texte de la commission mixte paritaire'],
 ];
 
+/** Lecture d'une décision de séance de l'Assemblée d'après son `codeActe`, ou `null` (autre acte, Sénat, commission). */
+export function lectureDeCode(code) {
+  return LECTURES.find(([motif]) => motif.test(String(code)))?.[1] ?? null;
+}
+
 /** Numéros des scrutins de la 17ᵉ législature cités par `voteRefs` (une chaîne ou une liste). */
-function scrutinsCites(voteRefs) {
+export function scrutinsCites(voteRefs) {
   return liste(voteRefs?.voteRef)
     .map((ref) => /^VTANR5L17V(\d+)$/.exec(String(ref))?.[1])
     .filter((n) => n !== undefined)
@@ -418,7 +423,7 @@ function scrutinsCites(voteRefs) {
 }
 
 /** Tous les actes d'un dossier, en profondeur et dans l'ordre de l'archive. */
-function* actes(conteneur) {
+export function* actes(conteneur) {
   for (const acte of liste(conteneur?.acteLegislatif)) {
     yield acte;
     yield* actes(acte.actesLegislatifs);
@@ -444,7 +449,7 @@ export function lireDossier(brut) {
       continue;
     }
     if (acte['@xsi:type'] !== 'Decision_Type') continue;
-    const lecture = LECTURES.find(([code]) => code.test(String(acte.codeActe)))?.[1];
+    const lecture = lectureDeCode(acte.codeActe);
     // « 2025-11-21T00:00:00.000+01:00 » : les dix premiers caractères sont le jour à Paris.
     const date = dateIso(typeof acte.dateActe === 'string' ? acte.dateActe.slice(0, 10) : null);
     if (!lecture || !date) continue;
