@@ -6,6 +6,7 @@ import { strToU8, zipSync } from 'fflate';
 import {
   TAILLE_MINIMALE,
   URL_ACTEURS,
+  URL_DOSSIERS,
   URL_SCRUTINS,
   entreesDossier,
   entreesZip,
@@ -305,6 +306,10 @@ describe('entreesDossier et ouvrirArchives (fixtures)', () => {
     writeFileSync(join(racine, 'json', 'scrutins', 'VTANR5L17V1.json'), '{"s":1}');
     writeFileSync(join(racine, 'json', 'acteur', 'PA1.json'), '{"a":1}');
     writeFileSync(join(racine, 'json', 'organe', 'PO1.json'), '{"o":1}');
+    mkdirSync(join(racine, 'json', 'dossierParlementaire'));
+    mkdirSync(join(racine, 'json', 'document'));
+    writeFileSync(join(racine, 'json', 'dossierParlementaire', 'DLR5L17N1.json'), '{"d":1}');
+    writeFileSync(join(racine, 'json', 'document', 'PIONANR5L17BTA0001.json'), '{"t":1}');
     writeFileSync(join(racine, 'LISEZMOI.md'), 'ignoré');
   });
   afterEach(() => rmSync(racine, { recursive: true, force: true }));
@@ -314,13 +319,15 @@ describe('entreesDossier et ouvrirArchives (fixtures)', () => {
     expect(noms).toEqual([
       'LISEZMOI.md',
       'json/acteur/PA1.json',
+      'json/document/PIONANR5L17BTA0001.json',
+      'json/dossierParlementaire/DLR5L17N1.json',
       'json/organe/PO1.json',
       'json/scrutins/VTANR5L17V1.json',
       'json/scrutins/VTANR5L17V2.json',
     ]);
   });
 
-  it("ouvre les fixtures comme une source : scrutins d'un côté, acteurs et organes de l'autre", async () => {
+  it('ouvre les fixtures comme une source : scrutins, acteurs et organes, dossiers et documents', async () => {
     const archives = await ouvrirArchives({ depuis: 'fixtures', fixtures: racine });
     expect([...archives.scrutins()].map(([nom]) => nom)).toEqual([
       'json/scrutins/VTANR5L17V1.json',
@@ -330,6 +337,11 @@ describe('entreesDossier et ouvrirArchives (fixtures)', () => {
       'json/acteur/PA1.json',
       'json/organe/PO1.json',
     ]);
+    expect([...archives.dossiers()].map(([nom]) => nom)).toEqual([
+      'json/document/PIONANR5L17BTA0001.json',
+      'json/dossierParlementaire/DLR5L17N1.json',
+    ]);
+    expect(archives.sources.dossiers).toEqual(archives.sources.scrutins);
     expect(archives.sources.scrutins).toEqual({
       url: racine.split('\\').join('/'),
       lastModified: null,
@@ -348,7 +360,7 @@ describe('entreesDossier et ouvrirArchives (fixtures)', () => {
 });
 
 describe('ouvrirArchives (officiel)', () => {
-  it("télécharge les deux archives de l'Assemblée, chacune dans son dossier de cache", async () => {
+  it("télécharge les trois archives de l'Assemblée, chacune dans son dossier de cache", async () => {
     const cache = mkdtempSync(join(tmpdir(), 'donnees-officiel-'));
     try {
       const scrutins = zipVolumineux({ 'json/VTANR5L17V1.json': '{"s":1}' });
@@ -357,18 +369,25 @@ describe('ouvrirArchives (officiel)', () => {
         'json/organe/PO1.json': '{"o":1}',
         'json/deport/D1.json': '{}',
       });
+      const dossiers = zipVolumineux({
+        'json/dossierParlementaire/DLR5L17N1.json': '{"d":1}',
+        'json/document/PIONANR5L17BTA0001.json': '{"t":1}',
+        'json/autre/X.json': '{}',
+      });
+      const archive = (url: string) =>
+        url === URL_SCRUTINS ? scrutins : url === URL_DOSSIERS ? dossiers : acteurs;
       const demandees: string[] = [];
       const requete = async (url: string) => {
         demandees.push(url);
-        return reponse(url === URL_SCRUTINS ? scrutins : acteurs, 200, {
+        return reponse(archive(url), 200, {
           etag: `"${demandees.length}"`,
         });
       };
 
       const archives = await ouvrirArchives({ depuis: 'officiel', cache, fetch: requete as never });
 
-      expect(demandees.sort()).toEqual([URL_ACTEURS, URL_SCRUTINS].sort());
-      expect(readdirSync(cache).sort()).toEqual(['acteurs', 'scrutins']);
+      expect(demandees.sort()).toEqual([URL_ACTEURS, URL_DOSSIERS, URL_SCRUTINS].sort());
+      expect(readdirSync(cache).sort()).toEqual(['acteurs', 'dossiers', 'scrutins']);
       expect([...archives.scrutins()].map(([nom]) => nom)).toEqual(['json/VTANR5L17V1.json']);
       expect([...archives.acteurs()].map(([nom]) => nom).sort()).toEqual([
         'json/acteur/PA1.json',
@@ -376,6 +395,11 @@ describe('ouvrirArchives (officiel)', () => {
       ]);
       expect(archives.sources.scrutins.url).toBe(URL_SCRUTINS);
       expect(archives.sources.acteurs.url).toBe(URL_ACTEURS);
+      expect([...archives.dossiers()].map(([nom]) => nom).sort()).toEqual([
+        'json/document/PIONANR5L17BTA0001.json',
+        'json/dossierParlementaire/DLR5L17N1.json',
+      ]);
+      expect(archives.sources.dossiers.url).toBe(URL_DOSSIERS);
     } finally {
       rmSync(cache, { recursive: true, force: true });
     }
@@ -387,6 +411,9 @@ describe('ouvrirArchives (officiel)', () => {
     );
     expect(URL_ACTEURS).toBe(
       'https://data.assemblee-nationale.fr/static/openData/repository/17/amo/tous_acteurs_mandats_organes_xi_legislature/AMO30_tous_acteurs_tous_mandats_tous_organes_historique.json.zip',
+    );
+    expect(URL_DOSSIERS).toBe(
+      'https://data.assemblee-nationale.fr/static/openData/repository/17/loi/dossiers_legislatifs/Dossiers_Legislatifs.json.zip',
     );
   });
 });

@@ -20,6 +20,7 @@
  * @property {string | null} codeTypeVote `SPO`, `SPS` ou `MOC`
  * @property {string | null} sortCode `adopté` ou `rejeté`
  * @property {string | null} dossier `dossierRef`, ou `null`
+ * @property {string | null} seance `seanceRef` : la séance du scrutin, comparée au `reunionRef` d'une décision
  * @property {Compte} compte `syntheseVote.decompte`
  * @property {boolean} miseAuPoint La section `miseAuPoint` contient au moins un député.
  * @property {GroupeDuScrutin[]} groupes
@@ -47,6 +48,22 @@
  * @property {string | null} hatvp Page nominative de la HATVP, seulement quand l'archive en donne une valide.
  * @property {LiensWeb} liens Site, X et Facebook déclarés, seulement quand l'extraction est fiable.
  * @property {MandatLu[]} mandats
+ *
+ * @typedef {object} DecisionLue Décision de séance de l'Assemblée sur un texte (`Decision_Type`).
+ * @property {string} date `AAAA-MM-JJ`
+ * @property {string} lecture « première lecture », « nouvelle lecture », « texte de la commission mixte paritaire »…
+ * @property {string} statut `statutConclusion.libelle` : « adopté », « rejetée », « considéré comme adopté … 49, alinéa 3 … »
+ * @property {string | null} seance `reunionRef`
+ * @property {number[]} scrutins Numéros des scrutins de la 17ᵉ législature cités (`voteRefs`).
+ * @property {string[]} textes Documents associés (`textesAssocies`), dont le texte adopté.
+ *
+ * @typedef {object} DossierLu
+ * @property {string} uid
+ * @property {string | null} titre `titreDossier.titre`
+ * @property {string | null} procedure `procedureParlementaire.libelle`
+ * @property {boolean} estLoi Projet ou proposition de loi, ou ratification ; pas une résolution.
+ * @property {DecisionLue[]} decisions Dans l'ordre de l'archive.
+ * @property {number[]} motions Scrutins des motions de censure (`DecisionMotionCensure_Type`).
  *
  * @typedef {object} OrganeLu
  * @property {string} id
@@ -179,6 +196,7 @@ export function lireScrutin(brut) {
     codeTypeVote: scrutin.typeVote?.codeTypeVote ?? null,
     sortCode: scrutin.sort?.code ?? null,
     dossier: scrutin.objet?.dossierLegislatif?.dossierRef ?? null,
+    seance: typeof scrutin.seanceRef === 'string' ? scrutin.seanceRef : null,
     compte: lireDecompte(scrutin.syntheseVote?.decompte),
     miseAuPoint: aUneMiseAuPoint(scrutin.miseAuPoint),
     groupes,
@@ -378,4 +396,88 @@ export function lireOrgane(brut) {
     fin: organe.viMoDe?.dateFin ?? null,
     preseance: Number(organe.preseance) || 999,
   };
+}
+
+/** Lecture d'une décision de séance d'après le début de son `codeActe` ; les autres codes ne sont pas des séances de l'Assemblée. */
+const LECTURES = [
+  [/^AN1-DEBATS-DEC$/, 'première lecture'],
+  [/^AN2-DEBATS-DEC$/, 'deuxième lecture'],
+  [/^AN3-DEBATS-DEC$/, 'troisième lecture'],
+  [/^ANNLEC-DEBATS-DEC$/, 'nouvelle lecture'],
+  [/^ANLDEF-DEBATS-DEC$/, 'lecture définitive'],
+  [/^ANLUNI-DEBATS-DEC$/, 'lecture unique'],
+  [/^CMP-DEBATS-AN-DEC$/, 'texte de la commission mixte paritaire'],
+];
+
+/** Numéros des scrutins de la 17ᵉ législature cités par `voteRefs` (une chaîne ou une liste). */
+function scrutinsCites(voteRefs) {
+  return liste(voteRefs?.voteRef)
+    .map((ref) => /^VTANR5L17V(\d+)$/.exec(String(ref))?.[1])
+    .filter((n) => n !== undefined)
+    .map(Number);
+}
+
+/** Tous les actes d'un dossier, en profondeur et dans l'ordre de l'archive. */
+function* actes(conteneur) {
+  for (const acte of liste(conteneur?.acteLegislatif)) {
+    yield acte;
+    yield* actes(acte.actesLegislatifs);
+  }
+}
+
+/**
+ * Un dossier législatif (`dossierParlementaire`) : ses décisions de séance à l'Assemblée et les scrutins qu'il cite.
+ * @param {any} brut
+ * @returns {DossierLu}
+ */
+export function lireDossier(brut) {
+  const dossier = brut?.dossierParlementaire;
+  if (!dossier) throw new Error('dossier illisible : clé « dossierParlementaire » absente');
+  if (typeof dossier.uid !== 'string' || !/^DL[A-Z0-9]+$/.test(dossier.uid))
+    throw new Error(`identifiant de dossier invalide : ${JSON.stringify(dossier.uid)}`);
+  const procedure = chaine(dossier.procedureParlementaire?.libelle);
+  const decisions = [];
+  const motions = [];
+  for (const acte of actes(dossier.actesLegislatifs)) {
+    if (acte['@xsi:type'] === 'DecisionMotionCensure_Type') {
+      motions.push(...scrutinsCites(acte.voteRefs));
+      continue;
+    }
+    if (acte['@xsi:type'] !== 'Decision_Type') continue;
+    const lecture = LECTURES.find(([code]) => code.test(String(acte.codeActe)))?.[1];
+    // « 2025-11-21T00:00:00.000+01:00 » : les dix premiers caractères sont le jour à Paris.
+    const date = dateIso(typeof acte.dateActe === 'string' ? acte.dateActe.slice(0, 10) : null);
+    if (!lecture || !date) continue;
+    decisions.push({
+      date,
+      lecture,
+      statut: chaine(acte.statutConclusion?.libelle) ?? '',
+      seance: chaine(acte.reunionRef),
+      scrutins: scrutinsCites(acte.voteRefs),
+      textes: liste(acte.textesAssocies?.texteAssocie)
+        .map((t) => chaine(t?.refTexteAssocie))
+        .filter((t) => t !== null),
+    });
+  }
+  return {
+    uid: dossier.uid,
+    titre: chaine(dossier.titreDossier?.titre),
+    procedure,
+    // « Projet ou proposition de loi … », « … de loi de finances … », ratification des traités ; pas les résolutions.
+    estLoi: procedure !== null && /\bloi\b|ratification/i.test(procedure),
+    decisions,
+    motions,
+  };
+}
+
+/**
+ * Un document (texte déposé ou adopté) : seulement son titre principal, pour nommer un texte qui n'a pas de scrutin.
+ * @param {any} brut
+ * @returns {{ uid: string, titre: string | null }}
+ */
+export function lireDocument(brut) {
+  const document = brut?.document;
+  if (!document || typeof document.uid !== 'string')
+    throw new Error('document illisible : identifiant absent');
+  return { uid: document.uid, titre: chaine(document.titres?.titrePrincipal) };
 }
