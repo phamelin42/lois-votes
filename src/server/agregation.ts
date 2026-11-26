@@ -177,15 +177,18 @@ export function creerAgregation(
     donnees.sansVoteParDossier.get(dossier)?.titre.replace(/\s+/g, ' ').trim();
 
   /**
-   * Titre court d'un dossier : celui de son vote final le plus récent, sinon dérivé du texte cité par ses scrutins, sinon
-   * (aucun scrutin public) celui du texte adopté sans vote.
+   * Titre court d'un dossier : celui de son vote final le plus récent ; sinon celui du texte adopté sans vote ; sinon
+   * celui du texte que cite un de ses scrutins. Une motion de censure rattachée au dossier (49.3) ne nomme pas le texte :
+   * elle ne sert qu'en dernier recours.
    */
   const titreDuDossier = memoiser(1000, (dossier: string): string => {
     const scrutins = donnees.parDossier.get(dossier) ?? [];
     const dernier = scrutins.find(estFinal);
     if (dernier !== undefined) return titreCourt(donnees.titre(dernier));
-    if (scrutins.length) return titreCourtDuTexte(donnees.titre(scrutins[0]));
-    return titreCourt(titreDuTexteSansVote(dossier) ?? dossier);
+    const texte = titreDuTexteSansVote(dossier);
+    if (texte !== undefined) return titreCourt(texte);
+    const citant = scrutins.find((s) => TEXTE_DE_LOI.test(donnees.titre(s))) ?? scrutins[0];
+    return citant !== undefined ? titreCourtDuTexte(donnees.titre(citant)) : dossier;
   });
 
   /**

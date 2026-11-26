@@ -1,8 +1,9 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Compte, Position, PositionGroupe, ScrutinDetail } from '@contrat';
 import { creerAgregation, type Agregation } from './agregation';
+import { chargerDonnees } from './donnees';
 import { GENERE_LE, produireDonneesDeTest, type DonneesDeTest } from './testing/donnees';
 
 const somme = (comptes: Compte[]): Compte =>
@@ -649,5 +650,44 @@ describe('agregation', () => {
     it("n'invente pas de député", () => {
       expect(agregation.depute('personne')).toBeNull();
     });
+  });
+});
+
+// Sur les vraies données, les motions de censure d'un texte adopté par le 49.3 sont rattachées à son dossier : sans vote
+// final, le titre ne doit pas venir de la motion (« La motion de censure déposée… », vu le 26/11/2026).
+describe('agregation : texte adopté par le 49.3 dont une motion de censure est rattachée', () => {
+  let jeu: DonneesDeTest;
+  let agregation: Agregation;
+
+  beforeAll(async () => {
+    jeu = await produireDonneesDeTest();
+    const chemin = join(jeu.dossier, 'scrutins.json');
+    const scrutins = JSON.parse(readFileSync(chemin, 'utf8')) as {
+      n: number;
+      dossier: string | null;
+    }[];
+    scrutins.find((s) => s.n === 7979)!.dossier = 'DLR5L17N52428';
+    writeFileSync(chemin, JSON.stringify(scrutins));
+    agregation = creerAgregation(chargerDonnees(jeu.dossier));
+  });
+  afterAll(() => jeu.nettoyer());
+
+  it('garde le titre du texte sur la carte, la page de la loi et la page du scrutin', () => {
+    const carte = agregation.accueil(2).lois.find((l) => l.dossier === 'DLR5L17N52428')!;
+
+    expect(carte.titreCourt).toBe('Projet de loi de finances pour 2026');
+    expect(agregation.loi('DLR5L17N52428')!.titreCourt).toBe('Projet de loi de finances pour 2026');
+    expect((agregation.scrutin(7979) as ScrutinDetail).loi).toEqual({
+      dossier: 'DLR5L17N52428',
+      titreCourt: 'Projet de loi de finances pour 2026',
+    });
+  });
+
+  it('range la motion parmi les autres scrutins du texte, sous la décision 49.3', () => {
+    const loi = agregation.loi('DLR5L17N52428')!;
+
+    expect(loi.adoptionSansVote?.mode).toBe('article49-3');
+    expect(loi.voteFinal).toBeNull();
+    expect(loi.scrutins.map((s) => [s.numero, s.type])).toEqual([[7979, 'motion']]);
   });
 });
