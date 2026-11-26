@@ -154,7 +154,7 @@ describe('AppLoiCard', () => {
         'Considéré comme adopté (article 49.3)',
       );
       expect(racine.querySelector('.app-loi-card__officiel')!.textContent!.trim()).toMatch(
-        /^Sans vote : le Gouvernement a engagé sa responsabilité et aucune motion de censure n'a été adoptée\.$/,
+        /^Sans vote\u00a0: le Gouvernement a engagé sa responsabilité et aucune motion de censure n'a été adoptée\.$/,
       );
     });
 

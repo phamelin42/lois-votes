@@ -1,14 +1,14 @@
 // @vitest-environment node
 import { DEBUT_LEGISLATURE, modeSansVote, rattacher, textesSansVote } from './dossiers.mjs';
 
-type Decision = {
+interface Decision {
   date: string;
   lecture: string;
   statut: string;
   seance: string | null;
   scrutins: number[];
   textes: string[];
-};
+}
 
 const decision = (plus: Partial<Decision> = {}): Decision => ({
   date: '2026-02-25',
