@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test';
 import { attendreHydratation } from './aide';
 
 // Le jeu de données de ces tests est celui des fixtures officielles (src/server/fixtures/officiel) : 19 scrutins,
-// dont 11 votes finaux, regroupés en 10 cartes sur l'accueil (le projet de loi n°53980 a deux votes finaux).
+// dont 11 votes finaux regroupés en 10 cartes (le projet de loi n°53980 a deux votes finaux), et 3 textes adoptés
+// sans vote nominatif (deux ratifications à main levée, le budget 2026 par l'article 49.3) : 13 cartes sur l'accueil.
 test.describe('parcours complet', () => {
   test("accueil → loi → liste nominative → député → recherche d'un autre député", async ({
     page,
@@ -15,14 +16,28 @@ test.describe('parcours complet', () => {
     );
     const cartes = page.locator('app-loi-card');
     await expect(cartes).toHaveCount(10);
-    await expect(cartes.first()).toContainText('Proposition de loi organique visant à adapter');
-    await expect(cartes.first()).toContainText(/Adopté|Rejeté par l'Assemblée/);
-    await expect(page.getByRole('button', { name: 'Voir plus' })).toHaveCount(0);
-
-    // Un vote final sans dossier mène à son scrutin, jamais à une page de loi vide
+    await expect(cartes.first()).toContainText(
+      "Projet de loi autorisant l'approbation de l'accord",
+    );
+    await expect(cartes.first()).toContainText('Adopté à main levée');
+    await expect(cartes.nth(2)).toContainText('Proposition de loi organique visant à adapter');
+    await expect(cartes.nth(2)).toContainText(/Adopté|Rejeté par l'Assemblée/);
+    // Rattaché à sa loi par les dossiers législatifs, le vote 5729 mène à la page de la loi
     await expect(
-      cartes.filter({ hasText: "droit à l'aide à mourir" }).locator('a[href="/scrutins/5729"]'),
+      cartes
+        .filter({ hasText: "droit à l'aide à mourir" })
+        .locator('a[href="/lois/DLR5L17N51670"]'),
     ).toHaveCount(1);
+
+    // Page suivante : le budget 2026, adopté par l'article 49.3, et un vote final sans dossier, qui mène à son scrutin
+    await page.getByRole('button', { name: 'Voir plus' }).click();
+    await expect(cartes).toHaveCount(13);
+    await expect(
+      page.locator('a.app-loi-card[href="/lois/DLR5L17N52428"]', {
+        hasText: 'Considéré comme adopté (article 49.3)',
+      }),
+    ).toHaveCount(1);
+    await expect(page.locator('a.app-loi-card[href="/scrutins/881"]')).toHaveCount(1);
 
     // Loi : le vote final, le tableau par groupe
     await page.locator('app-loi-card', { hasText: 'réponses immédiates' }).click();

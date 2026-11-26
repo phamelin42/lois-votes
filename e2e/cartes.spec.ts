@@ -68,10 +68,12 @@ for (const largeur of [375, 1280]) {
           .filter((c) => {
             const carte = c.getBoundingClientRect();
             const contenu = c.querySelector<HTMLElement>('.fd-card__body')!;
-            // Le dernier élément (pastilles ou barre) reste dans la carte, et rien n'est coupé par le bas.
-            const dernier = c
-              .querySelector<HTMLElement>('app-group-pills')!
-              .getBoundingClientRect();
+            // Le dernier élément (pastilles, ou badges d'une carte sans vote nominatif) reste dans la carte, et rien
+            // n'est coupé par le bas.
+            const dernier = (
+              c.querySelector<HTMLElement>('app-group-pills') ??
+              c.querySelector<HTMLElement>('.app-loi-card__badges')!
+            ).getBoundingClientRect();
             return contenu.scrollHeight > contenu.clientHeight || dernier.bottom > carte.bottom;
           })
           .map((c) => c.querySelector('.app-loi-card__titre')!.textContent),
@@ -101,14 +103,31 @@ for (const largeur of [375, 1280]) {
       await attendreHydratation(page);
 
       const ecarts = await page.evaluate(() =>
-        Array.from(document.querySelectorAll<HTMLElement>('a.app-loi-card')).map((c) => {
-          const bas = c.getBoundingClientRect().bottom;
-          const pastilles = c.querySelector('app-group-pills')!.getBoundingClientRect().bottom;
-          return bas - pastilles;
-        }),
+        Array.from(document.querySelectorAll<HTMLElement>('a.app-loi-card'))
+          // Une carte adoptée sans vote nominatif n'a ni barre ni pastilles.
+          .filter((c) => c.querySelector('app-group-pills'))
+          .map((c) => {
+            const bas = c.getBoundingClientRect().bottom;
+            const pastilles = c.querySelector('app-group-pills')!.getBoundingClientRect().bottom;
+            return bas - pastilles;
+          }),
       );
+      expect(ecarts.length).toBeGreaterThanOrEqual(5);
       // Même écart (le padding du bas) sur toutes les cartes.
       expect(new Set(ecarts.map((e) => Math.round(e))).size).toBe(1);
+    });
+
+    test('une carte adoptée sans vote nominatif le dit, sans barre de vote ni pastilles', async ({
+      page,
+    }) => {
+      await page.goto('/');
+      await attendreHydratation(page);
+      const carte = page.locator('a.app-loi-card[href="/lois/DLR5L17N54168"]');
+
+      await expect(carte).toContainText('Adopté à main levée');
+      await expect(carte).toContainText('Pas de vote nominatif');
+      await expect(carte.locator('app-vote-bar')).toHaveCount(0);
+      await expect(carte.locator('app-group-pills')).toHaveCount(0);
     });
   });
 }
@@ -192,11 +211,16 @@ test.describe('vote solennel ou vote ordinaire', () => {
     await page.goto('/');
     await attendreHydratation(page);
 
-    const cartes = page.locator('a.app-loi-card');
+    // Chaque carte qui a un vote final ; une carte adoptée sans vote nominatif n'a pas de type de vote.
+    const cartes = page.locator('a.app-loi-card', { has: page.locator('app-vote-bar') });
     const nombre = await cartes.count();
+    expect(nombre).toBeGreaterThanOrEqual(5);
     for (let i = 0; i < nombre; i++) {
       await expect(cartes.nth(i)).toContainText(/Vote (solennel|ordinaire)/);
     }
+    await expect(
+      page.locator('a.app-loi-card', { hasText: 'Adopté à main levée' }).first(),
+    ).not.toContainText(/Vote (solennel|ordinaire)/);
     await expect(
       page.locator('a.app-loi-card', { hasText: 'Vote solennel' }).first(),
     ).toBeVisible();
