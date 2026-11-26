@@ -1,4 +1,4 @@
-// Téléchargement des deux archives officielles de l'Assemblée nationale (cache et ETag), dézippage en mémoire
+// Téléchargement des trois archives officielles de l'Assemblée nationale (cache et ETag), dézippage en mémoire
 // avec fflate, ou lecture des fixtures (mode `DONNEES_DEPUIS=fixtures`). Aucune clé, aucune base.
 
 import {
@@ -17,6 +17,7 @@ const RACINE = 'https://data.assemblee-nationale.fr/static/openData/repository/1
 
 export const URL_SCRUTINS = `${RACINE}/loi/scrutins/Scrutins.json.zip`;
 export const URL_ACTEURS = `${RACINE}/amo/tous_acteurs_mandats_organes_xi_legislature/AMO30_tous_acteurs_tous_mandats_tous_organes_historique.json.zip`;
+export const URL_DOSSIERS = `${RACINE}/loi/dossiers_legislatifs/Dossiers_Legislatifs.json.zip`;
 
 /** En dessous, l'archive est tronquée ou n'est pas l'archive (page d'erreur) : on échoue. */
 export const TAILLE_MINIMALE = 1024 * 1024;
@@ -213,10 +214,15 @@ export function* entreesDossier(racine, accepte) {
 export const estScrutin = (nom) => /(^|\/)VTANR5L17V\d+\.json$/.test(nom);
 export const estActeur = (nom) => /(^|\/)acteur\/PA\d+\.json$/.test(nom);
 export const estOrgane = (nom) => /(^|\/)organe\/PO\d+\.json$/.test(nom);
+export const estDossierLegislatif = (nom) =>
+  /(^|\/)dossierParlementaire\/DL[A-Z0-9]+\.json$/.test(nom);
+export const estDocument = (nom) => /(^|\/)document\/[A-Z0-9]+\.json$/.test(nom);
+const estDossierOuDocument = (nom) => estDossierLegislatif(nom) || estDocument(nom);
 
 /**
  * Ouvre les archives de la source choisie. Le résultat est le même pour les deux sources : les `sources`
- * (pour `meta.json`) et deux itérateurs de fichiers JSON bruts.
+ * (pour `meta.json`) et trois itérateurs de fichiers JSON bruts (scrutins ; acteurs et organes ; dossiers législatifs
+ * et documents).
  *
  * @param {object} options
  * @param {'officiel' | 'fixtures'} [options.depuis]
@@ -225,7 +231,7 @@ export const estOrgane = (nom) => /(^|\/)organe\/PO\d+\.json$/.test(nom);
  * @param {typeof fetch} [options.fetch]
  * @param {(message: string) => void} [options.journal]
  * @param {number[]} [options.pauses]
- * @returns {Promise<{ sources: { scrutins: SourceArchive, acteurs: SourceArchive }, scrutins: () => Iterable<[string, Uint8Array]>, acteurs: () => Iterable<[string, Uint8Array]> }>}
+ * @returns {Promise<{ sources: { scrutins: SourceArchive, acteurs: SourceArchive, dossiers: SourceArchive }, scrutins: () => Iterable<[string, Uint8Array]>, acteurs: () => Iterable<[string, Uint8Array]>, dossiers: () => Iterable<[string, Uint8Array]> }>}
  */
 export async function ouvrirArchives({
   depuis = 'officiel',
@@ -239,9 +245,10 @@ export async function ouvrirArchives({
     if (!existsSync(fixtures)) throw new Error(`fixtures introuvables : ${fixtures}`);
     const source = { url: fixtures.split(sep).join('/'), lastModified: null, etag: null };
     return {
-      sources: { scrutins: source, acteurs: source },
+      sources: { scrutins: source, acteurs: source, dossiers: source },
       scrutins: () => entreesDossier(fixtures, estScrutin),
       acteurs: () => entreesDossier(fixtures, (nom) => estActeur(nom) || estOrgane(nom)),
+      dossiers: () => entreesDossier(fixtures, estDossierOuDocument),
     };
   }
   if (depuis !== 'officiel')
@@ -249,13 +256,15 @@ export async function ouvrirArchives({
 
   // Chaque archive a son propre dossier de cache, et personne ne lance rien depuis ces dossiers.
   const options = { fetch: requete, journal, pauses };
-  const [scrutins, acteurs] = await Promise.all([
+  const [scrutins, acteurs, dossiers] = await Promise.all([
     telecharger({ url: URL_SCRUTINS, dossier: join(cache, 'scrutins'), ...options }),
     telecharger({ url: URL_ACTEURS, dossier: join(cache, 'acteurs'), ...options }),
+    telecharger({ url: URL_DOSSIERS, dossier: join(cache, 'dossiers'), ...options }),
   ]);
   return {
-    sources: { scrutins: scrutins.source, acteurs: acteurs.source },
+    sources: { scrutins: scrutins.source, acteurs: acteurs.source, dossiers: dossiers.source },
     scrutins: () => entreesZip(scrutins.octets, estScrutin),
     acteurs: () => entreesZip(acteurs.octets, (nom) => estActeur(nom) || estOrgane(nom)),
+    dossiers: () => entreesZip(dossiers.octets, estDossierOuDocument),
   };
 }

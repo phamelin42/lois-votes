@@ -123,4 +123,17 @@ describe('AProposPage', () => {
     expect(texte).toContain('Umami');
     expect(texte).toMatch(/sans cookie/i);
   });
+
+  it("explique la main levée et l'article 49.3, et cite les dossiers législatifs parmi les sources", () => {
+    const texte = afficher();
+
+    expect(texte).toContain('Adopté à main levée');
+    expect(texte).toContain('Pas de vote nominatif');
+    expect(texte).toContain('Considéré comme adopté (article 49.3)');
+    expect(texte).toMatch(
+      /considéré comme adopté sans vote, sauf si une motion de\s+censure est adoptée/,
+    );
+    expect(texte).toMatch(/dossiers\s+législatifs/);
+    expect(texte).toMatch(/rejeté sans scrutin public n'y figure\s+pas/);
+  });
 });

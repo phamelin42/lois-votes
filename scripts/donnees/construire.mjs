@@ -3,6 +3,7 @@
 
 import { CARACTERES_GROUPE } from '../../src/server/donnees.types.ts';
 import { classerTous } from './classer.mjs';
+import { DEBUT_LEGISLATURE, rattacher, textesSansVote } from './dossiers.mjs';
 
 /**
  * Contrôle de l'effectif : pour chaque scrutin, le nombre de députés « en mandat » (cases ≠ `-` de `votes.txt`) est
@@ -27,7 +28,13 @@ export const SEUILS_EFFECTIF = { tolerance: 3, grossier: 20, partGrossiere: 0.01
  * Seuils du plan : en dessous, l'archive est incomplète ou ce n'est pas la bonne. `effectif` est absent du mini-jeu de
  * fixtures (les listes nominatives y sont réduites à 99 députés : son effectif n'est pas celui de l'Assemblée).
  */
-export const SEUILS_OFFICIELS = { scrutins: 8000, deputes: 570, effectif: SEUILS_EFFECTIF };
+/** `dossiers` : dossiers de loi ayant une décision de séance dans la 17ᵉ législature (environ 200 le 09/11/2026). */
+export const SEUILS_OFFICIELS = {
+  scrutins: 8000,
+  deputes: 570,
+  dossiers: 100,
+  effectif: SEUILS_EFFECTIF,
+};
 
 /** Au plus ce nombre de scrutins dont le nombre de non-votants officiel diffère de la somme des groupes (corrigé). */
 export const MAX_NONVOTANTS_CORRIGES = 5;
@@ -275,7 +282,9 @@ export function couverture(deputes) {
  * @param {Map<string, string> | null} [entree.wikipedia] Articles Wikipédia par numéro d'acteur sans « PA » ; `null` quand Wikidata est indisponible.
  * @param {string[]} [entree.avertissements] Sources facultatives manquantes (`wikipedia`), recopiées dans `meta.json`.
  * @param {Date} [entree.maintenant]
- * @param {{ scrutins: number, deputes: number, effectif?: typeof SEUILS_EFFECTIF }} [entree.seuils] `effectif` absent : pas de contrôle de l'effectif (fixtures, tests).
+ * @param {{ scrutins: number, deputes: number, dossiers?: number, effectif?: typeof SEUILS_EFFECTIF }} [entree.seuils] `effectif` absent : pas de contrôle de l'effectif (fixtures, tests) ; `dossiers` absent : pas de minimum de dossiers de loi.
+ * @param {import('./lire.mjs').DossierLu[]} [entree.dossiers] Dossiers législatifs lus (`lireDossier`).
+ * @param {{ uid: string, titre: string | null }[]} [entree.documents] Titres des documents (`lireDocument`).
  */
 export function construire({
   scrutins,
@@ -286,6 +295,8 @@ export function construire({
   avertissements = [],
   maintenant = new Date(),
   seuils = SEUILS_OFFICIELS,
+  dossiers = [],
+  documents = [],
 }) {
   if (scrutins.length < seuils.scrutins) {
     throw new ErreurDonnees(
@@ -530,6 +541,31 @@ export function construire({
   const lignesGroupes = [];
   /** Députés en mandat et effectif officiel de chaque scrutin, pour le contrôle de l'effectif. */
   const effectifs = [];
+  // --- Dossiers législatifs : rattachement des scrutins, textes adoptés sans vote nominatif -------------------------
+  const lois = dossiers.filter(
+    (d) => d.estLoi && d.decisions.some((x) => x.date >= DEBUT_LEGISLATURE),
+  );
+  if (lois.length < (seuils.dossiers ?? 0)) {
+    throw new ErreurDonnees(
+      `${lois.length} dossiers de loi avec une décision de la 17ᵉ législature, au moins ${seuils.dossiers} attendus`,
+    );
+  }
+  const { dossierDe, rattaches, ambigus } = rattacher(
+    ordonnes.map((s) => ({ numero: s.lu.numero, dossier: s.lu.dossier })),
+    dossiers,
+  );
+  const textesSansVoteNominatif = textesSansVote({
+    dossiers,
+    titres: new Map(documents.map((d) => [d.uid, d.titre])),
+    scrutins: ordonnes.map((s, i) => ({
+      numero: s.lu.numero,
+      date: s.lu.date,
+      seance: s.lu.seance ?? null,
+      final: types[i] === 'final',
+    })),
+    dossierDe,
+  });
+
   const scrutinsFichier = ordonnes.map((s, i) => {
     const votes = new Array(deputes.length).fill('-');
     const parGroupe = new Array(deputes.length).fill('-');
@@ -569,7 +605,7 @@ export function construire({
       type: types[i],
       adopte: s.lu.sortCode === 'adopté',
       solennel: s.lu.codeTypeVote === 'SPS',
-      dossier: s.lu.dossier,
+      dossier: dossierDe.get(s.lu.numero) ?? null,
       compte: s.compte,
       groupes: s.entrees
         .map((e) => ({
@@ -616,6 +652,12 @@ export function construire({
       nonVotantsCorriges,
       effectif,
       couverture: couverture(deputes),
+      dossiers: {
+        lois: lois.length,
+        rattaches,
+        ambigus,
+        sansVoteNominatif: textesSansVoteNominatif.length,
+      },
     },
   };
 
@@ -626,6 +668,7 @@ export function construire({
     scrutins: scrutinsFichier,
     votes: lignesVotes,
     groupesVotes: lignesGroupes,
+    dossiers: textesSansVoteNominatif,
   };
   const fichiers = {
     'meta.json': JSON.stringify(meta),
@@ -634,6 +677,7 @@ export function construire({
     'scrutins.json': JSON.stringify(scrutinsFichier),
     'votes.txt': lignesVotes.join('\n'),
     'groupes-votes.txt': lignesGroupes.join('\n'),
+    'dossiers.json': JSON.stringify(textesSansVoteNominatif),
   };
   return { donnees, fichiers };
 }

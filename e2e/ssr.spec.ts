@@ -11,10 +11,12 @@ test.describe('rendu serveur (JavaScript désactivé)', () => {
     await expect(page).toHaveTitle(/Qui a voté quoi \?/);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(page.locator('app-loi-card')).toHaveCount(10);
-    await expect(page.locator('app-loi-card').first()).toContainText(/\d+\s%\spour \(\d+\)/);
-    await expect(page.locator('app-loi-card').first()).toContainText(
-      /\d+ n'(?:ont|a) pas voté sur \d+ en mandat/,
-    );
+    const avecVote = page.locator('app-loi-card', { has: page.locator('app-vote-bar') }).first();
+    await expect(avecVote).toContainText(/\d+\s%\spour \(\d+\)/);
+    await expect(avecVote).toContainText(/\d+ n'(?:ont|a) pas voté sur \d+ en mandat/);
+    // Sans JavaScript aussi, une carte adoptée sans vote nominatif le dit, et l'accueil donne le total.
+    await expect(page.locator('app-loi-card').first()).toContainText('Adopté à main levée');
+    await expect(page.locator('.app-accueil__total')).toContainText('13 textes depuis le');
   });
 
   test('loi : titre, vote final et tableau par groupe', async ({ page }) => {

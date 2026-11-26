@@ -1,8 +1,9 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Compte, Position, PositionGroupe, ScrutinDetail } from '@contrat';
 import { creerAgregation, type Agregation } from './agregation';
+import { chargerDonnees } from './donnees';
 import { GENERE_LE, produireDonneesDeTest, type DonneesDeTest } from './testing/donnees';
 
 const somme = (comptes: Compte[]): Compte =>
@@ -197,7 +198,12 @@ describe('agregation', () => {
         dossier: 'DLR5L17N53980',
         titreCourt: expect.stringMatching(/^Projet de loi visant à offrir/),
       });
-      expect((agregation.scrutin(5729) as ScrutinDetail).loi).toBeNull();
+      // 5729 n'indique pas son dossier : l'archive des dossiers le rattache à sa loi. 881 reste sans dossier.
+      expect((agregation.scrutin(5729) as ScrutinDetail).loi).toEqual({
+        dossier: 'DLR5L17N51670',
+        titreCourt: "Proposition de loi relative au droit à l'aide à mourir",
+      });
+      expect((agregation.scrutin(881) as ScrutinDetail).loi).toBeNull();
     });
 
     it('compte les députés en mandat (cases ≠ « - ») : au moins autant que les votants, pour chaque scrutin', () => {
@@ -231,8 +237,8 @@ describe('agregation', () => {
         expect(detail.solennel, `scrutin ${s.n}`).toBe(solennels.includes(s.n));
       }
       const accueil = agregation.accueil(1).lois;
-      expect(accueil.find((l) => l.voteFinal.numero === 8706)!.voteFinal.solennel).toBe(true);
-      expect(accueil.find((l) => l.voteFinal.numero === 8696)!.voteFinal.solennel).toBe(false);
+      expect(accueil.find((l) => l.voteFinal?.numero === 8706)!.voteFinal!.solennel).toBe(true);
+      expect(accueil.find((l) => l.voteFinal?.numero === 8696)!.voteFinal!.solennel).toBe(false);
       const loi = agregation.loi('DLR5L17N53980')!;
       expect(loi.voteFinal!.solennel).toBe(true);
       for (const r of [...loi.lectures, ...loi.scrutins]) {
@@ -242,41 +248,99 @@ describe('agregation', () => {
   });
 
   describe('accueil', () => {
-    it('liste les votes finaux, une carte par texte, du plus récent au plus ancien', () => {
-      const accueil = agregation.accueil(1);
+    /** Une carte par son vote final, ou par son dossier quand le texte a été adopté sans vote nominatif. */
+    const cle = (l: { voteFinal: { numero: number } | null; dossier: string | null }) =>
+      l.voteFinal?.numero ?? l.dossier;
 
-      // 8279 (première lecture du texte n°53980) est écarté : 8433 est le vote final le plus récent du dossier.
-      expect(accueil.lois.map((l) => l.voteFinal.numero)).toEqual([
-        8706, 8705, 8696, 8695, 8694, 8693, 8433, 5729, 3053, 881,
+    it('liste une carte par texte, votes finaux et adoptions sans vote nominatif, du plus récent au plus ancien', () => {
+      // 8279 (première lecture du texte n°53980) est écarté : 8433 est le vote final le plus récent du dossier. Les deux
+      // ratifications du 20/11/2026 ont été adoptées à main levée, le budget 2026 par l'article 49.3 (le 02/02/2026).
+      expect(agregation.accueil(1).lois.map(cle)).toEqual([
+        'DLR5L17N54168',
+        'DLR5L17N54169',
+        8706,
+        8705,
+        8696,
+        8695,
+        8694,
+        8693,
+        8433,
+        5729,
       ]);
-      expect(accueil.lois.every((l) => l.voteFinal.type === 'final')).toBe(true);
+      expect(agregation.accueil(2).lois.map(cle)).toEqual(['DLR5L17N52428', 3053, 881]);
+      const accueil = agregation.accueil(1);
+      expect(accueil.lois.every((l) => l.voteFinal === null || l.voteFinal.type === 'final')).toBe(
+        true,
+      );
       expect(accueil.page).toBe(1);
-      expect(accueil.pageSuivante).toBe(false);
+      expect(accueil.pageSuivante).toBe(true);
+      expect(agregation.accueil(2).pageSuivante).toBe(false);
       expect(accueil.miseAJour).toBe(GENERE_LE);
     });
 
+    it('donne le nombre de textes et la date du plus ancien, sur chaque page', () => {
+      for (const page of [1, 2, 3]) {
+        expect(agregation.accueil(page).total).toBe(13);
+        expect(agregation.accueil(page).depuis).toBe('2025-02-20');
+      }
+    });
+
     it('renvoie une page vide au-delà de la dernière', () => {
-      const accueil = agregation.accueil(2);
+      const accueil = agregation.accueil(3);
 
       expect(accueil.lois).toEqual([]);
       expect(accueil.pageSuivante).toBe(false);
     });
 
     it('dérive le titre court et la lecture du titre du scrutin, sans le point final', () => {
-      const carte = agregation.accueil(1).lois.find((l) => l.voteFinal.numero === 8433)!;
+      const carte = agregation.accueil(1).lois.find((l) => l.voteFinal?.numero === 8433)!;
 
       expect(carte.titreCourt).toMatch(/^Projet de loi visant à offrir des réponses immédiates/);
       expect(carte.titreCourt.endsWith('.')).toBe(false);
       expect(carte.titreOfficiel.endsWith('.')).toBe(true);
       expect(carte.lecture).toBe('texte de la commission mixte paritaire');
       expect(carte.statut).toBeNull();
-      expect(agregation.accueil(1).lois[0].lecture).toBe('première lecture');
+      expect(carte.adoptionSansVote).toBeNull();
+      expect(agregation.accueil(1).lois.find((l) => l.voteFinal?.numero === 8706)!.lecture).toBe(
+        'première lecture',
+      );
     });
 
-    it('garde un vote final sans dossier : il se lie à /scrutins/:numero', () => {
-      const sansDossier = agregation.accueil(1).lois.filter((l) => l.dossier === null);
+    it('décrit un texte adopté à main levée : pas de vote final, pas de groupes, sa lecture et sa date', () => {
+      const carte = agregation.accueil(1).lois[0];
 
-      expect(sansDossier.map((l) => l.voteFinal.numero)).toEqual([5729, 3053, 881]);
+      expect(carte).toEqual({
+        dossier: 'DLR5L17N54168',
+        titreCourt:
+          "Projet de loi autorisant l'approbation de l'accord entre le Gouvernement de la République française et le Gouvernement de la République unie de Tanzanie relatif aux services aériens",
+        // Le titre du dossier nomme le texte : il est gardé tel quel (apostrophes typographiques comprises).
+        titreOfficiel:
+          'Projet de loi autorisant l’approbation de l’accord entre le Gouvernement de la République française et le Gouvernement de la République unie de Tanzanie relatif aux services aériens',
+        lecture: 'première lecture',
+        statut: null,
+        voteFinal: null,
+        adoptionSansVote: { date: '2026-11-20', lecture: 'première lecture', mode: 'mainLevee' },
+        groupes: [],
+      });
+    });
+
+    it("décrit un texte adopté par l'article 49.3, avec le titre de son dossier", () => {
+      const carte = agregation.accueil(2).lois[0];
+
+      expect(carte.titreCourt).toBe('Projet de loi de finances pour 2026');
+      expect(carte.adoptionSansVote).toEqual({
+        date: '2026-02-02',
+        lecture: 'lecture définitive',
+        mode: 'article49-3',
+      });
+      expect(carte.lecture).toBe('lecture définitive');
+    });
+
+    it("rattache un vote final à son dossier par l'archive des dossiers, et en garde sans dossier", () => {
+      const toutes = [...agregation.accueil(1).lois, ...agregation.accueil(2).lois];
+
+      expect(toutes.find((l) => l.voteFinal?.numero === 5729)!.dossier).toBe('DLR5L17N51670');
+      expect(toutes.filter((l) => l.dossier === null).map(cle)).toEqual([3053, 881]);
     });
 
     it("affiche la lecture d'un texte de commission mixte paritaire telle quelle", () => {
@@ -289,8 +353,9 @@ describe('agregation', () => {
     });
 
     it('somme les groupes de chaque carte au décompte du vote final', () => {
-      for (const loi of agregation.accueil(1).lois) {
-        expect(somme(loi.groupes.map((g) => g.compte))).toEqual(loi.voteFinal.compte);
+      for (const loi of [...agregation.accueil(1).lois, ...agregation.accueil(2).lois]) {
+        if (loi.voteFinal === null) expect(loi.groupes).toEqual([]);
+        else expect(somme(loi.groupes.map((g) => g.compte))).toEqual(loi.voteFinal.compte);
       }
     });
   });
@@ -302,6 +367,7 @@ describe('agregation', () => {
       expect(loi.dossier).toBe('DLR5L17N53980');
       expect(loi.voteFinal?.numero).toBe(8433);
       expect(loi.voteFinal?.groupes.length).toBeGreaterThan(5);
+      expect(loi.adoptionSansVote).toBeNull();
       expect(loi.lectures.map((s) => s.numero)).toEqual([8279]);
       expect(loi.scrutins.map((s) => s.numero)).toEqual([8278, 8259]);
       expect(loi.scrutins.map((s) => s.type)).toEqual(['amendement', 'article']);
@@ -316,11 +382,40 @@ describe('agregation', () => {
       const loi = agregation.loi('DLR5L17N54629')!;
 
       expect(loi.voteFinal).toBeNull();
+      expect(loi.adoptionSansVote).toBeNull();
       expect(loi.lecture).toBeNull();
       expect(loi.lectures).toEqual([]);
       expect(loi.scrutins.map((s) => s.numero)).toEqual([8748]);
       // Le titre est tiré du texte cité par les amendements, pas « L'amendement n° … ».
       expect(loi.titreCourt).toBe('Projet de loi de finances pour 2027');
+    });
+
+    it('a une page pour un texte adopté sans aucun scrutin public (article 49.3), sans vote final', () => {
+      const loi = agregation.loi('DLR5L17N52428')!;
+
+      expect(loi).toEqual({
+        dossier: 'DLR5L17N52428',
+        titreCourt: 'Projet de loi de finances pour 2026',
+        titreOfficiel: 'Projet de loi de finances pour 2026',
+        lecture: 'lecture définitive',
+        statut: null,
+        urlDossier: null,
+        voteFinal: null,
+        adoptionSansVote: {
+          date: '2026-02-02',
+          lecture: 'lecture définitive',
+          mode: 'article49-3',
+        },
+        lectures: [],
+        scrutins: [],
+      });
+    });
+
+    it('ouvre sur sa loi un vote final rattaché par les dossiers', () => {
+      const loi = agregation.loi('DLR5L17N51670')!;
+
+      expect(loi.voteFinal?.numero).toBe(5729);
+      expect(loi.adoptionSansVote).toBeNull();
     });
 
     it('classe les scrutins du texte du plus récent au plus ancien', () => {
@@ -371,7 +466,10 @@ describe('agregation', () => {
 
       expect(liste.groupes.map((g) => g.abrege)).toContain('UDR');
       expect(liste.groupes.every((g) => g.id.startsWith('PO'))).toBe(true);
+      // Les textes de l'accueil qui ont un dossier, y compris ceux adoptés sans vote nominatif, dans le même ordre.
       expect(liste.loisRecentes.map((l) => l.dossier)).toEqual([
+        'DLR5L17N54168',
+        'DLR5L17N54169',
         'DLR5L17N54777',
         'DLR5L17N54776',
         'DLR5L17N53095',
@@ -379,8 +477,15 @@ describe('agregation', () => {
         'DLR5L17N53886',
         'DLR5L17N54445',
         'DLR5L17N53980',
+        'DLR5L17N51670',
+        'DLR5L17N52428',
       ]);
-      expect(liste.loisRecentes[0]).toEqual({
+      expect(liste.loisRecentes.at(-1)).toEqual({
+        dossier: 'DLR5L17N52428',
+        titreCourt: 'Projet de loi de finances pour 2026',
+        date: '2026-02-02',
+      });
+      expect(liste.loisRecentes[2]).toEqual({
         dossier: 'DLR5L17N54777',
         titreCourt: expect.stringMatching(/^Proposition de loi organique visant à adapter/),
         date: '2026-10-13',
@@ -512,11 +617,11 @@ describe('agregation', () => {
       }
     });
 
-    it('renvoie ses votes finaux sans dossier avec un dossier nul', () => {
+    it('renvoie ses votes finaux avec leur dossier, rattaché par les dossiers législatifs au besoin', () => {
       const depute = agregation.depute('jerome-guedj')!;
       const vote = depute.dernieresLois.find((v) => v.numero === 5729)!;
 
-      expect(vote.loi.dossier).toBeNull();
+      expect(vote.loi.dossier).toBe('DLR5L17N51670');
       expect(vote.loi.titreCourt).toBe("Proposition de loi relative au droit à l'aide à mourir");
     });
 
@@ -545,5 +650,44 @@ describe('agregation', () => {
     it("n'invente pas de député", () => {
       expect(agregation.depute('personne')).toBeNull();
     });
+  });
+});
+
+// Sur les vraies données, les motions de censure d'un texte adopté par le 49.3 sont rattachées à son dossier : sans vote
+// final, le titre ne doit pas venir de la motion (« La motion de censure déposée… », vu le 26/11/2026).
+describe('agregation : texte adopté par le 49.3 dont une motion de censure est rattachée', () => {
+  let jeu: DonneesDeTest;
+  let agregation: Agregation;
+
+  beforeAll(async () => {
+    jeu = await produireDonneesDeTest();
+    const chemin = join(jeu.dossier, 'scrutins.json');
+    const scrutins = JSON.parse(readFileSync(chemin, 'utf8')) as {
+      n: number;
+      dossier: string | null;
+    }[];
+    scrutins.find((s) => s.n === 7979)!.dossier = 'DLR5L17N52428';
+    writeFileSync(chemin, JSON.stringify(scrutins));
+    agregation = creerAgregation(chargerDonnees(jeu.dossier));
+  });
+  afterAll(() => jeu.nettoyer());
+
+  it('garde le titre du texte sur la carte, la page de la loi et la page du scrutin', () => {
+    const carte = agregation.accueil(2).lois.find((l) => l.dossier === 'DLR5L17N52428')!;
+
+    expect(carte.titreCourt).toBe('Projet de loi de finances pour 2026');
+    expect(agregation.loi('DLR5L17N52428')!.titreCourt).toBe('Projet de loi de finances pour 2026');
+    expect((agregation.scrutin(7979) as ScrutinDetail).loi).toEqual({
+      dossier: 'DLR5L17N52428',
+      titreCourt: 'Projet de loi de finances pour 2026',
+    });
+  });
+
+  it('range la motion parmi les autres scrutins du texte, sous la décision 49.3', () => {
+    const loi = agregation.loi('DLR5L17N52428')!;
+
+    expect(loi.adoptionSansVote?.mode).toBe('article49-3');
+    expect(loi.voteFinal).toBeNull();
+    expect(loi.scrutins.map((s) => [s.numero, s.type])).toEqual([[7979, 'motion']]);
   });
 });

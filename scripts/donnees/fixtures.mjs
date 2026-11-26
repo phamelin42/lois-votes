@@ -7,16 +7,30 @@
 //                                      publiables, mandats de député de toutes les législatures, mandats de groupe, de bureau,
 //                                      de commission permanente et de parti de la 17ᵉ législature),
 //   json/organe/PO<n>.json             groupes politiques de la 17ᵉ législature, et organes cités par ces mandats,
-//   wikidata.json                      extrait de la réponse de Wikidata (articles Wikipédia) pour ces députés.
+//   wikidata.json                      extrait de la réponse de Wikidata (articles Wikipédia) pour ces députés,
+//   json/dossierParlementaire/DL….json dossiers législatifs retenus (voir choisirDossiers), réduits aux actes utiles,
+//   json/document/….json               titres des textes adoptés que citent ces dossiers.
+// `--dossiers` ne régénère que les dossiers (et la séance des scrutins), sans changer le choix des scrutins.
 // Les listes nominatives et les décomptes des scrutins sont réduits aux députés retenus : les effectifs du jeu sont
 // donc ceux de l'échantillon, pas les totaux officiels (le résultat « adopté » ou « rejeté » reste l'officiel).
 
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { classerTous } from './classer.mjs';
-import { liste, lireActeur, lireOrgane, lireScrutin } from './lire.mjs';
-import { estOrgane, ouvrirArchives } from './telecharger.mjs';
+import { rattacher, textesSansVote } from './dossiers.mjs';
+import {
+  actes,
+  lectureDeCode,
+  liste,
+  lireActeur,
+  lireDocument,
+  lireDossier,
+  lireOrgane,
+  lireScrutin,
+  scrutinsCites,
+} from './lire.mjs';
+import { estDocument, estDossierLegislatif, estOrgane, ouvrirArchives } from './telecharger.mjs';
 import { telechargerWikidata } from './wikipedia.mjs';
 
 const DESTINATION = join('src', 'server', 'fixtures', 'officiel');
@@ -128,10 +142,7 @@ export function reduireScrutin(brut, retenus) {
     s.miseAuPoint = { ...listes, ...(dysfonctionnement ? { dysfonctionnement } : {}) };
   }
   for (const cle of Object.keys(s))
-    if (
-      cle.startsWith('@') ||
-      ['demandeur', 'seanceRef', 'sessionRef', 'quantiemeJourSeance'].includes(cle)
-    )
+    if (cle.startsWith('@') || ['demandeur', 'sessionRef', 'quantiemeJourSeance'].includes(cle))
       delete s[cle];
   return { scrutin: s };
 }
@@ -435,6 +446,7 @@ export async function genererFixtures({
     }
   }
   await ecrireWikidata(destination, retenus, journal);
+  ecrireDossiers({ destination, archives, journal });
   journal(`[fixtures] ${nbOrganes} organes, écrit dans ${destination}`);
 }
 
@@ -456,8 +468,188 @@ async function ecrireWikidata(destination, retenus, journal) {
   journal(`[fixtures] wikidata.json : ${bindings.length} articles pour ${numeros.size} députés`);
 }
 
+// --- Dossiers législatifs ----------------------------------------------------------------------------------------
+
+/** Un acte réduit : sans ses sous-actes (on garde une liste plate des actes retenus). */
+const sansSousActes = (acte) => ({ ...structuredClone(acte), actesLegislatifs: null });
+
+/**
+ * Un dossier brut réduit aux actes que `garder` retient, à plat, et à ce que lit `lireDossier`.
+ * @param {any} brut `{ dossierParlementaire: … }`
+ * @param {(acte: any) => boolean} garder
+ */
+export function reduireDossier(brut, garder) {
+  const d = brut.dossierParlementaire;
+  const gardes = [...actes(d.actesLegislatifs)].filter(garder).map(sansSousActes);
+  return {
+    dossierParlementaire: {
+      '@xsi:type': d['@xsi:type'],
+      uid: d.uid,
+      legislature: d.legislature,
+      titreDossier: { titre: d.titreDossier?.titre ?? null },
+      procedureParlementaire: {
+        code: d.procedureParlementaire?.code ?? null,
+        libelle: d.procedureParlementaire?.libelle ?? null,
+      },
+      // Comme l'archive : un seul acte est un objet, plusieurs forment un tableau.
+      actesLegislatifs: { acteLegislatif: gardes.length === 1 ? gardes[0] : gardes },
+    },
+  };
+}
+
+/** Un document brut réduit à son identifiant et à son titre principal. */
+export function reduireDocument(brut) {
+  return {
+    document: {
+      uid: brut.document.uid,
+      titres: { titrePrincipal: brut.document.titres?.titrePrincipal ?? null },
+    },
+  };
+}
+
+/**
+ * Les dossiers du jeu de test, choisis sur les vraies archives :
+ * - le dossier de loi de chaque scrutin du jeu qui n'a pas de dossier propre mais qu'un dossier cite, sauf pour le plus
+ *   ancien vote final concerné, qui reste sans dossier (le cas existe toujours : `/scrutins/:numero`) ; on n'en garde que
+ *   les décisions et motions qui citent un scrutin du jeu ;
+ * - les deux textes les plus récents dont la dernière décision est une adoption à main levée, et le plus récent adopté
+ *   par l'article 49.3 ; on n'en garde que cette décision.
+ *
+ * @param {object} entree
+ * @param {import('./lire.mjs').ScrutinLu[]} entree.scrutins Tous les scrutins de l'archive.
+ * @param {import('./lire.mjs').DossierLu[]} entree.dossiers Tous les dossiers de l'archive.
+ * @param {number[]} entree.numeros Scrutins du jeu.
+ * @returns {{ uid: string, scrutins: Set<number>, decision: { date: string, lecture: string } | null }[]}
+ */
+export function choisirDossiers({ scrutins, dossiers, numeros }) {
+  const ordonnes = [...scrutins].sort(parNumeroDecroissant);
+  const types = classerTous(ordonnes.map((s) => ({ titre: s.titre, typeVote: s.codeTypeVote })));
+  const { dossierDe } = rattacher(ordonnes, dossiers);
+  const jeu = new Set(numeros);
+  const choix = new Map();
+
+  const rattachables = ordonnes
+    .map((s, i) => ({ s, final: types[i] === 'final' }))
+    .filter(({ s }) => jeu.has(s.numero) && s.dossier === null && dossierDe.get(s.numero));
+  const gardeSansDossier = rattachables.filter(({ final }) => final).at(-1)?.s.numero;
+  for (const { s } of rattachables) {
+    if (s.numero === gardeSansDossier) continue;
+    const uid = dossierDe.get(s.numero);
+    const deja = choix.get(uid) ?? { uid, scrutins: new Set(), decision: null };
+    deja.scrutins.add(s.numero);
+    choix.set(uid, deja);
+  }
+
+  const textes = textesSansVote({
+    dossiers,
+    titres: new Map(),
+    scrutins: ordonnes.map((s, i) => ({
+      numero: s.numero,
+      date: s.date,
+      seance: s.seance,
+      final: types[i] === 'final',
+    })),
+    dossierDe,
+  });
+  const parUid = new Map(dossiers.map((d) => [d.uid, d]));
+  // La décision sans vote doit être la dernière de l'Assemblée sur le texte : c'est elle qui fait sa carte.
+  const derniere = (t) =>
+    parUid.get(t.id).decisions.every((x) => x.date <= t.decisions[0].date) && !choix.has(t.id);
+  const retenus = [
+    ...textes.filter((t) => t.decisions[0].mode === 'mainLevee' && derniere(t)).slice(0, 2),
+    ...textes.filter((t) => t.decisions[0].mode === 'article49-3' && derniere(t)).slice(0, 1),
+  ];
+  for (const t of retenus)
+    choix.set(t.id, {
+      uid: t.id,
+      scrutins: new Set(),
+      decision: { date: t.decisions[0].date, lecture: t.decisions[0].lecture },
+    });
+  return [...choix.values()].sort((a, b) => (a.uid < b.uid ? -1 : 1));
+}
+
+/** Retient un acte brut d'après un choix de {@link choisirDossiers}. */
+function acteRetenu(choix) {
+  return (acte) => {
+    const type = acte['@xsi:type'];
+    if (type === 'DecisionMotionCensure_Type')
+      return scrutinsCites(acte.voteRefs).some((n) => choix.scrutins.has(n));
+    if (type !== 'Decision_Type') return false;
+    if (scrutinsCites(acte.voteRefs).some((n) => choix.scrutins.has(n))) return true;
+    const date = typeof acte.dateActe === 'string' ? acte.dateActe.slice(0, 10) : null;
+    return (
+      choix.decision !== null &&
+      date === choix.decision.date &&
+      lectureDeCode(acte.codeActe) === choix.decision.lecture
+    );
+  };
+}
+
+/**
+ * Écrit les dossiers (et les titres de leurs textes) du jeu, et ajoute la séance réelle aux scrutins du jeu déjà écrits.
+ * @param {object} entree
+ * @param {string} entree.destination
+ * @param {Awaited<ReturnType<typeof ouvrirArchives>>} entree.archives Archives officielles ouvertes.
+ * @param {(message: string) => void} entree.journal
+ */
+export function ecrireDossiers({ destination, archives, journal }) {
+  const scrutins = [];
+  for (const [, octets] of archives.scrutins()) scrutins.push(lireScrutin(json(octets)));
+  const dossiers = [];
+  for (const [nom, octets] of archives.dossiers())
+    if (estDossierLegislatif(nom)) dossiers.push(lireDossier(json(octets)));
+  const dossierScrutins = join(destination, 'json', 'scrutins');
+  const numeros = readdirSync(dossierScrutins).map((f) => Number(/V(\d+)\.json$/.exec(f)[1]));
+  const choix = new Map(choisirDossiers({ scrutins, dossiers, numeros }).map((c) => [c.uid, c]));
+
+  rmSync(join(destination, 'json', 'dossierParlementaire'), { recursive: true, force: true });
+  rmSync(join(destination, 'json', 'document'), { recursive: true, force: true });
+  const textes = new Set();
+  for (const [nom, octets] of archives.dossiers()) {
+    if (!estDossierLegislatif(nom)) continue;
+    const brut = json(octets);
+    const c = choix.get(brut.dossierParlementaire.uid);
+    if (!c) continue;
+    const reduit = reduireDossier(brut, acteRetenu(c));
+    for (const d of lireDossier(reduit).decisions) d.textes.forEach((t) => textes.add(t));
+    ecrire(destination, `json/dossierParlementaire/${c.uid}.json`, reduit);
+  }
+  for (const [nom, octets] of archives.dossiers()) {
+    if (!estDocument(nom)) continue;
+    const brut = json(octets);
+    if (!textes.has(lireDocument(brut).uid)) continue;
+    ecrire(destination, `json/document/${brut.document.uid}.json`, reduireDocument(brut));
+  }
+
+  // La séance de chaque scrutin du jeu, que le jeu n'avait pas avant les dossiers.
+  const seances = new Map(scrutins.map((s) => [s.numero, s.seance]));
+  for (const f of readdirSync(dossierScrutins)) {
+    const chemin = join(dossierScrutins, f);
+    const brut = JSON.parse(readFileSync(chemin, 'utf8'));
+    const seance = seances.get(Number(brut.scrutin.numero)) ?? null;
+    if (seance) brut.scrutin.seanceRef = seance;
+    writeFileSync(chemin, JSON.stringify(brut));
+  }
+  journal(
+    `[fixtures] ${choix.size} dossiers et ${textes.size} textes cités, séance ajoutée aux scrutins`,
+  );
+}
+
+/**
+ * Régénère seulement les dossiers du jeu (`--dossiers`), sans toucher au choix des scrutins ni des députés.
+ * @param {{ destination?: string, cache?: string, journal?: (message: string) => void }} [options]
+ */
+export async function genererDossiers({
+  destination = DESTINATION,
+  cache,
+  journal = console.log,
+} = {}) {
+  const archives = await ouvrirArchives({ depuis: 'officiel', cache, journal });
+  ecrireDossiers({ destination, archives, journal });
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  genererFixtures().catch((erreur) => {
+  (process.argv.includes('--dossiers') ? genererDossiers() : genererFixtures()).catch((erreur) => {
     console.error(`[fixtures] ÉCHEC : ${erreur.message}`);
     process.exit(1);
   });

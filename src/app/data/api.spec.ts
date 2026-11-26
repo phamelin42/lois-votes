@@ -28,15 +28,22 @@ describe('services de données (httpResource)', () => {
       lois: [],
       page: 1,
       pageSuivante: true,
+      total: 0,
+      depuis: null,
       miseAJour: '2025-01-01T00:00:00Z',
     } satisfies Accueil);
     await vi.waitFor(() => expect(ressource.value()?.pageSuivante).toBe(true));
 
     page.set(2);
     TestBed.tick();
-    http
-      .expectOne('/api/accueil?page=2')
-      .flush({ lois: [], page: 2, pageSuivante: false, miseAJour: '' } satisfies Accueil);
+    http.expectOne('/api/accueil?page=2').flush({
+      lois: [],
+      page: 2,
+      pageSuivante: false,
+      total: 0,
+      depuis: null,
+      miseAJour: '',
+    } satisfies Accueil);
     await vi.waitFor(() => expect(ressource.value()?.page).toBe(2));
   });
 

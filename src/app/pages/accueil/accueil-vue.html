@@ -15,9 +15,16 @@
 
   @if (donnees(); as page) {
     @if (page.lois.length > 0) {
-      <h2 class="app-accueil__liste-titre">Lois votées, de la plus récente à la plus ancienne</h2>
+      <h2 class="app-accueil__liste-titre">Textes de loi, du plus récent au plus ancien</h2>
+      @if (page.depuis; as depuis) {
+        <p class="app-accueil__total caption">
+          {{ page.total }} {{ page.total > 1 ? 'textes' : 'texte' }} depuis le
+          <time [attr.datetime]="depuis">{{ dateLongue(depuis) }}</time
+          >. Un texte adopté à main levée ou par l'article 49.3 n'a pas de vote nominatif.
+        </p>
+      }
       <ul class="app-accueil__liste">
-        @for (loi of page.lois; track loi.voteFinal.numero) {
+        @for (loi of page.lois; track loi.voteFinal?.numero ?? loi.dossier) {
           <li><app-loi-card [loi]="loi" /></li>
         }
       </ul>

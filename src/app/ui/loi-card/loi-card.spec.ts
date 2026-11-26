@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { dateCourte } from '../../data/format';
-import { loiCarte } from '../../testing/builders';
+import { loiCarte, loiCarteSansVote } from '../../testing/builders';
 import { AppLoiCard } from './loi-card';
 
 function monter(loi = loiCarte()) {
@@ -72,7 +72,7 @@ describe('AppLoiCard', () => {
 
   it("affiche « Rejeté par l'Assemblée »", () => {
     const { racine } = monter(
-      loiCarte('DLR5L17N1', 1, { voteFinal: { ...loiCarte().voteFinal, adopte: false } }),
+      loiCarte('DLR5L17N1', 1, { voteFinal: { ...loiCarte().voteFinal!, adopte: false } }),
     );
 
     expect(racine.querySelector('fd-badge')!.textContent!.trim()).toBe("Rejeté par l'Assemblée");
@@ -104,7 +104,7 @@ describe('AppLoiCard', () => {
 
   it('écrit « Vote ordinaire » à côté du résultat', () => {
     const { racine } = monter(
-      loiCarte('DLR5L17N1', 1, { voteFinal: { ...loiCarte().voteFinal, solennel: false } }),
+      loiCarte('DLR5L17N1', 1, { voteFinal: { ...loiCarte().voteFinal!, solennel: false } }),
     );
 
     expect(
@@ -124,5 +124,48 @@ describe('AppLoiCard', () => {
     const { lien } = monter();
 
     expect(lien.textContent).toContain('Projet de loi relatif à la sobriété foncière');
+  });
+
+  describe('texte adopté sans vote nominatif', () => {
+    it('dit « Adopté à main levée » et « Pas de vote nominatif », sans barre de vote ni groupes', () => {
+      const { racine } = monter(loiCarteSansVote());
+
+      expect(racine.querySelector('fd-badge')!.textContent!.trim()).toBe('Adopté à main levée');
+      expect(racine.querySelector('.app-loi-card__officiel')!.textContent!.trim()).toBe(
+        "Pas de vote nominatif : l'Assemblée a adopté ce texte à main levée.",
+      );
+      expect(racine.querySelector('app-vote-bar')).toBeNull();
+      expect(racine.querySelector('app-group-pills')).toBeNull();
+      expect(racine.querySelector('app-type-vote')).toBeNull();
+    });
+
+    it("dit « Considéré comme adopté (article 49.3) » et « Sans vote » pour l'article 49.3", () => {
+      const { racine } = monter(
+        loiCarteSansVote('DLR5L17N52428', {
+          adoptionSansVote: {
+            date: '2026-02-02',
+            lecture: 'lecture définitive',
+            mode: 'article49-3',
+          },
+        }),
+      );
+
+      expect(racine.querySelector('fd-badge')!.textContent!.trim()).toBe(
+        'Considéré comme adopté (article 49.3)',
+      );
+      expect(racine.querySelector('.app-loi-card__officiel')!.textContent!.trim()).toMatch(
+        /^Sans vote\u00a0: le Gouvernement a engagé sa responsabilité et aucune motion de censure n'a été adoptée\.$/,
+      );
+    });
+
+    it('pointe vers la page de la loi et date la carte du jour de la décision', () => {
+      const { racine, lien } = monter(loiCarteSansVote());
+
+      expect(lien.getAttribute('href')).toBe('/lois/DLR5L17N54168');
+      const date = racine.querySelector('time')!;
+      expect(date.getAttribute('datetime')).toBe('2026-11-20');
+      expect(date.textContent!.trim()).toBe(dateCourte('2026-11-20'));
+      expect(racine.textContent).not.toMatch(/loi adoptée/i);
+    });
   });
 });

@@ -8,6 +8,7 @@ import {
   type Donnees,
   type DonneesMeta,
   type DeputeFichier,
+  type DossierFichier,
   type GroupeFichier,
   type ScrutinFichier,
 } from '../../src/server/donnees.types';
@@ -38,6 +39,7 @@ const lireDossier = (dossier: string): Donnees => {
     scrutins: json<ScrutinFichier[]>('scrutins.json'),
     votes: lignes('votes.txt'),
     groupesVotes: lignes('groupes-votes.txt'),
+    dossiers: json<DossierFichier[]>('dossiers.json'),
   };
 };
 
@@ -226,6 +228,27 @@ function ecarts(d: Donnees): string[] {
     );
   });
 
+  // dossiers.json : textes adoptés sans vote nominatif (PLAN.md, « Textes adoptés sans vote nominatif »).
+  verifie(meta.statistiques.dossiers?.sansVoteNominatif === d.dossiers.length, 'meta : dossiers');
+  verifie(typeof meta.sources.dossiers?.url === 'string', 'meta : source des dossiers');
+  const vus = new Set<string>();
+  d.dossiers.forEach((t, i) => {
+    verifie(/^DL[A-Z0-9]+$/.test(t.id) && !vus.has(t.id), `dossiers[${i}] : identifiant`);
+    vus.add(t.id);
+    verifie(typeof t.titre === 'string' && t.titre !== '', `dossiers[${i}] : titre`);
+    verifie(t.decisions.length > 0, `dossiers[${i}] : décisions`);
+    t.decisions.forEach((x, j) => {
+      verifie(DATE.test(x.date) && x.date >= '2024-07-18', `dossiers[${i}].decisions[${j}] : date`);
+      verifie(typeof x.lecture === 'string' && x.lecture !== '', `dossiers[${i}] : lecture`);
+      verifie(['mainLevee', 'article49-3'].includes(x.mode), `dossiers[${i}] : mode`);
+      verifie(j === 0 || t.decisions[j - 1].date >= x.date, `dossiers[${i}] : ordre`);
+    });
+    verifie(
+      i === 0 || (d.dossiers[i - 1].decisions[0]?.date ?? '') >= (t.decisions[0]?.date ?? ''),
+      `dossiers[${i}] : ordre des textes`,
+    );
+  });
+
   verifie(
     d.votes.length === d.scrutins.length && d.groupesVotes.length === d.scrutins.length,
     'matrices : une ligne par scrutin',
@@ -380,7 +403,7 @@ describe('npm run donnees, en mode fixtures', () => {
   });
   afterAll(() => rmSync(sortie, { recursive: true, force: true }));
 
-  it("écrit les six fichiers de data/, et rien d'autre", () => {
+  it("écrit les sept fichiers de data/, et rien d'autre", () => {
     expect(readdirSync(join(sortie, 'data')).sort()).toEqual([...FICHIERS_DONNEES].sort());
     expect(readdirSync(sortie)).toEqual(['data']);
   });
@@ -394,7 +417,8 @@ describe('npm run donnees, en mode fixtures', () => {
     casse.votes[0] = casse.votes[0].slice(1);
     casse.scrutins[0].type = 'inconnu' as never;
     casse.deputes[1].slug = casse.deputes[0].slug;
-    expect(ecarts(casse).length).toBeGreaterThanOrEqual(3);
+    casse.dossiers.push({ id: 'X', titre: '', decisions: [] });
+    expect(ecarts(casse).length).toBeGreaterThanOrEqual(5);
   });
 
   it("daté de l'appel et sourcé sur les fixtures", () => {
@@ -440,6 +464,17 @@ describe('npm run donnees, en mode fixtures', () => {
     it('un vote « article unique » compté comme final, et des votes finaux sans dossier', () => {
       expect(finals().some((s) => /^l'article unique\b/.test(s.titre))).toBe(true);
       expect(finals().some((s) => s.dossier === null)).toBe(true);
+    });
+
+    it("des scrutins rattachés à leur dossier par l'archive des dossiers législatifs", () => {
+      expect(donnees.meta.statistiques.dossiers.rattaches).toBeGreaterThan(0);
+      expect(donnees.meta.statistiques.dossiers.lois).toBeGreaterThan(0);
+    });
+
+    it("un texte adopté à main levée et un texte adopté par l'article 49.3", () => {
+      const modes = donnees.dossiers.flatMap((t) => t.decisions.map((x) => x.mode));
+      expect(modes).toContain('mainLevee');
+      expect(modes).toContain('article49-3');
     });
 
     it('au moins 6 amendements ou articles', () => {

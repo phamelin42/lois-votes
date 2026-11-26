@@ -22,6 +22,7 @@ Décisions :
 |---|---|---|
 | Scrutins | `loi/scrutins/Scrutins.json.zip` | 27,6 Mo ; 8 877 fichiers, 181 Mo décompressés ; régénérée chaque nuit (~04:25 GMT), ETag (le CDN sert parfois deux versions le même jour) |
 | Acteurs, mandats, organes | `amo/tous_acteurs_mandats_organes_xi_legislature/AMO30_tous_acteurs_tous_mandats_tous_organes_historique.json.zip` | 14 Mo ; acteurs, mandats, organes (groupes) |
+| Dossiers législatifs | `loi/dossiers_legislatifs/Dossiers_Legislatifs.json.zip` | 11 Mo ; 3 402 dossiers (toutes législatures) et 7 622 documents (09/11/2026) ; on lit les décisions de séance de la 17ᵉ et le titre des textes adoptés |
 
 Photos officielles : `https://www.assemblee-nationale.fr/dyn/static/tribun/17/photos/carre/<numéro du PA sans le préfixe PA>.jpg` (environ 47 Ko en moyenne, 58 Ko pour la plus lourde mesurée sur Sébastien Chenu : la liste des députés n'en montre que 60 à la fois, en chargement paresseux ; aucun service de redimensionnement). Lien d'un scrutin : `https://www.assemblee-nationale.fr/dyn/17/scrutins/<numero>`.
 
@@ -74,6 +75,17 @@ Téléchargement échoué    le build échoue : l'ancien déploiement reste en l
 - **« En mandat » = de la prise de fonction à la fin du mandat.** Un mandat de remplaçant (nommé au gouvernement, démissionnaire, décédé, retour d'un ministre : 96 mandats sur 683) a pour `dateDebut` l'élection générale de 2024 ; le jour réel est `mandature.datePriseFonction`. Lu tel quel, `enMandat` dépassait l'effectif officiel de 0 à 65 députés (609 pour 575 le 9 décembre 2025) et la participation des remplaçants s'effondrait (Pauline Cestrières : 10 % au lieu de 35 %). Après correction, l'écart va de -1 à +1 (98,4 % des scrutins exacts). Mesures, cas lus et résidus dans DONNEES.md, « Effectif en mandat ».
 - **Garde-fou** : à chaque préparation, `enMandat` est comparé à la somme des `nombreMembresGroupe` de chaque scrutin. Tolérance de 3 (avertissement au-delà), échec si plus de 1 % des scrutins s'écartent de plus de 20. Le format de `data/` ne change pas, et `meta.statistiques.effectif` garde la mesure.
 - **Fiche** : `mandat.depuis` est la prise de fonction d'un remplaçant, la date d'élection d'un élu. `/a-propos` explique ce que « en mandat » veut dire.
+
+### Décisions validées (09/11 et 26/11/2026) : textes adoptés sans vote nominatif
+
+Constat (archives du 09/11/2026) : l'archive des scrutins ne contient que les **scrutins publics** ; 222 portent sur l'ensemble d'un texte. Les textes adoptés **à main levée** (surtout des ratifications de traités) ou **sans vote par l'article 49, alinéa 3** (budgets 2025 et 2026, sécurité sociale 2025) n'y sont pas, et le site semblait avoir « très peu de lois ».
+
+- **Troisième archive officielle** : les dossiers législatifs (`loi/dossiers_legislatifs/Dossiers_Legislatifs.json.zip`, 11 Mo), lue au build comme les deux autres. On n'en garde que les dossiers de loi (procédure « … de loi … » ou ratification) et les **décisions de séance de l'Assemblée** de la 17ᵉ législature.
+- **Ajoutés à l'accueil** (choix de Phil : « main levée et 49.3 ») : un texte dont la dernière décision de l'Assemblée est une **adoption à main levée** ou une **adoption par l'article 49.3**. Les textes rejetés sans scrutin, ou par une motion de rejet préalable, ne sont pas ajoutés.
+- **Libellés** : « Adopté à main levée » avec « Pas de vote nominatif », et « Considéré comme adopté (article 49.3) » avec « Sans vote ». Mêlés aux autres cartes, par date de la dernière décision.
+- **Prudence sur « main levée »** : une décision sans référence de scrutin n'est dite « à main levée » que si sa séance ne contient aucun vote sur l'ensemble d'un texte qui pourrait être le sien (non rattaché à un autre dossier). Sinon elle est écartée : l'archive des dossiers omet parfois la référence d'un scrutin qui existe (29 décisions le 09/11/2026), et un « à main levée » faux serait une erreur de fait.
+- **Rattachement des scrutins à leur dossier** : le dossier indiqué par le scrutin, sinon celui des décisions qui le citent (`voteRefs`), seulement s'il n'y en a qu'un parmi les dossiers de loi. 199 votes finaux sur 222 ont alors un dossier (80 avant) et s'ouvrent sur la page de leur loi ; cela évite aussi deux cartes pour un même texte.
+- **Total sur l'accueil** : le nombre de textes et la date du plus ancien ; `/a-propos` explique la main levée, le 49.3 et ce rattachement.
 
 ### Serveur : `src/server/`
 

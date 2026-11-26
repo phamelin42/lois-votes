@@ -13,7 +13,13 @@ import {
 import type { LoiDetail, ScrutinResume } from '@contrat';
 import { LoiApi } from '../../data/loi-api';
 import { AppLienVisible } from '../../data/lien-visible';
-import { dateCourte, dateLongue, libelleAdoption } from '../../data/format';
+import {
+  dateCourte,
+  dateLongue,
+  explicationSansVote,
+  libelleAdoption,
+  libelleSansVote,
+} from '../../data/format';
 import { AppPrefetch } from '../../data/prefetch';
 import { PageMeta } from '../../data/page-meta';
 import { valeurDe } from '../../data/ressource';
@@ -96,6 +102,8 @@ export class LoiPage {
   protected readonly dateLongue = dateLongue;
   protected readonly dateCourte = dateCourte;
   protected readonly libelleAdoption = libelleAdoption;
+  protected readonly libelleSansVote = libelleSansVote;
+  protected readonly explicationSansVote = explicationSansVote;
 
   constructor() {
     statutDePage(this.ressource);

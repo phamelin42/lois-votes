@@ -1,5 +1,14 @@
 // @vitest-environment node
-import { entier, liste, lireActeur, lireOrgane, lirePosition, lireScrutin } from './lire.mjs';
+import {
+  entier,
+  liste,
+  lireActeur,
+  lireDocument,
+  lireDossier,
+  lireOrgane,
+  lirePosition,
+  lireScrutin,
+} from './lire.mjs';
 
 // Les bruts ci-dessous sont des extraits réels de l'archive (scrutin 8317, acteur PA720468, organe PO845401),
 // réduits mais gardant leurs particularités : objets à la place de listes d'un élément, `null`, chaînes.
@@ -15,6 +24,7 @@ const brutScrutin = () => ({
   scrutin: {
     uid: 'VTANR5L17V8317',
     numero: '8317',
+    seanceRef: 'RUANR5L17S2026IDS30868',
     dateScrutin: '2026-07-16',
     typeVote: { codeTypeVote: 'SPO', libelleTypeVote: 'scrutin public ordinaire' },
     sort: { code: 'rejeté', libelle: "L'Assemblée nationale n'a pas adopté" },
@@ -133,9 +143,16 @@ describe('lireScrutin', () => {
       codeTypeVote: 'SPO',
       sortCode: 'rejeté',
       dossier: 'DLR5L17N54372',
+      seance: 'RUANR5L17S2026IDS30868',
       compte: { pour: 37, contre: 87, abstention: 0, nonvotant: 2 },
     });
     expect(scrutin.titre).toContain("l'amendement n° 770");
+  });
+
+  it("n'a pas de séance quand l'archive n'en donne pas", () => {
+    const brut = brutScrutin();
+    delete (brut.scrutin as { seanceRef?: string }).seanceRef;
+    expect(lireScrutin(brut).seance).toBeNull();
   });
 
   it('lit les listes nominatives, y compris celles réduites à un objet ou à null', () => {
@@ -416,6 +433,230 @@ describe('lireOrgane', () => {
       fin: null,
       legislature: null,
       preseance: 999,
+    });
+  });
+});
+
+// Extrait réel réduit du dossier DLR5L17N52428 (projet de loi de finances pour 2026, archive du 09/11/2026) : décisions
+// de l'Assemblée et du Sénat, CMP, motions de censure et adoptions par l'article 49, alinéa 3.
+const brutDossier = () => ({
+  dossierParlementaire: {
+    '@xsi:type': 'DossierLegislatif_Type',
+    uid: 'DLR5L17N52428',
+    legislature: '17',
+    titreDossier: { titre: 'Projet de loi de finances pour 2026', titreChemin: 'PLF_2026' },
+    procedureParlementaire: { code: '3', libelle: "Projet de loi de finances de l'année" },
+    actesLegislatifs: {
+      acteLegislatif: [
+        {
+          '@xsi:type': 'Etape_Type',
+          codeActe: 'AN1',
+          dateActe: null,
+          actesLegislatifs: {
+            acteLegislatif: {
+              '@xsi:type': 'Etape_Type',
+              codeActe: 'AN1-DEBATS',
+              actesLegislatifs: {
+                acteLegislatif: {
+                  '@xsi:type': 'Decision_Type',
+                  codeActe: 'AN1-DEBATS-DEC',
+                  dateActe: '2025-11-21T00:00:00.000+01:00',
+                  statutConclusion: { fam_code: 'TSORTF07', libelle: 'rejeté' },
+                  reunionRef: 'RUANR5L17S2026IDS29940',
+                  voteRefs: { voteRef: 'VTANR5L17V4241' },
+                  textesAssocies: {
+                    texteAssocie: { typeTexte: 'BTA', refTexteAssocie: 'PRJLANR5L17BTA0180' },
+                  },
+                  actesLegislatifs: null,
+                },
+              },
+            },
+          },
+        },
+        {
+          '@xsi:type': 'Etape_Type',
+          codeActe: 'SN1',
+          actesLegislatifs: {
+            acteLegislatif: {
+              '@xsi:type': 'Decision_Type',
+              codeActe: 'SN1-DEBATS-DEC',
+              dateActe: '2025-12-15T00:00:00.000+01:00',
+              statutConclusion: { libelle: 'modifié' },
+              voteRefs: null,
+              reunionRef: null,
+            },
+          },
+        },
+        {
+          '@xsi:type': 'Etape_Type',
+          codeActe: 'CMP',
+          actesLegislatifs: {
+            acteLegislatif: {
+              '@xsi:type': 'Decision_Type',
+              codeActe: 'CMP-DEC',
+              dateActe: '2026-01-02T00:00:00.000+01:00',
+              statutConclusion: { libelle: 'Désaccord' },
+              voteRefs: null,
+            },
+          },
+        },
+        {
+          '@xsi:type': 'Etape_Type',
+          codeActe: 'ANNLEC',
+          actesLegislatifs: {
+            acteLegislatif: [
+              {
+                '@xsi:type': 'DecisionMotionCensure_Type',
+                codeActe: 'ANNLEC-MOTION-VOTE',
+                dateActe: '2026-01-23T00:00:00.000+01:00',
+                voteRefs: { voteRef: ['VTANR5L17V5154', 'VTANR5L17V5155'] },
+                decision: { libelle: 'Motion rejetée' },
+              },
+              {
+                '@xsi:type': 'Decision_Type',
+                codeActe: 'ANNLEC-DEBATS-DEC',
+                dateActe: '2026-01-27T00:00:00.000+01:00',
+                statutConclusion: {
+                  fam_code: 'TSORTF06',
+                  libelle:
+                    "considéré comme adopté par l'Assemblée nationale en application de l'article 49, alinéa 3 de la Constitution",
+                },
+                voteRefs: null,
+                reunionRef: 'RUANR5L17S2026IDS30188',
+                textesAssocies: {
+                  texteAssocie: [
+                    { typeTexte: 'BTA', refTexteAssocie: 'PRJLANR5L17BTA0230' },
+                    { typeTexte: 'TAP', refTexteAssocie: 'PRJLANR5L17TAP0230' },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+});
+
+describe('lireDossier', () => {
+  it("lit l'identifiant, le titre, la procédure et reconnaît un texte de loi", () => {
+    const d = lireDossier(brutDossier());
+    expect(d.uid).toBe('DLR5L17N52428');
+    expect(d.titre).toBe('Projet de loi de finances pour 2026');
+    expect(d.procedure).toBe("Projet de loi de finances de l'année");
+    expect(d.estLoi).toBe(true);
+  });
+
+  it("ne garde que les décisions de séance de l'Assemblée, dans l'ordre de l'archive, avec leur lecture", () => {
+    expect(lireDossier(brutDossier()).decisions).toEqual([
+      {
+        date: '2025-11-21',
+        lecture: 'première lecture',
+        statut: 'rejeté',
+        seance: 'RUANR5L17S2026IDS29940',
+        scrutins: [4241],
+        textes: ['PRJLANR5L17BTA0180'],
+      },
+      {
+        date: '2026-01-27',
+        lecture: 'nouvelle lecture',
+        statut:
+          "considéré comme adopté par l'Assemblée nationale en application de l'article 49, alinéa 3 de la Constitution",
+        seance: 'RUANR5L17S2026IDS30188',
+        scrutins: [],
+        textes: ['PRJLANR5L17BTA0230', 'PRJLANR5L17TAP0230'],
+      },
+    ]);
+  });
+
+  it('relève les scrutins des motions de censure (un ou plusieurs par acte)', () => {
+    expect(lireDossier(brutDossier()).motions).toEqual([5154, 5155]);
+  });
+
+  it('nomme chaque lecture de séance, y compris la CMP lue à l’Assemblée et la lecture unique', () => {
+    const avec = (codeActe: string) => {
+      const brut = brutDossier();
+      brut.dossierParlementaire.actesLegislatifs.acteLegislatif = [
+        {
+          '@xsi:type': 'Decision_Type',
+          codeActe,
+          dateActe: '2026-03-01T00:00:00.000+01:00',
+          statutConclusion: { libelle: 'adopté' },
+          voteRefs: null,
+        } as never,
+      ];
+      return lireDossier(brut).decisions.map((d) => d.lecture);
+    };
+    expect(avec('AN2-DEBATS-DEC')).toEqual(['deuxième lecture']);
+    expect(avec('ANLDEF-DEBATS-DEC')).toEqual(['lecture définitive']);
+    expect(avec('ANLUNI-DEBATS-DEC')).toEqual(['lecture unique']);
+    expect(avec('CMP-DEBATS-AN-DEC')).toEqual(['texte de la commission mixte paritaire']);
+    expect(avec('CMP-DEBATS-SN-DEC')).toEqual([]);
+    expect(avec('AN1-COM-DEC')).toEqual([]);
+  });
+
+  it("n'est pas un texte de loi pour une résolution, et garde une loi constitutionnelle ou une ratification", () => {
+    const procedure = (libelle: string) => {
+      const brut = brutDossier();
+      brut.dossierParlementaire.procedureParlementaire.libelle = libelle;
+      return lireDossier(brut).estLoi;
+    };
+    expect(procedure('Résolution')).toBe(false);
+    expect(procedure('Résolution Article 34-1')).toBe(false);
+    expect(procedure('Projet de ratification des traités et conventions')).toBe(true);
+    expect(procedure('Projet ou proposition de loi constitutionnelle')).toBe(true);
+  });
+
+  it("ignore une référence de scrutin d'une autre législature ou illisible, et une décision sans date", () => {
+    const brut = brutDossier();
+    brut.dossierParlementaire.actesLegislatifs.acteLegislatif = [
+      {
+        '@xsi:type': 'Decision_Type',
+        codeActe: 'AN1-DEBATS-DEC',
+        dateActe: '2026-03-01T00:00:00.000+01:00',
+        statutConclusion: { libelle: 'adopté' },
+        voteRefs: { voteRef: ['VTANR5L16V12', 'VTANR5L17Vx', 'VTANR5L17V7'] },
+      } as never,
+      {
+        '@xsi:type': 'Decision_Type',
+        codeActe: 'AN2-DEBATS-DEC',
+        dateActe: null,
+        statutConclusion: { libelle: 'adopté' },
+      } as never,
+    ];
+    const d = lireDossier(brut);
+    expect(d.decisions).toHaveLength(1);
+    expect(d.decisions[0].scrutins).toEqual([7]);
+  });
+
+  it('refuse un dossier illisible avec un message clair', () => {
+    expect(() => lireDossier({})).toThrow(/dossier illisible/);
+    expect(() => lireDossier({ dossierParlementaire: { uid: 42 } })).toThrow(/identifiant/);
+  });
+});
+
+describe('lireDocument', () => {
+  it("lit l'identifiant et le titre principal d'un texte", () => {
+    expect(
+      lireDocument({
+        document: {
+          uid: 'PIONANR5L17BTA0297',
+          titres: {
+            titrePrincipal: 'proposition de loi rétablissant le droit commun de la prescription',
+            titrePrincipalCourt: 'Prescription acquisitive',
+          },
+        },
+      }),
+    ).toEqual({
+      uid: 'PIONANR5L17BTA0297',
+      titre: 'proposition de loi rétablissant le droit commun de la prescription',
+    });
+  });
+
+  it("n'invente pas de titre quand il manque", () => {
+    expect(lireDocument({ document: { uid: 'X1', titres: null } })).toEqual({
+      uid: 'X1',
+      titre: null,
     });
   });
 });

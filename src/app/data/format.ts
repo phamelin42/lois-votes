@@ -1,4 +1,4 @@
-import type { PositionGroupe, TypeScrutin } from '@contrat';
+import type { ModeAdoption, PositionGroupe, TypeScrutin } from '@contrat';
 
 const FUSEAU = 'Europe/Paris';
 
@@ -105,6 +105,21 @@ export function libelleType(type: TypeScrutin): string {
 /** Résultat d'un vote, écrit en toutes lettres : jamais « loi adoptée » (voir CLAUDE.md). */
 export function libelleAdoption(adopte: boolean): string {
   return adopte ? "Adopté par l'Assemblée" : "Rejeté par l'Assemblée";
+}
+
+/** Badge d'un texte adopté sans vote nominatif (archive des dossiers législatifs, voir PLAN.md). */
+export function libelleSansVote(mode: ModeAdoption): string {
+  return mode === 'mainLevee' ? 'Adopté à main levée' : 'Considéré comme adopté (article 49.3)';
+}
+
+/**
+ * Ce que veut dire une adoption sans vote nominatif, en une phrase. Au 49.3, le texte est considéré comme adopté parce
+ * qu'aucune motion de censure n'a été adoptée (article 49, alinéa 3, de la Constitution).
+ */
+export function explicationSansVote(mode: ModeAdoption): string {
+  return mode === 'mainLevee'
+    ? "Pas de vote nominatif : l'Assemblée a adopté ce texte à main levée."
+    : "Sans vote : le Gouvernement a engagé sa responsabilité et aucune motion de censure n'a été adoptée.";
 }
 
 /** Complément de lieu : « à Beauvais », « au Havre », « aux Lilas » (l'article défini se contracte). */

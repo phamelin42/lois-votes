@@ -6,6 +6,7 @@ export const PAGES = [
   { nom: 'accueil', chemin: '/' },
   { nom: 'loi', chemin: '/lois/DLR5L17N54445' },
   { nom: 'loi à plusieurs lectures', chemin: '/lois/DLR5L17N53980' },
+  { nom: "loi adoptée par l'article 49.3", chemin: '/lois/DLR5L17N52428' },
   { nom: 'scrutin', chemin: '/scrutins/8706' },
   { nom: 'députés', chemin: '/deputes' },
   { nom: 'député', chemin: '/deputes/jerome-guedj' },

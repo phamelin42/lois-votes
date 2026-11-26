@@ -17,18 +17,26 @@ test.describe('chargement intelligent', () => {
     expect(appels).toEqual([]); // seul le rendu serveur a interrogé le BFF
   });
 
-  test("sans page suivante, l'accueil ne propose pas « Voir plus » et ne fait aucune requête", async ({
+  // Le jeu de test a 13 textes : 10 sur la première page, 3 derrière « Voir plus ».
+  test("« Voir plus » demande la page suivante une fois, l'ajoute, puis disparaît", async ({
     page,
   }) => {
     const appels: string[] = [];
-    page.on('request', (r) => estApi(r.url()) && appels.push(new URL(r.url()).pathname));
+    page.on('request', (r) => {
+      const url = new URL(r.url());
+      if (estApi(r.url())) appels.push(url.pathname + url.search);
+    });
 
     await page.goto('/');
     await attendreHydratation(page);
-
     await expect(page.locator('app-loi-card')).toHaveCount(10);
-    await expect(page.getByRole('button', { name: 'Voir plus' })).toHaveCount(0);
     expect(appels).toEqual([]);
+
+    await page.getByRole('button', { name: 'Voir plus' }).click();
+
+    await expect(page.locator('app-loi-card')).toHaveCount(13);
+    await expect(page.getByRole('button', { name: 'Voir plus' })).toHaveCount(0);
+    expect(appels.filter((a) => a.startsWith('/api/accueil'))).toEqual(['/api/accueil?page=2']);
   });
 
   test("le survol d'une carte précharge le code de la route et les données de la loi", async ({
@@ -39,7 +47,7 @@ test.describe('chargement intelligent', () => {
     const apres: string[] = [];
     page.on('request', (r) => apres.push(new URL(r.url()).pathname));
 
-    await page.locator('app-loi-card').nth(1).hover();
+    await page.locator('a.app-loi-card[href="/lois/DLR5L17N54776"]').hover();
 
     await expect.poll(() => apres.some((p) => p.startsWith('/api/lois/DLR5L17N54776'))).toBe(true);
     expect(page.url()).toMatch(/\/$/); // on n'a pas navigué : seulement préchargé

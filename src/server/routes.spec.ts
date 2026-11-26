@@ -62,6 +62,13 @@ describe('routes /api/*', () => {
         expect(loi.dossier === null || /^DL[A-Z0-9]+$/.test(loi.dossier)).toBe(true);
         expect(loi.titreCourt).not.toBe('');
         expect(loi.statut).toBeNull();
+        // Une carte a soit un vote final, soit une adoption sans vote nominatif (et alors aucun groupe).
+        expect((loi.voteFinal === null) !== (loi.adoptionSansVote === null)).toBe(true);
+        if (loi.voteFinal === null) {
+          expect(loi.dossier).not.toBeNull();
+          expect(loi.groupes).toEqual([]);
+          continue;
+        }
         expect(loi.voteFinal.type).toBe('final');
         verifierEnMandat(loi.voteFinal);
         expect(loi.voteFinal.urlOfficielle).toBe(

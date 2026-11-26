@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { accueil } from '../../testing/builders';
+import { accueil, loiCarteSansVote } from '../../testing/builders';
 import { AccueilVue } from './accueil-vue';
 
 function monter(entrees: Record<string, unknown> = {}) {
@@ -33,6 +33,33 @@ describe('AccueilVue', () => {
     expect(
       racine.querySelector('h1 + p, .app-accueil__intro')!.textContent!.trim().length,
     ).toBeGreaterThan(20);
+  });
+
+  it('donne le nombre de textes et la date du plus ancien', () => {
+    const { racine } = monter({
+      donnees: { ...accueil(3, 1, true), total: 259, depuis: '2024-10-08' },
+    });
+    const total = racine.querySelector('.app-accueil__total')!;
+
+    expect(total.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+      "259 textes depuis le 8 octobre 2024. Un texte adopté à main levée ou par l'article 49.3 n'a pas de vote nominatif.",
+    );
+    expect(total.querySelector('time')!.getAttribute('datetime')).toBe('2024-10-08');
+  });
+
+  it('écrit « 1 texte » au singulier', () => {
+    const { racine } = monter({ donnees: { ...accueil(1), total: 1 } });
+
+    expect(racine.querySelector('.app-accueil__total')!.textContent).toMatch(/^\s*1 texte depuis/);
+  });
+
+  it('mêle les textes adoptés sans vote nominatif aux autres cartes', () => {
+    const donnees = accueil(2);
+    donnees.lois.splice(1, 0, loiCarteSansVote());
+    const { racine } = monter({ donnees });
+
+    expect(racine.querySelectorAll('app-loi-card')).toHaveLength(3);
+    expect(racine.querySelectorAll('app-loi-card')[1].textContent).toContain('Adopté à main levée');
   });
 
   it("affiche une carte par loi, dans l'ordre reçu", () => {

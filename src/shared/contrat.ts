@@ -42,14 +42,25 @@ export interface ScrutinResume {
   urlOfficielle: string; // https://www.assemblee-nationale.fr/dyn/17/scrutins/<numero>
 }
 
+/** Comment l'Assemblée a adopté un texte sans vote nominatif : à main levée, ou sans vote par l'article 49, alinéa 3. */
+export type ModeAdoption = 'mainLevee' | 'article49-3';
+
+/** Adoption d'un texte par l'Assemblée sans vote nominatif (archive des dossiers législatifs). */
+export interface AdoptionSansVote {
+  date: string; // jour de la décision (AAAA-MM-JJ)
+  lecture: string; // « première lecture », « lecture définitive », « texte de la commission mixte paritaire »…
+  mode: ModeAdoption;
+}
+
 export interface LoiCarte {
   dossier: string | null; // dossier_ref (« DLR5L17N54372 ») ; null si le scrutin n'est rattaché à aucun dossier
-  titreCourt: string; // dérivé du titre du scrutin final (« Projet de loi relatif à … »)
-  titreOfficiel: string; // titre du scrutin final (sert de résumé, tronqué à 2 lignes sur l'accueil)
+  titreCourt: string; // dérivé du titre du scrutin final ou du texte adopté sans vote (« Projet de loi relatif à … »)
+  titreOfficiel: string; // titre du scrutin final, ou titre officiel du texte adopté sans vote
   lecture: string | null; // « première lecture », « lecture définitive »… ; peut valoir « texte de la commission mixte paritaire »
   statut: null; // l'archive des scrutins ne le fournit pas ; gardé pour plus tard
-  voteFinal: ScrutinResume;
-  groupes: VoteGroupe[]; // triés par nombre de sièges décroissant
+  voteFinal: ScrutinResume | null; // null : la dernière décision de l'Assemblée n'a pas de vote nominatif (adoptionSansVote)
+  adoptionSansVote: AdoptionSansVote | null; // la dernière décision, quand c'est une adoption sans vote nominatif ; sinon null
+  groupes: VoteGroupe[]; // triés par nombre de sièges décroissant ; vide sans vote final
 }
 
 /** GET /api/accueil?page=1 */
@@ -57,6 +68,8 @@ export interface Accueil {
   lois: LoiCarte[]; // 10 par page, du plus récent au plus ancien
   page: number;
   pageSuivante: boolean;
+  total: number; // nombre de textes, toutes pages confondues
+  depuis: string | null; // date de la décision du plus ancien d'entre eux ; null s'il n'y en a aucun
   miseAJour: string; // ISO : date de génération de data/ (meta.json)
 }
 
@@ -68,8 +81,9 @@ export interface LoiDetail {
   lecture: string | null;
   statut: null; // voir LoiCarte
   urlDossier: null; // idem
-  voteFinal: (ScrutinResume & { groupes: VoteGroupe[]; groupesSansVotant: Groupe[] }) | null; // vote sur l'ensemble le plus récent ; null s'il n'y en a pas encore
-  lectures: ScrutinResume[]; // autres votes sur l'ensemble du texte (lectures précédentes), du plus récent au plus ancien
+  voteFinal: (ScrutinResume & { groupes: VoteGroupe[]; groupesSansVotant: Groupe[] }) | null; // vote sur l'ensemble le plus récent ; null s'il n'y en a pas encore, ou si la dernière décision est une adoption sans vote nominatif
+  adoptionSansVote: AdoptionSansVote | null; // la dernière décision, quand c'est une adoption sans vote nominatif ; sinon null
+  lectures: ScrutinResume[]; // autres votes sur l'ensemble du texte (lectures précédentes, tous si adoptionSansVote), du plus récent au plus ancien
   scrutins: ScrutinResume[]; // articles, amendements, motions et autres scrutins du texte, du plus récent au plus ancien
 }
 
