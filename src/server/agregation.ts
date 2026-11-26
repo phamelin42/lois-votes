@@ -1,5 +1,6 @@
 import type {
   Accueil,
+  AdoptionSansVote,
   DeputeDetail,
   DeputeIndex,
   DeputeListe,
@@ -171,47 +172,116 @@ export function creerAgregation(
     });
   })();
 
-  /** Titre court d'un dossier : celui de son vote final le plus récent, sinon dérivé du texte cité par ses scrutins. */
+  /** Titre officiel d'un texte adopté sans vote, sur une seule ligne. */
+  const titreDuTexteSansVote = (dossier: string): string | undefined =>
+    donnees.sansVoteParDossier.get(dossier)?.titre.replace(/\s+/g, ' ').trim();
+
+  /**
+   * Titre court d'un dossier : celui de son vote final le plus récent, sinon dérivé du texte cité par ses scrutins, sinon
+   * (aucun scrutin public) celui du texte adopté sans vote.
+   */
   const titreDuDossier = memoiser(1000, (dossier: string): string => {
     const scrutins = donnees.parDossier.get(dossier) ?? [];
     const dernier = scrutins.find(estFinal);
-    return dernier !== undefined
-      ? titreCourt(donnees.titre(dernier))
-      : titreCourtDuTexte(donnees.titre(scrutins[0]));
+    if (dernier !== undefined) return titreCourt(donnees.titre(dernier));
+    if (scrutins.length) return titreCourtDuTexte(donnees.titre(scrutins[0]));
+    return titreCourt(titreDuTexteSansVote(dossier) ?? dossier);
   });
 
-  function carte(s: number): LoiCarte {
+  /**
+   * L'adoption sans vote nominatif d'un dossier quand c'est sa dernière décision : plus récente que son dernier vote
+   * final (le même jour, le vote nominatif l'emporte). Sinon `null`.
+   */
+  function adoptionFinale(dossier: string): AdoptionSansVote | null {
+    const texte = donnees.sansVoteParDossier.get(dossier);
+    if (!texte) return null;
+    const { date, lecture: etape, mode } = texte.decisions[0];
+    const dernier = (donnees.parDossier.get(dossier) ?? []).find(estFinal);
+    if (dernier !== undefined && donnees.date(dernier) >= date) return null;
+    return { date, lecture: etape, mode };
+  }
+
+  /**
+   * Une carte par texte, de la décision la plus récente à la plus ancienne : le dernier vote final de chaque dossier (sans
+   * dossier : chacun), ou son adoption sans vote nominatif quand elle est plus récente. À date égale, l'ordre est celui des
+   * votes finaux, puis celui de `dossiers.json` (tri stable).
+   */
+  type Entree =
+    { date: string; s: number } | { date: string; dossier: string; adoption: AdoptionSansVote };
+  const entrees: Entree[] = (() => {
+    const liste: Entree[] = finauxUniques
+      .filter((s) => {
+        const dossier = donnees.dossier(s);
+        return dossier === null || adoptionFinale(dossier) === null;
+      })
+      .map((s) => ({ date: donnees.date(s), s }));
+    for (const t of donnees.textesSansVote) {
+      const adoption = adoptionFinale(t.id);
+      if (adoption) liste.push({ date: adoption.date, dossier: t.id, adoption });
+    }
+    return liste.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  })();
+
+  function carte(entree: Entree): LoiCarte {
+    if ('s' in entree) {
+      const { s } = entree;
+      return {
+        dossier: donnees.dossier(s),
+        titreCourt: titreCourt(donnees.titre(s)),
+        titreOfficiel: donnees.titre(s),
+        lecture: lecture(donnees.titre(s)),
+        statut: null,
+        voteFinal: resume(s),
+        adoptionSansVote: null,
+        groupes: votesDesGroupes(s),
+      };
+    }
+    const { dossier, adoption } = entree;
     return {
-      dossier: donnees.dossier(s),
-      titreCourt: titreCourt(donnees.titre(s)),
-      titreOfficiel: donnees.titre(s),
-      lecture: lecture(donnees.titre(s)),
+      dossier,
+      titreCourt: titreDuDossier(dossier),
+      titreOfficiel: titreDuTexteSansVote(dossier) ?? titreDuDossier(dossier),
+      lecture: adoption.lecture,
       statut: null,
-      voteFinal: resume(s),
-      groupes: votesDesGroupes(s),
+      voteFinal: null,
+      adoptionSansVote: adoption,
+      groupes: [],
     };
   }
 
   const accueil = memoiser(TAILLE_MEMO.accueil, (page: number): Accueil => {
     const debut = (page - 1) * TAILLE_PAGE_ACCUEIL;
     return {
-      lois: finauxUniques.slice(debut, debut + TAILLE_PAGE_ACCUEIL).map(carte),
+      lois: entrees.slice(debut, debut + TAILLE_PAGE_ACCUEIL).map(carte),
       page,
-      pageSuivante: debut + TAILLE_PAGE_ACCUEIL < finauxUniques.length,
+      pageSuivante: debut + TAILLE_PAGE_ACCUEIL < entrees.length,
+      total: entrees.length,
+      depuis: entrees.at(-1)?.date ?? null,
       miseAJour: donnees.meta.genereLe,
     };
   });
 
   const loi = memoiser(TAILLE_MEMO.loi, (dossier: string): LoiDetail | null => {
-    const scrutins = donnees.parDossier.get(dossier);
-    if (!scrutins) return null;
+    const scrutins = donnees.parDossier.get(dossier) ?? [];
+    if (!scrutins.length && !donnees.sansVoteParDossier.has(dossier)) return null;
+    const adoption = adoptionFinale(dossier);
     const votesFinaux = scrutins.filter(estFinal);
-    const dernier: number | undefined = votesFinaux[0];
+    // Après une adoption sans vote nominatif, tous les votes finaux du texte sont des lectures précédentes.
+    const dernier: number | undefined = adoption ? undefined : votesFinaux[0];
     return {
       dossier,
       titreCourt: titreDuDossier(dossier),
-      titreOfficiel: donnees.titre(dernier ?? scrutins[0]),
-      lecture: dernier !== undefined ? lecture(donnees.titre(dernier)) : null,
+      titreOfficiel:
+        dernier !== undefined
+          ? donnees.titre(dernier)
+          : adoption
+            ? (titreDuTexteSansVote(dossier) ?? titreDuDossier(dossier))
+            : donnees.titre(scrutins[0]),
+      lecture: adoption
+        ? adoption.lecture
+        : dernier !== undefined
+          ? lecture(donnees.titre(dernier))
+          : null,
       statut: null,
       urlDossier: null,
       voteFinal:
@@ -222,7 +292,8 @@ export function creerAgregation(
               groupesSansVotant: groupesSansVotant(dernier),
             }
           : null,
-      lectures: votesFinaux.slice(1).map(resume),
+      adoptionSansVote: adoption,
+      lectures: (adoption ? votesFinaux : votesFinaux.slice(1)).map(resume),
       scrutins: scrutins.filter((s) => !estFinal(s)).map(resume),
     };
   });
@@ -289,10 +360,13 @@ export function creerAgregation(
       groupes: groupes
         .filter((g) => idsActuels.has(g.id))
         .sort((a, b) => collateur.compare(a.abrege, b.abrege) || (a.id < b.id ? -1 : 1)),
-      loisRecentes: finauxUniques.flatMap((s) => {
-        const dossier = donnees.dossier(s);
+      // Les textes de l'accueil qui ont un dossier, dans le même ordre (adoptions sans vote nominatif comprises).
+      loisRecentes: entrees.flatMap((e) => {
+        if (!('s' in e))
+          return [{ dossier: e.dossier, titreCourt: titreDuDossier(e.dossier), date: e.date }];
+        const dossier = donnees.dossier(e.s);
         return dossier
-          ? [{ dossier, titreCourt: titreCourt(donnees.titre(s)), date: donnees.date(s) }]
+          ? [{ dossier, titreCourt: titreCourt(donnees.titre(e.s)), date: donnees.date(e.s) }]
           : [];
       }),
     };

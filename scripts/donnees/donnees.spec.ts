@@ -235,10 +235,7 @@ function ecarts(d: Donnees): string[] {
   d.dossiers.forEach((t, i) => {
     verifie(/^DL[A-Z0-9]+$/.test(t.id) && !vus.has(t.id), `dossiers[${i}] : identifiant`);
     vus.add(t.id);
-    verifie(
-      t.titre === null || (typeof t.titre === 'string' && t.titre !== ''),
-      `dossiers[${i}] : titre`,
-    );
+    verifie(typeof t.titre === 'string' && t.titre !== '', `dossiers[${i}] : titre`);
     verifie(t.decisions.length > 0, `dossiers[${i}] : décisions`);
     t.decisions.forEach((x, j) => {
       verifie(DATE.test(x.date) && x.date >= '2024-07-18', `dossiers[${i}].decisions[${j}] : date`);

@@ -93,6 +93,36 @@ describe('LoiPage', () => {
     expect(sansEspaces(racine.textContent)).not.toMatch(/statut/i);
   });
 
+  it("décrit un texte adopté par l'article 49.3 : date, badge et phrase, sans vote ni lien de scrutin", async () => {
+    const { racine } = await afficher(
+      loiDetail({
+        titreCourt: 'Projet de loi de finances pour 2026',
+        titreOfficiel: 'Projet de loi de finances pour 2026',
+        lecture: 'lecture définitive',
+        voteFinal: null,
+        adoptionSansVote: {
+          date: '2026-02-02',
+          lecture: 'lecture définitive',
+          mode: 'article49-3',
+        },
+      }),
+    );
+    const texte = sansEspaces(racine.textContent);
+
+    expect(racine.querySelector('#vote-final')!.textContent!.trim()).toBe(
+      "Décision de l'Assemblée",
+    );
+    expect(texte).toContain('Considéré comme adopté (article 49.3)');
+    expect(texte).toContain(
+      // sansEspaces ramène l'espace insécable à une espace simple.
+      "Sans vote : le Gouvernement a engagé sa responsabilité et aucune motion de censure n'a été adoptée.",
+    );
+    expect(racine.querySelector('time[datetime="2026-02-02"]')).not.toBeNull();
+    expect(texte).not.toContain("Pas encore de vote sur l'ensemble du texte.");
+    expect(racine.querySelector('app-group-table')).toBeNull();
+    expect(racine.textContent).not.toContain('Voir le scrutin');
+  });
+
   it("prévient quand il n'y a pas encore de vote sur l'ensemble", async () => {
     const { racine } = await afficher(loiDetail({ voteFinal: null }));
 

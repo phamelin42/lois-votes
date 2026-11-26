@@ -5,12 +5,14 @@ import {
   CARACTERES_GROUPE,
   type DeputeFichier,
   type DonneesMeta,
+  type DossierFichier,
   type GroupeFichier,
+  type ModeSansVote,
   type ScrutinFichier,
 } from './donnees.types';
 
 /*
- * Chargement de `data/` (voir docs/DONNEES.md) : les six fichiers sont lus une fois au démarrage, validés,
+ * Chargement de `data/` (voir docs/DONNEES.md) : les sept fichiers sont lus une fois au démarrage, validés,
  * puis gardés en mémoire sous une forme compacte. Aucun appel réseau, aucun accès disque après le chargement.
  *  - `scrutins.json` (12 Mo de JSON) est réduit à des tableaux typés : ni objet par scrutin, ni objet par groupe ;
  *    les groupes d'un scrutin sont relus à la demande ;
@@ -171,6 +173,39 @@ function verifierCompte(compte: Compte, contexte: string): void {
   }
 }
 
+const DOSSIER = /^DL[A-Z0-9]+$/;
+const MODES_SANS_VOTE: readonly ModeSansVote[] = ['mainLevee', 'article49-3'];
+
+/** Contrôle `dossiers.json` (forme, ordre, identifiants uniques) et l'indexe par dossier. */
+function verifierTextesSansVote(textes: DossierFichier[]): Map<string, DossierFichier> {
+  verifier(Array.isArray(textes), 'dossiers.json : tableau attendu');
+  const parId = new Map<string, DossierFichier>();
+  textes.forEach((t, i) => {
+    const ctx = `dossiers.json : élément ${i}`;
+    verifier(typeof t?.id === 'string' && DOSSIER.test(t.id), `${ctx} : identifiant`);
+    verifier(!parId.has(t.id), `${ctx} : ${t.id} en double`);
+    verifier(typeof t.titre === 'string' && t.titre.length > 0, `${ctx} : titre`);
+    verifier(Array.isArray(t.decisions) && t.decisions.length > 0, `${ctx} : décisions`);
+    t.decisions.forEach((d, j) => {
+      verifier(
+        typeof d?.date === 'string' &&
+          DATE.test(d.date) &&
+          typeof d.lecture === 'string' &&
+          d.lecture.length > 0 &&
+          MODES_SANS_VOTE.includes(d.mode),
+        `${ctx} : décision ${j}`,
+      );
+      verifier(j === 0 || t.decisions[j - 1].date >= d.date, `${ctx} : ordre des décisions`);
+    });
+    verifier(
+      i === 0 || textes[i - 1].decisions[0].date >= t.decisions[0].date,
+      `${ctx} : ordre des textes`,
+    );
+    parId.set(t.id, t);
+  });
+  return parId;
+}
+
 /** Données de `data/` en mémoire, sous forme compacte, avec des accès typés. */
 export class DonneesChargees {
   readonly meta: DonneesMeta;
@@ -186,6 +221,10 @@ export class DonneesChargees {
   readonly parDossier: ReadonlyMap<string, readonly number[]>;
   /** Indice d'un député par son slug. */
   readonly parSlug: ReadonlyMap<string, number>;
+  /** Textes adoptés sans vote nominatif (`dossiers.json`), du plus récent au plus ancien. */
+  readonly textesSansVote: readonly DossierFichier[];
+  /** Les mêmes, par identifiant de dossier. */
+  readonly sansVoteParDossier: ReadonlyMap<string, DossierFichier>;
   /** Indices de tous les scrutins, du plus récent au plus ancien (date, puis numéro). */
   readonly ordreRecent: readonly number[];
   readonly mesures: Mesures;
@@ -215,7 +254,9 @@ export class DonneesChargees {
     const scrutins = lireJson<ScrutinFichier[]>(dossier, 'scrutins.json');
     const votes = lireTexte(dossier, 'votes.txt');
     const groupesVotes = lireTexte(dossier, 'groupes-votes.txt');
-    const octetsLus = meta.octets + groupes.octets + deputes.octets + scrutins.octets;
+    const sansVote = lireJson<DossierFichier[]>(dossier, 'dossiers.json');
+    const octetsLus =
+      meta.octets + groupes.octets + deputes.octets + scrutins.octets + sansVote.octets;
 
     this.meta = meta.valeur;
     this.groupes = groupes.valeur;
@@ -274,6 +315,8 @@ export class DonneesChargees {
       parSlug.set(d.slug, i);
     });
     this.parSlug = parSlug;
+    this.textesSansVote = sansVote.valeur;
+    this.sansVoteParDossier = verifierTextesSansVote(sansVote.valeur);
 
     // Matrices : une ligne par scrutin, un octet par député, lignes séparées par « \n ».
     this.pas = nbDeputes + 1;

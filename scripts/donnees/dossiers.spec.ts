@@ -223,6 +223,12 @@ describe('textesSansVote', () => {
     );
   });
 
+  it("écarte un texte qui n'a aucun titre, ni de dossier ni de texte adopté", () => {
+    expect(appel([dossier('DLA', [decision({ textes: ['TXTVIDE'] })], { titre: null })])).toEqual(
+      [],
+    );
+  });
+
   it("écarte une décision d'avant la 17ᵉ législature, une résolution et un texte voté par scrutin", () => {
     expect(DEBUT_LEGISLATURE).toBe('2024-07-18');
     expect(

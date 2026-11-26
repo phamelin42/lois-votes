@@ -64,8 +64,8 @@ export type ModeSansVote = 'mainLevee' | 'article49-3';
 export interface DossierFichier {
   /** Identifiant officiel du dossier (« DLR5L17N54898 »). */
   id: string;
-  /** Titre officiel du texte adopté le plus récent (« projet de loi autorisant… »), sinon celui du dossier ; `null` si aucun. */
-  titre: string | null;
+  /** Titre du dossier s'il nomme le texte de loi, sinon celui du texte adopté le plus récent (« projet de loi autorisant… »). */
+  titre: string;
   /** Décisions sans vote nominatif, de la plus récente à la plus ancienne. */
   decisions: { date: string; lecture: string; mode: ModeSansVote }[];
 }

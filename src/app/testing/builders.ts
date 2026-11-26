@@ -100,7 +100,27 @@ export function loiCarte(
     lecture: 'première lecture',
     statut: null,
     voteFinal: scrutin(numero),
+    adoptionSansVote: null,
     groupes: groupes(),
+    ...surcharge,
+  };
+}
+
+/** Une carte de texte adopté sans vote nominatif (à main levée par défaut). */
+export function loiCarteSansVote(
+  dossier = 'DLR5L17N54168',
+  surcharge: Partial<LoiCarte> = {},
+): LoiCarte {
+  return {
+    dossier,
+    titreCourt: "Projet de loi autorisant l'approbation de l'accord relatif aux services aériens",
+    titreOfficiel:
+      "projet de loi autorisant l'approbation de l'accord relatif aux services aériens",
+    lecture: 'première lecture',
+    statut: null,
+    voteFinal: null,
+    adoptionSansVote: { date: '2026-11-20', lecture: 'première lecture', mode: 'mainLevee' },
+    groupes: [],
     ...surcharge,
   };
 }
@@ -114,6 +134,8 @@ export function accueil(nombre = 2, page = 1, pageSuivante = false): Accueil {
     ),
     page,
     pageSuivante,
+    total: nombre,
+    depuis: '2024-10-08',
     miseAJour: '2025-01-15T09:00:00Z',
   };
 }
@@ -127,6 +149,7 @@ export function loiDetail(surcharge: Partial<LoiDetail> = {}): LoiDetail {
     statut: null,
     urlDossier: null,
     voteFinal: { ...scrutin(8317), groupes: groupes(), groupesSansVotant: [] },
+    adoptionSansVote: null,
     lectures: [],
     scrutins: [],
     ...surcharge,

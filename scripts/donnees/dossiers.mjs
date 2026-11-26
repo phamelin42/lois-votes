@@ -102,6 +102,8 @@ export function textesSansVote({ dossiers, titres, scrutins, dossierDe }) {
       (d.titre && NOMME_UN_TEXTE.test(d.titre) ? d.titre : null) ??
       decisions[0].x.textes.map((t) => titres.get(t) ?? null).find((t) => t !== null) ??
       d.titre;
+    // Sans aucun titre, la carte ne saurait nommer le texte : on ne l'invente pas, on ne l'ajoute pas.
+    if (!titre) continue;
     textes.push({
       id: d.uid,
       titre,
