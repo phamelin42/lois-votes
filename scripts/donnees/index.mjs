@@ -7,8 +7,8 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { construire, SEUILS_OFFICIELS } from './construire.mjs';
 import { ecrireAtomique } from './ecrire.mjs';
-import { lireActeur, lireOrgane, lireScrutin } from './lire.mjs';
-import { estOrgane, ouvrirArchives } from './telecharger.mjs';
+import { lireActeur, lireDocument, lireDossier, lireOrgane, lireScrutin } from './lire.mjs';
+import { estDocument, estOrgane, ouvrirArchives } from './telecharger.mjs';
 import { chargerWikipedia } from './wikipedia.mjs';
 
 const texte = new TextDecoder();
@@ -79,8 +79,19 @@ export async function executer({
       throw new Error(`${nom} : ${erreur.message}`, { cause: erreur });
     }
   }
+  const dossiers = [];
+  const documents = [];
+  for (const [nom, octets] of archives.dossiers()) {
+    try {
+      if (estDocument(nom)) documents.push(lireDocument(json(octets)));
+      else dossiers.push(lireDossier(json(octets)));
+    } catch (erreur) {
+      throw new Error(`${nom} : ${erreur.message}`, { cause: erreur });
+    }
+  }
   journal(
-    `[donnees] lu : ${scrutins.length} scrutins, ${acteurs.length} acteurs, ${organes.length} organes en ${secondes(lecture)}`,
+    `[donnees] lu : ${scrutins.length} scrutins, ${acteurs.length} acteurs, ${organes.length} organes, ` +
+      `${dossiers.length} dossiers, ${documents.length} documents en ${secondes(lecture)}`,
   );
 
   const { liens: liensWikipedia, avertissements } = await wikipedia;
@@ -97,6 +108,8 @@ export async function executer({
     avertissements,
     maintenant,
     seuils,
+    dossiers,
+    documents,
   });
   journal(`[donnees] réduit en ${secondes(reduction)}`);
 
@@ -110,6 +123,11 @@ export async function executer({
       (stat.nonVotantsCorriges.length
         ? `, non-votants corrigés : scrutin(s) ${stat.nonVotantsCorriges.join(', ')}`
         : ''),
+  );
+  journal(
+    `[donnees] dossiers : ${stat.dossiers.lois} dossiers de loi, ${stat.dossiers.rattaches} scrutins rattachés à leur dossier, ` +
+      `${stat.dossiers.ambigus} cités par plusieurs dossiers (laissés sans dossier), ` +
+      `${stat.dossiers.sansVoteNominatif} textes adoptés sans vote nominatif`,
   );
   for (const [qui, c] of Object.entries(stat.couverture)) {
     const part = (n) => `${n} (${c.deputes ? Math.round((n * 100) / c.deputes) : 0} %)`;

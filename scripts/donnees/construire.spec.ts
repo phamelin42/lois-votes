@@ -19,6 +19,8 @@ interface Entree {
   sources: unknown;
   seuils: { scrutins: number; deputes: number };
   maintenant: Date;
+  dossiers?: unknown[];
+  documents?: unknown[];
 }
 
 /** `construire` typé par les fichiers de data/ (les entrées de ce test sont des objets simplifiés). */
@@ -494,6 +496,75 @@ describe('construire : scrutins', () => {
   });
 });
 
+describe('construire : dossiers législatifs', () => {
+  const decision = (plus: Record<string, unknown>) => ({
+    date: '2025-03-04',
+    lecture: 'première lecture',
+    statut: 'adopté',
+    seance: 'SE2',
+    scrutins: [] as number[],
+    textes: [] as string[],
+    ...plus,
+  });
+  const loi = (uid: string, decisions: unknown[]) => ({
+    uid,
+    titre: `Dossier ${uid}`,
+    procedure: 'Projet de loi ordinaire',
+    estLoi: true,
+    decisions,
+    motions: [],
+  });
+  const avecDossiers = (seuils = SEUILS_BAS) =>
+    construire({
+      ...base(),
+      seuils,
+      dossiers: [
+        loi('DLR5L17N9', [decision({ date: '2025-02-10', seance: 'SE1', scrutins: [1] })]),
+        loi('DLR5L17N8', [decision({ textes: ['TXT8'] })]),
+      ],
+      documents: [{ uid: 'TXT8', titre: "projet de loi autorisant l'approbation de l'accord Z" }],
+    } as Entree);
+
+  it('rattache un vote final sans dossier au dossier qui le cite', () => {
+    const { donnees } = avecDossiers();
+    expect(donnees.scrutins.find((s) => s.n === 1)!.dossier).toBe('DLR5L17N9');
+    expect(donnees.scrutins.find((s) => s.n === 2)!.dossier).toBe('DLR5L17N1');
+  });
+
+  it('écrit dossiers.json : les textes adoptés sans vote nominatif, avec le titre du texte adopté', () => {
+    const { donnees, fichiers } = avecDossiers();
+    const attendu = [
+      {
+        id: 'DLR5L17N8',
+        titre: "projet de loi autorisant l'approbation de l'accord Z",
+        decisions: [{ date: '2025-03-04', lecture: 'première lecture', mode: 'mainLevee' }],
+      },
+    ];
+    expect(donnees.dossiers).toEqual(attendu);
+    expect(JSON.parse(fichiers['dossiers.json'])).toEqual(attendu);
+  });
+
+  it('compte les dossiers de loi, les scrutins rattachés et les textes sans vote nominatif', () => {
+    expect(avecDossiers().donnees.meta.statistiques.dossiers).toEqual({
+      lois: 2,
+      rattaches: 1,
+      ambigus: 0,
+      sansVoteNominatif: 1,
+    });
+  });
+
+  it("échoue quand l'archive des dossiers a moins de dossiers de loi que le seuil", () => {
+    expect(() => avecDossiers({ ...SEUILS_BAS, dossiers: 3 } as never)).toThrow(ErreurDonnees);
+    expect(() => avecDossiers({ ...SEUILS_BAS, dossiers: 3 } as never)).toThrow(/dossiers de loi/);
+  });
+
+  it('écrit un dossiers.json vide sans archive des dossiers', () => {
+    const { fichiers, donnees } = construire(base());
+    expect(fichiers['dossiers.json']).toBe('[]');
+    expect(donnees.meta.statistiques.dossiers.lois).toBe(0);
+  });
+});
+
 describe('construire : entrées de groupe « PO0 » ou inconnues', () => {
   const inconnu = (votants: Votants) => entree('PO0', votants);
 
@@ -624,7 +695,7 @@ describe('construire : garde-fous', () => {
 const VIDE = { wikipedia: 0, hatvp: 0, profession: 0, naissance: 0, siteWeb: 0, x: 0, facebook: 0 };
 
 describe('construire : meta et fichiers', () => {
-  it('écrit les six fichiers, en JSON compact', () => {
+  it('écrit les sept fichiers, en JSON compact', () => {
     const { fichiers } = construire(base());
     expect(Object.keys(fichiers)).toEqual([
       'meta.json',
@@ -633,6 +704,7 @@ describe('construire : meta et fichiers', () => {
       'scrutins.json',
       'votes.txt',
       'groupes-votes.txt',
+      'dossiers.json',
     ]);
     expect(fichiers['groupes.json']).not.toMatch(/\n/);
     expect(JSON.parse(fichiers['scrutins.json'])).toHaveLength(3);
@@ -670,6 +742,7 @@ describe('construire : meta et fichiers', () => {
           actifs: { ...VIDE, deputes: 3 },
           tous: { ...VIDE, deputes: 4 },
         },
+        dossiers: { lois: 0, rattaches: 0, ambigus: 0, sansVoteNominatif: 0 },
       },
     });
   });

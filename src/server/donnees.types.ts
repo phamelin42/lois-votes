@@ -23,7 +23,7 @@ export interface DonneesMeta {
   autresGroupes: GroupeFichier[];
   /** Défauts non bloquants de la préparation : `wikipedia` quand Wikidata n'a pas répondu (le site vit sans ces liens), `effectif` quand des scrutins s'écartent de l'effectif officiel au-delà de la tolérance. */
   avertissements: string[];
-  sources: { scrutins: SourceArchive; acteurs: SourceArchive };
+  sources: { scrutins: SourceArchive; acteurs: SourceArchive; dossiers: SourceArchive };
   /** Mesures faites pendant la réduction, pour le journal de build et la page « à propos ». */
   statistiques: {
     adoptes: number;
@@ -48,7 +48,26 @@ export interface DonneesMeta {
     } | null;
     /** Part des députés qui ont chaque information, pour les députés en mandat et pour tous. */
     couverture: { actifs: Couverture; tous: Couverture };
+    /**
+     * Archive des dossiers législatifs : dossiers de loi ayant une décision de séance dans la 17ᵉ législature, scrutins
+     * rattachés à un dossier par les décisions qui les citent, scrutins cités par plusieurs dossiers de loi (laissés sans
+     * dossier) et textes de `dossiers.json`.
+     */
+    dossiers: { lois: number; rattaches: number; ambigus: number; sansVoteNominatif: number };
   };
+}
+
+/** Comment l'Assemblée a adopté un texte sans vote nominatif. */
+export type ModeSansVote = 'mainLevee' | 'article49-3';
+
+/** Un élément de `dossiers.json` : texte de loi adopté au moins une fois sans vote nominatif. */
+export interface DossierFichier {
+  /** Identifiant officiel du dossier (« DLR5L17N54898 »). */
+  id: string;
+  /** Titre officiel du texte adopté le plus récent (« projet de loi autorisant… »), sinon celui du dossier ; `null` si aucun. */
+  titre: string | null;
+  /** Décisions sans vote nominatif, de la plus récente à la plus ancienne. */
+  decisions: { date: string; lecture: string; mode: ModeSansVote }[];
 }
 
 export interface Couverture {
@@ -151,7 +170,7 @@ export type CaractereVote =
   /** pas en mandat ce jour-là */
   | '-';
 
-/** Les six fichiers de `data/`, une fois lus. */
+/** Les sept fichiers de `data/`, une fois lus. */
 export interface Donnees {
   meta: DonneesMeta;
   groupes: GroupeFichier[];
@@ -161,6 +180,8 @@ export interface Donnees {
   votes: string[];
   /** Même forme : index du groupe au jour du vote. */
   groupesVotes: string[];
+  /** Textes adoptés sans vote nominatif, du plus récent au plus ancien. */
+  dossiers: DossierFichier[];
 }
 
 /** Noms des fichiers de `data/`. */
@@ -171,6 +192,7 @@ export const FICHIERS_DONNEES = [
   'scrutins.json',
   'votes.txt',
   'groupes-votes.txt',
+  'dossiers.json',
 ] as const;
 
 /** Caractère d'un index de groupe dans `groupes-votes.txt` (0-9 puis a-z) ; `-` pour aucun. */
